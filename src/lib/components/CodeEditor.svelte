@@ -5,6 +5,9 @@
 	import 'prismjs/components/prism-cpp';
 	import 'prismjs/themes/prism-tomorrow.css';
 	
+	// Tutorial support
+	export let tutorialCode: string | undefined = undefined;
+	
 	let codeContent = `// Circuitspace Auto-Generated Arduino Code
 // Project: [Your Project Name]
 // Generated on: ${new Date().toLocaleDateString()}
@@ -88,6 +91,12 @@ void loop() {
 			window.removeEventListener('updateCode', handleCodeUpdate as EventListener);
 		};
 	});
+	
+	// Watch for tutorial code changes
+	$: if (tutorialCode !== undefined) {
+		codeContent = tutorialCode;
+		updateHighlighting();
+	}
 	
 	function updateHighlighting() {
 		try {

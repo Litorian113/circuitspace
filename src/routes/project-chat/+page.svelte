@@ -7,6 +7,21 @@
 	import ExportModal from '$lib/components/ExportModal.svelte';
 	import CircuitDiagram from '$lib/components/CircuitDiagram.svelte';
 	import { currentProject, updateProjectCode, addChatMessage, componentLibrary, type Component } from '$lib/stores/project';
+	import { 
+		currentConversation, 
+		conversationStep, 
+		startConversation, 
+		nextConversationStep, 
+		markStepCompleted,
+		detectProjectType,
+		startCodeTutorial,
+		isTutorialActive,
+		currentTutorialStep,
+		leonardoCodeTutorial,
+		nextTutorialStep,
+		previousTutorialStep,
+		finishTutorial
+	} from '$lib/stores/conversations';
 	
 	type Message = {
 		id: number;
@@ -15,6 +30,9 @@
 		timestamp: Date;
 		codeGenerated?: string;
 		componentSuggestions?: Array<{name: string, description: string, price?: string}>;
+		componentImages?: string[];
+		showTutorialButton?: boolean;
+		showNextStepsButtons?: boolean;
 	};
 	
 	let messages: Message[] = [];
@@ -24,9 +42,14 @@
 	let chatHistory: string[] = [];
 	let showExportModal = false;
 	let showCircuitDiagram = false;
+	let isStructuredConversation = false;
 	
-	// Subscribe to current project
+	// Subscribe to current project and conversation
 	$: projectName = $currentProject.name;
+	$: conversation = $currentConversation;
+	$: currentStepIndex = $conversationStep;
+	$: tutorialActive = $isTutorialActive;
+	$: tutorialStepIndex = $currentTutorialStep;
 	
 	// Mock AI responses for different types of queries
 	const aiResponses = {
@@ -52,28 +75,38 @@
 	};
 	
 	onMount(() => {
-		const prompt = $page.url.searchParams.get('prompt');
-		if (prompt) {
-			addMessage('user', prompt);
-			setTimeout(() => {
-				generateAIResponse(prompt);
-			}, 1000);
+		// Check if there's an initial prompt from the URL
+		const initialPrompt = $page.url.searchParams.get('prompt');
+		if (initialPrompt) {
+			// Check if this is a structured conversation
+			const projectType = detectProjectType(initialPrompt);
+			if (projectType) {
+				isStructuredConversation = true;
+				startConversation(projectType);
+				
+				// Add user message
+				addMessage('user', initialPrompt);
+				
+				// Start the structured conversation flow
+				startStructuredConversationFlow();
+			} else {
+				// Normal conversation
+				addMessage('user', initialPrompt);
+				generateAIResponse(initialPrompt);
+			}
 		} else {
-			// Welcome message with circuit diagram feature highlight
-			addMessage('system', `Welcome to your Circuitspace project workspace! I'm here to help you design and build "${projectName}". 
-
-**New Feature**: Switch between **Code Editor** and **Circuit Diagram** views using the toggle button above!
-
-Ask me about components, code, circuit design, or wiring - I'll guide you through the entire development process.`);
+			// Default welcome message
+			addMessage('ai', "Willkommen bei Circuitspace! Beschreiben Sie Ihr Projekt und ich helfe Ihnen beim Design und der Implementierung.");
 		}
 	});
 	
-	function addMessage(type: 'user' | 'ai' | 'system', content: string, extras?: Partial<Message>) {
+	function addMessage(type: 'user' | 'ai' | 'system', content: string, extras?: Partial<Message>, componentImages?: string[]) {
 		const newMessage: Message = {
 			id: messageId++,
 			type,
 			content,
 			timestamp: new Date(),
+			componentImages,
 			...extras
 		};
 		messages = [...messages, newMessage];
@@ -85,6 +118,55 @@ Ask me about components, code, circuit design, or wiring - I'll guide you throug
 				chatContainer.scrollTop = chatContainer.scrollHeight;
 			}
 		}, 100);
+	}
+	
+	function startStructuredConversationFlow() {
+		if (!$currentConversation) return;
+		
+		// Show first step (components) immediately
+		const firstStep = $currentConversation.steps[0];
+		setTimeout(() => {
+			addMessage('ai', firstStep.content, {}, firstStep.componentImages);
+			
+			// Auto-simulate user response after 3 seconds
+			setTimeout(() => {
+				addMessage('user', 'okay ich habe alle komponenten');
+				
+				// Trigger the next step automatically
+				handleStructuredConversation('okay ich habe alle komponenten');
+			}, 3000);
+		}, 1000);
+	}
+	
+	function startTutorial() {
+		// Start the code tutorial
+		startCodeTutorial();
+		
+		// Add confirmation message
+		addMessage('ai', '🚀 Perfekt! Das Code Tutorial wurde gestartet. Schauen Sie in die rechte Spalte für die Schritt-für-Schritt Anleitung.');
+		
+		// Switch to code view if we're in circuit view
+		if (showCircuitDiagram) {
+			showCircuitDiagram = false;
+		}
+	}
+	
+	function completeTutorial() {
+		// Add final message about next steps
+		addMessage('ai', `Perfekt! Der Code ist fertig und bereit zum Hochladen auf Ihren Arduino Leonardo.
+
+**Nächste Schritte:**
+Jetzt sind wir bereit für die praktische Umsetzung! Möchten Sie:
+
+🔹 **Circuit Designer** - Die Schaltung hier virtuell aufbauen und testen
+🔹 **Realer Tisch** - Direkt zur physischen Umsetzung am Arbeitsplatz wechseln
+
+Wie möchten Sie fortfahren?`, {
+			showNextStepsButtons: true
+		});
+		
+		// Finish tutorial mode
+		finishTutorial();
 	}
 	
 	function generateAIResponse(userMessage: string) {
@@ -151,11 +233,56 @@ void loop() {
 			timestamp: new Date()
 		});
 		
-		isLoading = true;
-		setTimeout(() => {
-			isLoading = false;
-			generateAIResponse(message);
-		}, 1000 + Math.random() * 1000);
+		// Handle structured conversation
+		if (isStructuredConversation && conversation) {
+			handleStructuredConversation(message);
+		} else {
+			// Normal AI response
+			isLoading = true;
+			setTimeout(() => {
+				isLoading = false;
+				generateAIResponse(message);
+			}, 1000 + Math.random() * 1000);
+		}
+	}
+	
+	function handleStructuredConversation(userMessage: string) {
+		if (!conversation) return;
+		
+		const lowerMessage = userMessage.toLowerCase();
+		
+		// Check if user confirms having components
+		if (lowerMessage.includes('okay ich habe alle komponenten') || 
+			lowerMessage.includes('ok ich habe alle komponenten') ||
+			lowerMessage.includes('ja ich habe alle') ||
+			lowerMessage.includes('habe alle komponenten')) {
+			
+			// Move to code preparation step
+			markStepCompleted('component-analysis');
+			nextConversationStep();
+			
+			// Show code preparation message
+			isLoading = true;
+			setTimeout(() => {
+				isLoading = false;
+				const codeStep = conversation.steps[2]; // code-preparation step
+				addMessage('ai', codeStep.content, { showTutorialButton: true });
+			}, 1000);
+			
+		} else if (lowerMessage.includes('circuit') || lowerMessage.includes('schaltung')) {
+			// User wants to go to circuit designer
+			addMessage('ai', 'Perfekt! Ich öffne den Circuit Designer für Sie. Dort können Sie die Schaltung virtuell aufbauen und testen.');
+			setTimeout(() => {
+				showCircuitDiagram = true;
+			}, 1000);
+		} else {
+			// Default response for unrecognized input in structured conversation
+			isLoading = true;
+			setTimeout(() => {
+				isLoading = false;
+				generateAIResponse(userMessage);
+			}, 1000);
+		}
 	}
 	
 	function copyCodeToEditor(code: string) {
@@ -270,6 +397,19 @@ void loop() {
 									{@html message.content.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')}
 								</div>
 								
+								{#if message.componentImages && message.componentImages.length > 0}
+									<div class="component-images">
+										<h4>Benötigte Komponenten:</h4>
+										<div class="images-grid">
+											{#each message.componentImages as imagePath}
+												<div class="component-image">
+													<img src={imagePath} alt="Component" />
+												</div>
+											{/each}
+										</div>
+									</div>
+								{/if}
+								
 								{#if message.componentSuggestions && message.componentSuggestions.length > 0}
 									<div class="component-suggestions">
 										<h4>Recommended Components:</h4>
@@ -296,6 +436,25 @@ void loop() {
 											</button>
 										</div>
 										<pre><code>{message.codeGenerated}</code></pre>
+									</div>
+								{/if}
+								
+								{#if message.showTutorialButton}
+									<div class="tutorial-button-container">
+										<button class="tutorial-start-btn" on:click={startTutorial}>
+											💻 Code Tutorial starten
+										</button>
+									</div>
+								{/if}
+								
+								{#if message.showNextStepsButtons}
+									<div class="next-steps-container">
+										<button class="next-step-btn circuit" on:click={() => showCircuitDiagram = true}>
+											⚡ Circuit Designer
+										</button>
+										<button class="next-step-btn real-table" on:click={() => addMessage('ai', 'Perfekt! Gehen Sie zu Ihrem realen Arbeitsplatz und bauen Sie die Schaltung physisch auf.')}>
+											🔧 Realer Tisch
+										</button>
 									</div>
 								{/if}
 								
@@ -326,8 +485,8 @@ void loop() {
 				<PromptInput 
 					bind:value={currentInput}
 					onSend={handleSendMessage}
-					disabled={isLoading}
-					placeholder="Describe your circuit requirements, ask questions, or request component suggestions..."
+					disabled={isLoading || (isStructuredConversation && tutorialActive)}
+					placeholder={isStructuredConversation ? "Strukturierte Konversation läuft..." : "Describe your circuit requirements, ask questions, or request component suggestions..."}
 				/>
 			</div>
 			
@@ -340,6 +499,57 @@ void loop() {
 							<p class="diagram-description">Interactive circuit design for your project</p>
 						</div>
 						<CircuitDiagram />
+					</div>
+				{:else if tutorialActive}
+					<!-- Tutorial Mode -->
+					<div class="tutorial-container">
+						<div class="tutorial-header">
+							<h3>Code Tutorial</h3>
+							<p class="tutorial-description">Schritt-für-Schritt Arduino Programmierung</p>
+							<div class="tutorial-progress">
+								Schritt {tutorialStepIndex + 1} von {leonardoCodeTutorial.length}
+							</div>
+						</div>
+						
+						<div class="tutorial-content">
+							<div class="tutorial-step">
+								<h4>{leonardoCodeTutorial[tutorialStepIndex]?.title}</h4>
+								<p class="step-description">{leonardoCodeTutorial[tutorialStepIndex]?.description}</p>
+								<div class="step-explanation">
+									{leonardoCodeTutorial[tutorialStepIndex]?.explanation}
+								</div>
+							</div>
+							
+							<div class="tutorial-navigation">
+								<button 
+									class="nav-btn prev"
+									on:click={previousTutorialStep}
+									disabled={tutorialStepIndex === 0}
+								>
+									← Zurück
+								</button>
+								
+								{#if tutorialStepIndex < leonardoCodeTutorial.length - 1}
+									<button 
+										class="nav-btn next"
+										on:click={nextTutorialStep}
+									>
+										Weiter →
+									</button>
+								{:else}
+									<button 
+										class="nav-btn finish"
+										on:click={completeTutorial}
+									>
+										Tutorial beenden
+									</button>
+								{/if}
+							</div>
+						</div>
+						
+						<div class="tutorial-code-area">
+							<CodeEditor tutorialCode={leonardoCodeTutorial[tutorialStepIndex]?.code} />
+						</div>
 					</div>
 				{:else}
 					<CodeEditor />
@@ -829,6 +1039,237 @@ void loop() {
 		margin: 0;
 		color: #94a3b8;
 		font-size: 0.875rem;
+	}
+	
+	/* Component Images */
+	.component-images {
+		margin-top: 1rem;
+		padding: 1rem;
+		background: rgba(15, 23, 42, 0.8);
+		border-radius: 12px;
+		border: 1px solid rgba(0, 212, 170, 0.2);
+	}
+	
+	.component-images h4 {
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 1rem;
+		font-weight: 600;
+		margin: 0 0 1rem 0;
+		color: #00d4aa;
+	}
+	
+	.images-grid {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		justify-content: flex-start;
+	}
+	
+	.component-image {
+		background: rgba(30, 41, 59, 0.8);
+		border: 1px solid rgba(0, 212, 170, 0.2);
+		border-radius: 8px;
+		padding: 0.5rem;
+		transition: all 0.3s ease;
+		cursor: pointer;
+		width: 80px;
+		height: 80px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	
+	.component-image:hover {
+		border-color: #00d4aa;
+		transform: translateY(-2px);
+		box-shadow: 0 4px 16px rgba(0, 212, 170, 0.2);
+	}
+	
+	.component-image img {
+		max-width: 100%;
+		max-height: 100%;
+		object-fit: contain;
+		border-radius: 4px;
+	}
+	
+	/* Tutorial Button */
+	.tutorial-button-container {
+		margin-top: 1rem;
+		text-align: center;
+	}
+	
+	.tutorial-start-btn {
+		padding: 1rem 2rem;
+		background: linear-gradient(135deg, #00d4aa 0%, #0ea5e9 100%);
+		border: none;
+		border-radius: 12px;
+		color: #0a0f1a;
+		cursor: pointer;
+		font-family: 'Space Grotesk', sans-serif;
+		font-weight: 600;
+		font-size: 1.1rem;
+		transition: all 0.3s ease;
+		box-shadow: 0 4px 16px rgba(0, 212, 170, 0.3);
+	}
+	
+	.tutorial-start-btn:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 24px rgba(0, 212, 170, 0.4);
+	}
+	
+	/* Next Steps Buttons */
+	.next-steps-container {
+		margin-top: 1rem;
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+	}
+	
+	.next-step-btn {
+		padding: 1rem 1.5rem;
+		border: 2px solid;
+		border-radius: 12px;
+		cursor: pointer;
+		font-family: 'Space Grotesk', sans-serif;
+		font-weight: 600;
+		font-size: 1rem;
+		transition: all 0.3s ease;
+		min-width: 200px;
+	}
+	
+	.next-step-btn.circuit {
+		background: rgba(0, 212, 170, 0.1);
+		border-color: #00d4aa;
+		color: #00d4aa;
+	}
+	
+	.next-step-btn.real-table {
+		background: rgba(234, 179, 8, 0.1);
+		border-color: #eab308;
+		color: #eab308;
+	}
+	
+	.next-step-btn:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 24px rgba(0, 212, 170, 0.3);
+	}
+	
+	/* Tutorial Container */
+	.tutorial-container {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+	}
+	
+	.tutorial-header {
+		padding: 1.5rem 2rem;
+		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
+		background: rgba(15, 23, 42, 0.5);
+		backdrop-filter: blur(8px);
+	}
+	
+	.tutorial-header h3 {
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 1.25rem;
+		font-weight: 600;
+		margin: 0 0 0.5rem 0;
+		color: #00d4aa;
+	}
+	
+	.tutorial-description {
+		margin: 0 0 1rem 0;
+		color: #94a3b8;
+		font-size: 0.875rem;
+	}
+	
+	.tutorial-progress {
+		display: inline-block;
+		background: rgba(0, 212, 170, 0.2);
+		color: #00d4aa;
+		padding: 0.5rem 1rem;
+		border-radius: 20px;
+		font-size: 0.85rem;
+		font-weight: 600;
+		font-family: 'IBM Plex Mono', monospace;
+	}
+	
+	.tutorial-content {
+		padding: 2rem;
+		flex: 0 0 auto;
+		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
+	}
+	
+	.tutorial-step h4 {
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 1.1rem;
+		font-weight: 600;
+		margin: 0 0 0.5rem 0;
+		color: #e2e8f0;
+	}
+	
+	.step-description {
+		margin: 0 0 1rem 0;
+		color: #94a3b8;
+		font-size: 0.9rem;
+	}
+	
+	.step-explanation {
+		background: rgba(30, 41, 59, 0.6);
+		padding: 1rem;
+		border-radius: 8px;
+		border: 1px solid rgba(0, 212, 170, 0.1);
+		margin-bottom: 1.5rem;
+		line-height: 1.6;
+		color: #e2e8f0;
+	}
+	
+	.tutorial-navigation {
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+	}
+	
+	.nav-btn {
+		padding: 0.75rem 1.5rem;
+		border: 1px solid rgba(0, 212, 170, 0.3);
+		border-radius: 8px;
+		cursor: pointer;
+		font-family: 'Space Grotesk', sans-serif;
+		font-weight: 600;
+		font-size: 0.9rem;
+		transition: all 0.2s ease;
+	}
+	
+	.nav-btn.prev {
+		background: rgba(30, 41, 59, 0.8);
+		color: #94a3b8;
+	}
+	
+	.nav-btn.next {
+		background: rgba(0, 212, 170, 0.1);
+		color: #00d4aa;
+	}
+	
+	.nav-btn.finish {
+		background: linear-gradient(135deg, #00d4aa 0%, #0ea5e9 100%);
+		color: #0a0f1a;
+		border-color: transparent;
+	}
+	
+	.nav-btn:hover:not(:disabled) {
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(0, 212, 170, 0.2);
+	}
+	
+	.nav-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	
+	.tutorial-code-area {
+		flex: 1;
+		min-height: 0;
 	}
 	
 	/* Responsive Design */
