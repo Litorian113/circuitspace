@@ -1,5 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import Prism from 'prismjs';
+	import 'prismjs/components/prism-c';
+	import 'prismjs/components/prism-cpp';
+	import 'prismjs/themes/prism-tomorrow.css';
 	
 	let codeContent = `// Circuitspace Auto-Generated Arduino Code
 // Project: [Your Project Name]
@@ -58,12 +62,16 @@ void loop() {
 	let showSerialMonitor = false;
 	let serialMessages: Array<{timestamp: string, message: string}> = [];
 	let autoScroll = true;
+	let codeEditor: HTMLTextAreaElement;
+	let highlightedCode = '';
+	let syncScrolling = true;
 	
 	// Listen for code updates from chat
 	onMount(() => {
 		const handleCodeUpdate = (event: CustomEvent) => {
 			if (event.detail) {
 				codeContent = event.detail;
+				updateHighlighting();
 				const timestamp = new Date().toLocaleTimeString();
 				if (showSerialMonitor) {
 					serialMonitor += `[${timestamp}] New code loaded from chat\n`;
@@ -73,10 +81,38 @@ void loop() {
 		
 		window.addEventListener('updateCode', handleCodeUpdate as EventListener);
 		
+		// Initial highlighting
+		updateHighlighting();
+		
 		return () => {
 			window.removeEventListener('updateCode', handleCodeUpdate as EventListener);
 		};
 	});
+	
+	function updateHighlighting() {
+		try {
+			// Use C++ syntax highlighting for Arduino code
+			highlightedCode = Prism.highlight(codeContent, Prism.languages.cpp, 'cpp');
+		} catch (error) {
+			console.warn('Syntax highlighting error:', error);
+			highlightedCode = codeContent;
+		}
+	}
+	
+	function handleCodeInput() {
+		updateHighlighting();
+	}
+	
+	function handleScroll(event: Event) {
+		if (syncScrolling) {
+			const target = event.target as HTMLTextAreaElement;
+			const highlightElement = document.querySelector('.syntax-highlight') as HTMLElement;
+			if (highlightElement) {
+				highlightElement.scrollTop = target.scrollTop;
+				highlightElement.scrollLeft = target.scrollLeft;
+			}
+		}
+	}
 	
 	// Simulate real-time serial data
 	function startSerialSimulation() {
@@ -254,11 +290,19 @@ void loop() {
 				<div class="line-number">{i + 1}</div>
 			{/each}
 		</div>
-		<textarea
-			bind:value={codeContent}
-			class="code-editor"
-			spellcheck="false"
-		></textarea>
+		<div class="editor-container">
+			<!-- Syntax highlighting overlay -->
+			<pre class="syntax-highlight"><code class="language-cpp">{@html highlightedCode}</code></pre>
+			<!-- Textarea for editing -->
+			<textarea
+				bind:this={codeEditor}
+				bind:value={codeContent}
+				class="code-editor"
+				spellcheck="false"
+				on:input={handleCodeInput}
+				on:scroll={handleScroll}
+			></textarea>
+		</div>
 	</div>
 	
 	<!-- IDE Footer -->
@@ -448,22 +492,136 @@ void loop() {
 		line-height: 1.5rem;
 	}
 	
-	.code-editor {
+	.editor-container {
 		flex: 1;
+		position: relative;
+		overflow: hidden;
+	}
+	
+	.syntax-highlight {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		margin: 0;
+		padding: 1rem;
+		background: transparent;
+		color: transparent;
+		pointer-events: none;
+		overflow: auto;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.95rem;
+		line-height: 1.5;
+		white-space: pre-wrap;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+		z-index: 1;
+	}
+	
+	.syntax-highlight code {
+		background: transparent;
+		padding: 0;
+		margin: 0;
+		font-family: inherit;
+		font-size: inherit;
+		line-height: inherit;
+	}
+	
+	/* Override Prism.js default styles for dark theme */
+	.syntax-highlight :global(.token.comment),
+	.syntax-highlight :global(.token.prolog),
+	.syntax-highlight :global(.token.doctype),
+	.syntax-highlight :global(.token.cdata) {
+		color: #6b7280 !important;
+	}
+	
+	.syntax-highlight :global(.token.punctuation) {
+		color: #d1d5db !important;
+	}
+	
+	.syntax-highlight :global(.token.property),
+	.syntax-highlight :global(.token.tag),
+	.syntax-highlight :global(.token.boolean),
+	.syntax-highlight :global(.token.number),
+	.syntax-highlight :global(.token.constant),
+	.syntax-highlight :global(.token.symbol),
+	.syntax-highlight :global(.token.deleted) {
+		color: #f87171 !important;
+	}
+	
+	.syntax-highlight :global(.token.selector),
+	.syntax-highlight :global(.token.attr-name),
+	.syntax-highlight :global(.token.string),
+	.syntax-highlight :global(.token.char),
+	.syntax-highlight :global(.token.builtin),
+	.syntax-highlight :global(.token.inserted) {
+		color: #34d399 !important;
+	}
+	
+	.syntax-highlight :global(.token.operator),
+	.syntax-highlight :global(.token.entity),
+	.syntax-highlight :global(.token.url),
+	.syntax-highlight :global(.token.variable) {
+		color: #60a5fa !important;
+	}
+	
+	.syntax-highlight :global(.token.atrule),
+	.syntax-highlight :global(.token.attr-value),
+	.syntax-highlight :global(.token.function),
+	.syntax-highlight :global(.token.class-name) {
+		color: #fbbf24 !important;
+	}
+	
+	.syntax-highlight :global(.token.keyword) {
+		color: #a78bfa !important;
+		font-weight: 600;
+	}
+	
+	.syntax-highlight :global(.token.regex),
+	.syntax-highlight :global(.token.important) {
+		color: #f59e0b !important;
+	}
+	
+	.syntax-highlight :global(.token.important),
+	.syntax-highlight :global(.token.bold) {
+		font-weight: bold;
+	}
+	
+	.syntax-highlight :global(.token.italic) {
+		font-style: italic;
+	}
+	
+	.code-editor {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
 		background: transparent;
 		border: none;
 		padding: 1rem;
-		color: #e2e8f0;
+		color: transparent;
+		caret-color: #00d4aa;
 		font-family: 'IBM Plex Mono', monospace;
 		font-size: 0.95rem;
 		line-height: 1.5;
 		resize: none;
 		outline: none;
-		overflow-y: auto;
+		overflow: auto;
+		white-space: pre-wrap;
+		word-wrap: break-word;
+		overflow-wrap: break-word;
+		z-index: 2;
 	}
 	
 	.code-editor::selection {
 		background: rgba(0, 212, 170, 0.3);
+		color: transparent;
+	}
+	
+	.code-editor:focus {
+		background: transparent;
 	}
 	
 	/* IDE Footer */
