@@ -842,7 +842,7 @@ void loop() {
 		}
 		
 		.chat-column {
-			width: 100%;
+			width: 100% !important;
 			flex: 0 0 auto;
 			border-right: none;
 			border-bottom: 1px solid rgba(0, 212, 170, 0.2);
@@ -850,9 +850,10 @@ void loop() {
 		}
 		
 		.ide-column {
-			width: 100%;
+			width: 100% !important;
 			flex: 0 0 auto;
 			min-height: 50vh;
+			max-width: 100% !important; /* Override desktop max-width */
 		}
 	}
 	
@@ -911,15 +912,16 @@ void loop() {
 		}
 		
 		.chat-column {
-			width: 100%;
+			width: 100% !important;
 			flex: 0 0 auto;
 			min-height: 60vh;
 		}
 		
 		.ide-column {
-			width: 100%;
+			width: 100% !important;
 			flex: 0 0 auto;
 			min-height: 40vh;
+			max-width: 100% !important; /* Override desktop max-width */
 		}
 	}
 </style>
