@@ -780,6 +780,119 @@ export const componentLibrary: ComponentDetails[] = [
 		maxLevel: 5,
 		quizzesTaken: 0,
 		maxQuizzesPerDay: 5
+	},
+	{
+		id: 'leonardo-keyestudio',
+		name: 'Arduino Leonardo (Keyestudio)',
+		category: 'Microcontroller',
+		difficulty: 'advanced',
+		image: '/components/leonardoKeyestudio.png',
+		description: 'A versatile microcontroller board based on the ATmega32U4 with built-in USB communication.',
+		detailedDescription: 'The Arduino Leonardo is a microcontroller board based on the ATmega32U4. It has 20 digital input/output pins, a 16 MHz crystal oscillator, a micro USB connection, a power jack, an ICSP header, and a reset button. Unlike other Arduino boards, the Leonardo can act as a USB device, making it ideal for projects that need to emulate keyboards, mice, or other USB devices.',
+		specifications: {
+			'Microcontroller': 'ATmega32U4',
+			'Operating Voltage': '5V',
+			'Input Voltage': '7-12V (recommended)',
+			'Digital I/O Pins': '20',
+			'PWM Channels': '7',
+			'Analog Input Pins': '12',
+			'DC Current per I/O Pin': '20mA',
+			'DC Current for 3.3V Pin': '50mA',
+			'Flash Memory': '32KB (4KB used by bootloader)',
+			'SRAM': '2.5KB',
+			'EEPROM': '1KB',
+			'Clock Speed': '16MHz',
+			'USB': 'Micro USB',
+			'Dimensions': '68.6 x 53.4mm'
+		},
+		pinouts: [
+			'Digital pins 0-13',
+			'Analog pins A0-A5',
+			'Power pins (5V, 3.3V, GND, Vin)',
+			'ICSP header',
+			'Reset button',
+			'USB connector'
+		],
+		commonUses: [
+			'USB HID devices (keyboard/mouse emulation)',
+			'IoT projects with wireless communication',
+			'Sensor data logging and monitoring',
+			'Home automation systems',
+			'Interactive art installations',
+			'Educational programming projects',
+			'Prototype development for commercial products'
+		],
+		workingPrinciple: 'The Leonardo runs programs stored in its flash memory. It can communicate directly with a computer via USB without needing an additional USB-to-serial chip. The ATmega32U4 has built-in USB communication, allowing it to appear as various USB devices like keyboards, mice, or serial ports.',
+		safetyTips: [
+			'Never exceed the input voltage range of 7-12V',
+			'Avoid short circuits between power pins',
+			'Use appropriate current limiting for LEDs and other components',
+			'Be careful with the micro USB connector - it can break with excessive force',
+			'Always disconnect power before wiring connections',
+			'Use pull-up resistors for reliable digital inputs'
+		],
+		quiz: [
+			{
+				question: 'What makes the Arduino Leonardo different from the Arduino Uno?',
+				options: [
+					'It has more digital pins',
+					'It has built-in USB communication without a separate chip',
+					'It runs at a higher clock speed',
+					'It uses a different programming language'
+				],
+				correctAnswer: 1,
+				explanation: 'The Leonardo has built-in USB communication via the ATmega32U4 microcontroller, eliminating the need for a separate USB-to-serial converter chip like the Uno uses.'
+			},
+			{
+				question: 'How many analog input pins does the Arduino Leonardo have?',
+				options: [
+					'6 pins',
+					'8 pins',
+					'10 pins',
+					'12 pins'
+				],
+				correctAnswer: 3,
+				explanation: 'The Arduino Leonardo has 12 analog input pins (A0-A11), which is more than many other Arduino boards.'
+			},
+			{
+				question: 'What unique capability does the Leonardo have for USB communication?',
+				options: [
+					'It can only send data to a computer',
+					'It can emulate USB devices like keyboards and mice',
+					'It requires special drivers for USB communication',
+					'It cannot communicate via USB'
+				],
+				correctAnswer: 1,
+				explanation: 'The Leonardo can emulate USB HID devices like keyboards and mice, making it perfect for projects that need to control a computer directly.'
+			},
+			{
+				question: 'What is the recommended input voltage range for the Arduino Leonardo?',
+				options: [
+					'3-5V',
+					'5-9V',
+					'7-12V',
+					'12-20V'
+				],
+				correctAnswer: 2,
+				explanation: 'The recommended input voltage range is 7-12V. Going outside this range can damage the board or cause unreliable operation.'
+			},
+			{
+				question: 'How much flash memory does the Arduino Leonardo have available for user programs?',
+				options: [
+					'32KB total',
+					'28KB (32KB minus 4KB bootloader)',
+					'16KB',
+					'64KB'
+				],
+				correctAnswer: 1,
+				explanation: 'The Leonardo has 32KB of flash memory total, but 4KB is reserved for the bootloader, leaving 28KB available for user programs.'
+			}
+		],
+		level: 1,
+		experience: 0,
+		maxLevel: 5,
+		quizzesTaken: 0,
+		maxQuizzesPerDay: 5
 	}
 ];
 

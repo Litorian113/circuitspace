@@ -93,8 +93,8 @@
 </script>
 
 <svelte:head>
-	<title>Komponenten erkunden - Circuitspace</title>
-	<meta name="description" content="Erkunde elektronische Komponenten und lerne mit interaktiven Quizzes" />
+	<title>Explore Components - Circuitspace</title>
+	<meta name="description" content="Explore electronic components and learn with interactive quizzes" />
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
 	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -150,21 +150,21 @@
 		<!-- Header -->
 		<header class="components-header">
 			<div class="header-left">
-				<h1>Komponenten erkunden</h1>
-				<p class="page-description">Lerne elektronische Komponenten kennen und sammle Erfahrungspunkte durch interaktive Quizzes!</p>
+				<h1>Explore Components</h1>
+				<p class="page-description">Learn about electronic components and gain experience points through interactive quizzes!</p>
 			</div>
 			<div class="header-stats">
 				<div class="stat-card">
 					<span class="stat-number">{allComponents.length}</span>
-					<span class="stat-label">Komponenten</span>
+					<span class="stat-label">Components</span>
 				</div>
 				<div class="stat-card">
 					<span class="stat-number">{allComponents.filter(c => getProgressPercentage(c.id) > 0).length}</span>
-					<span class="stat-label">Begonnen</span>
+					<span class="stat-label">Started</span>
 				</div>
 				<div class="stat-card">
 					<span class="stat-number">{allComponents.filter(c => getProgressPercentage(c.id) === 100).length}</span>
-					<span class="stat-label">Abgeschlossen</span>
+					<span class="stat-label">Completed</span>
 				</div>
 			</div>
 		</header>
@@ -175,7 +175,7 @@
 				<div class="search-box">
 					<input 
 						type="text" 
-						placeholder="Komponenten suchen..." 
+						placeholder="Search components..." 
 						bind:value={searchTerm}
 					/>
 				</div>
@@ -183,9 +183,9 @@
 			
 			<div class="filter-controls">
 				<div class="filter-group">
-					<label for="category-select">Kategorie:</label>
+					<label for="category-select">Category:</label>
 					<select id="category-select" bind:value={selectedCategory}>
-						<option value="all">Alle Kategorien</option>
+						<option value="all">All Categories</option>
 						{#each categories as category}
 							<option value={category}>{category}</option>
 						{/each}
@@ -193,24 +193,24 @@
 				</div>
 				
 				<div class="filter-group">
-					<label for="difficulty-select">Schwierigkeit:</label>
+					<label for="difficulty-select">Difficulty:</label>
 					<select id="difficulty-select" bind:value={selectedDifficulty}>
-						<option value="all">Alle</option>
+						<option value="all">All</option>
 						{#each difficulties as difficulty}
 							<option value={difficulty}>
-								{difficulty === 'beginner' ? 'Anfänger' : 
-								 difficulty === 'intermediate' ? 'Fortgeschritten' : 'Experte'}
+								{difficulty === 'beginner' ? 'Beginner' : 
+								 difficulty === 'intermediate' ? 'Intermediate' : 'Advanced'}
 							</option>
 						{/each}
 					</select>
 				</div>
 				
 				<div class="filter-group">
-					<label for="sort-select">Sortieren:</label>
+					<label for="sort-select">Sort by:</label>
 					<select id="sort-select" bind:value={sortBy}>
 						<option value="name">Name</option>
-						<option value="difficulty">Schwierigkeit</option>
-						<option value="progress">Fortschritt</option>
+						<option value="difficulty">Difficulty</option>
+						<option value="progress">Progress</option>
 					</select>
 				</div>
 			</div>
@@ -229,8 +229,8 @@
 					<div class="component-image">
 						<img src={component.image} alt={component.name} />
 						<div class="difficulty-badge" style="background-color: {getDifficultyColor(component.difficulty)}">
-							{component.difficulty === 'beginner' ? 'Anfänger' : 
-							 component.difficulty === 'intermediate' ? 'Fortgeschritten' : 'Experte'}
+							{component.difficulty === 'beginner' ? 'Beginner' : 
+							 component.difficulty === 'intermediate' ? 'Intermediate' : 'Advanced'}
 						</div>
 					</div>
 					
@@ -241,7 +241,7 @@
 						
 						<div class="progress-section">
 							<div class="progress-header">
-								<span class="progress-label">Fortschritt</span>
+								<span class="progress-label">Progress</span>
 								<span class="progress-percentage">{Math.round(getProgressPercentage(component.id))}%</span>
 							</div>
 							<div class="progress-bar">
@@ -251,7 +251,7 @@
 								></div>
 							</div>
 							<div class="quiz-info">
-								{getComponentProgress(component.id).quizzesTaken}/5 Quizzes abgeschlossen
+								{getComponentProgress(component.id).quizzesTaken}/5 Quizzes completed
 							</div>
 						</div>
 					</div>
@@ -262,14 +262,14 @@
 		{#if filteredComponents.length === 0}
 			<div class="no-results">
 				<div class="no-results-icon">🔍</div>
-				<h3>Keine Komponenten gefunden</h3>
-				<p>Versuchen Sie eine andere Suche oder wählen Sie andere Filter.</p>
+				<h3>No components found</h3>
+				<p>Try a different search or select different filters.</p>
 				<button class="reset-filters-btn" on:click={() => {
 					searchTerm = '';
 					selectedCategory = 'all';
 					selectedDifficulty = 'all';
 				}}>
-					Filter zurücksetzen
+					Reset filters
 				</button>
 			</div>
 		{/if}

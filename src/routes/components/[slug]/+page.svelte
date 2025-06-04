@@ -161,8 +161,8 @@
 </script>
 
 <svelte:head>
-	<title>{component?.name || 'Komponente'} - Circuitspace</title>
-	<meta name="description" content={component?.description || 'Elektronische Komponente'} />
+	<title>{component?.name || 'Component'} - Circuitspace</title>
+	<meta name="description" content={component?.description || 'Electronic Component'} />
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
 	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -218,7 +218,7 @@
 		<!-- Back Button -->
 		<div class="back-button-container">
 			<button class="back-button" on:click={goToComponents}>
-				← Zurück zur Übersicht
+				← Back to Overview
 			</button>
 		</div>
 		<!-- Component Header -->
@@ -251,11 +251,11 @@
 				<div class="quiz-section">
 					{#if canStartQuiz}
 						<button class="quiz-button" on:click={startQuiz}>
-							🧠 Quiz starten ({component.maxQuizzesPerDay - dailyQuizCount} verbleibend)
+							🧠 Start Quiz ({component.maxQuizzesPerDay - dailyQuizCount} remaining)
 						</button>
 					{:else}
 						<div class="quiz-limit-message">
-							Tägliches Quiz-Limit erreicht. Versuchen Sie es morgen erneut!
+							Daily quiz limit reached. Try again tomorrow!
 						</div>
 					{/if}
 				</div>
@@ -266,13 +266,13 @@
 		<div class="details-grid">
 			<!-- Detailed Description -->
 			<div class="detail-card">
-				<h3>Detaillierte Beschreibung</h3>
+				<h3>Detailed Description</h3>
 				<p>{component.detailedDescription}</p>
 			</div>
 
 			<!-- Specifications -->
 			<div class="detail-card">
-				<h3>Technische Daten</h3>
+				<h3>Technical Specifications</h3>
 				<div class="specifications">
 					{#each Object.entries(component.specifications) as [key, value]}
 						<div class="spec-row">
@@ -285,13 +285,13 @@
 
 			<!-- Working Principle -->
 			<div class="detail-card">
-				<h3>Funktionsweise</h3>
+				<h3>Working Principle</h3>
 				<p>{component.workingPrinciple}</p>
 			</div>
 
 			<!-- Common Uses -->
 			<div class="detail-card">
-				<h3>Häufige Anwendungen</h3>
+				<h3>Common Applications</h3>
 				<ul>
 					{#each component.commonUses as use}
 						<li>{use}</li>
@@ -301,7 +301,7 @@
 
 			<!-- Safety Tips -->
 			<div class="detail-card">
-				<h3>Sicherheitshinweise</h3>
+				<h3>Safety Guidelines</h3>
 				<ul class="safety-list">
 					{#each component.safetyTips as tip}
 						<li>⚠️ {tip}</li>
@@ -331,8 +331,8 @@
 		<div class="quiz-modal">
 			{#if !isQuizCompleted}
 				<div class="quiz-header">
-					<h3>Quiz: {component?.name || 'Komponente'}</h3>
-					<span class="question-counter">Frage {currentQuestionIndex + 1} von {quizQuestions.length}</span>
+					<h3>Quiz: {component?.name || 'Component'}</h3>
+					<span class="question-counter">Question {currentQuestionIndex + 1} of {quizQuestions.length}</span>
 				</div>
 
 				<div class="quiz-question">
@@ -352,7 +352,7 @@
 
 					{#if showQuizResult}
 						<div class="quiz-explanation">
-							<strong>Erklärung:</strong> {quizQuestions[currentQuestionIndex].explanation}
+							<strong>Explanation:</strong> {quizQuestions[currentQuestionIndex].explanation}
 						</div>
 					{/if}
 
@@ -362,22 +362,22 @@
 							on:click={submitAnswer}
 							disabled={selectedAnswer === null}
 						>
-							Antwort bestätigen
+							Confirm Answer
 						</button>
 					{/if}
 				</div>
 			{:else}
 				<div class="quiz-results">
-					<h3>Quiz abgeschlossen! 🎉</h3>
+					<h3>Quiz completed! 🎉</h3>
 					<div class="results-summary">
 						<div class="score">{correctAnswers}/{quizQuestions.length}</div>
-						<div class="score-text">richtige Antworten</div>
-						<div class="experience-gained">+{correctAnswers * 20} XP erhalten!</div>
+						<div class="score-text">correct answers</div>
+						<div class="experience-gained">+{correctAnswers * 20} XP earned!</div>
 						{#if component && component.level > 1}
 							<div class="level-up">Level {component.level - 1} → {component.level}! 🚀</div>
 						{/if}
 					</div>
-					<button class="close-quiz-btn" on:click={closeQuiz}>Schließen</button>
+					<button class="close-quiz-btn" on:click={closeQuiz}>Close</button>
 				</div>
 			{/if}
 		</div>
