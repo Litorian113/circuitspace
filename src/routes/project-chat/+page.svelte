@@ -205,23 +205,22 @@ void loop() {
 	<!-- Sidebar -->
 	<aside class="sidebar">
 		<div class="sidebar-header">
-			<h2>Circuitspace</h2>
+			<button class="home-link" on:click={goHome}>
+				<h2>Circuitspace</h2>
+			</button>
 			<div class="status-indicator"></div>
 		</div>
 		
 		<nav class="sidebar-nav">
-			<button class="nav-item active">
-				<span class="nav-icon">💬</span>
+			<button class="nav-item" on:click={newProject}>
+				New Project +
+			</button>
+            <button class="nav-item active">
 				Current Project
 			</button>
-			<button class="nav-item" on:click={newProject}>
-				<span class="nav-icon">➕</span>
-				New Project
-			</button>
-			<button class="nav-item" on:click={goHome}>
-				<span class="nav-icon">🏠</span>
+			<!-- <button class="nav-item" on:click={goHome}>
 				Home
-			</button>
+			</button> -->
 		</nav>
 		
 		<div class="sidebar-footer">
@@ -246,7 +245,7 @@ void loop() {
 					</div>
 					<div class="header-actions">
 						<button class="action-btn" on:click={toggleCircuitDiagram}>
-							{showCircuitDiagram ? '📝 Code' : '⚡ Circuit'}
+							{showCircuitDiagram ? 'Code' : '⚡ Circuit'}
 						</button>
 						<button class="action-btn" on:click={exportChat}>Export Chat</button>
 						<button class="action-btn" on:click={shareProject}>Share Project</button>
@@ -340,7 +339,7 @@ void loop() {
 							<h3>Circuit Diagram</h3>
 							<p class="diagram-description">Interactive circuit design for your project</p>
 						</div>
-						<CircuitDiagram showDiagram={showCircuitDiagram} />
+						<CircuitDiagram />
 					</div>
 				{:else}
 					<CodeEditor />
@@ -387,12 +386,32 @@ void loop() {
 		justify-content: space-between;
 	}
 	
+	.home-link {
+		background: none;
+		border: none;
+		padding: 0;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		border-radius: 8px;
+		padding: 0.5rem 1rem;
+	}
+	
+	.home-link:hover {
+		background: rgba(0, 212, 170, 0.1);
+		transform: scale(1.02);
+	}
+	
 	.sidebar-header h2 {
 		font-family: 'Space Grotesk', sans-serif;
 		font-size: 1.25rem;
 		font-weight: 600;
 		margin: 0;
 		color: #00d4aa;
+		transition: color 0.2s ease;
+	}
+	
+	.home-link:hover h2 {
+		color: #ffffff;
 	}
 	
 	.status-indicator {

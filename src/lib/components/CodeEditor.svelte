@@ -56,7 +56,7 @@ void loop() {
 	let compilationStatus = 'Ready';
 	let serialMonitor = '';
 	let showSerialMonitor = false;
-	let serialMessages = [];
+	let serialMessages: Array<{timestamp: string, message: string}> = [];
 	let autoScroll = true;
 	
 	// Listen for code updates from chat
@@ -184,10 +184,15 @@ void loop() {
 		serialMonitor = `[${timestamp}] Serial Monitor cleared\n\n`;
 	}
 	
-	function sendSerialCommand(event) {
-		if (event.key === 'Enter' || event.type === 'click') {
-			const input = event.target.previousElementSibling || event.target.parentElement.querySelector('input');
-			const command = input.value.trim();
+	function sendSerialCommand(event: KeyboardEvent | MouseEvent) {
+		if ((event instanceof KeyboardEvent && event.key === 'Enter') || event.type === 'click') {
+			const target = event.target as HTMLElement;
+			if (!target) return;
+			
+			const input = target.previousElementSibling || target.parentElement?.querySelector('input');
+			if (!input) return;
+			
+			const command = (input as HTMLInputElement).value.trim();
 			
 			if (command) {
 				const timestamp = new Date().toLocaleTimeString();
@@ -208,7 +213,7 @@ void loop() {
 					serialMonitor += `[${responseTime}] < ${response}\n`;
 				}, 200 + Math.random() * 800);
 				
-				input.value = '';
+				(input as HTMLInputElement).value = '';
 			}
 		}
 	}
@@ -515,17 +520,6 @@ void loop() {
 		transform: none;
 	}
 	
-	.footer-btn.upload-btn {
-		background: linear-gradient(135deg, #00d4aa 0%, #0ea5e9 100%);
-		border: none;
-		color: #0a0f1a;
-		font-weight: 600;
-	}
-	
-	.footer-btn.upload-btn:hover:not(:disabled) {
-		background: linear-gradient(135deg, #00b894 0%, #0c7cd5 100%);
-		transform: translateY(-2px);
-	}
 	
 	/* Serial Monitor */
 	.serial-monitor {
@@ -770,10 +764,6 @@ void loop() {
 			justify-content: center;
 		}
 		
-		.upload-button {
-			width: 100%;
-			justify-content: center;
-		}
 		
 		.serial-monitor {
 			width: 100%;

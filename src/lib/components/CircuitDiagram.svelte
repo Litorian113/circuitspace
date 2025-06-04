@@ -30,7 +30,7 @@
 	let isDragging = false;
 	let dragOffset = {x: 0, y: 0};
 	
-	$: if (canvas && $currentProject && showDiagram) {
+	$: if (canvas && $currentProject) {
 		generateDiagram();
 	}
 	
@@ -395,13 +395,13 @@
 		</div>
 		<div class="header-actions">
 			<button class="action-btn" on:click={addComponent}>
-				➕ Add Component
+				Add Component
 			</button>
 			<button class="action-btn" on:click={resetDiagram}>
-				🔄 Reset
+				Reset
 			</button>
 			<button class="action-btn" on:click={exportDiagram}>
-				📥 Export
+				Export
 			</button>
 		</div>
 	</header>
@@ -474,31 +474,7 @@
 		transform: translateY(-2px);
 	}
 	
-	.control-btn {
-		padding: 0.5rem 1rem;
-		background: rgba(0, 212, 170, 0.1);
-		color: #00d4aa;
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 6px;
-		cursor: pointer;
-		font-family: inherit;
-		font-size: 0.85rem;
-		transition: all 0.2s ease;
-	}
-	
-	.control-btn:hover {
-		background: rgba(0, 212, 170, 0.2);
-	}
-	
-	.close-btn {
-		background: rgba(239, 68, 68, 0.1);
-		color: #ef4444;
-		border-color: rgba(239, 68, 68, 0.3);
-	}
-	
-	.close-btn:hover {
-		background: rgba(239, 68, 68, 0.2);
-	}
+
 	
 	.diagram-canvas-container {
 		flex: 1;

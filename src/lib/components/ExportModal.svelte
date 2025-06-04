@@ -133,8 +133,10 @@
 </script>
 
 {#if isOpen}
-	<div class="modal-overlay" on:click={closeModal}>
-		<div class="modal-content" on:click|stopPropagation>
+	<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+	<div class="modal-overlay" on:click={closeModal} on:keydown={(e) => e.key === 'Escape' && closeModal()} role="dialog" aria-modal="true" tabindex="-1">
+		<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+		<div class="modal-content" on:click|stopPropagation on:keydown|stopPropagation role="document">
 			<div class="modal-header">
 				<h2>Projekt exportieren</h2>
 				<button class="close-btn" on:click={closeModal}>×</button>
