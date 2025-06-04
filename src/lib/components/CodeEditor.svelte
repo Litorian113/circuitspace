@@ -1,0 +1,785 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	
+	let codeContent = `// Circuitspace Auto-Generated Arduino Code
+// Project: [Your Project Name]
+// Generated on: ${new Date().toLocaleDateString()}
+
+#include <Arduino.h>
+
+// Pin definitions
+const int LED_PIN = 13;
+const int BUTTON_PIN = 2;
+
+// Variables
+bool buttonState = false;
+bool lastButtonState = false;
+bool ledState = false;
+
+void setup() {
+  // Initialize serial communication
+  Serial.begin(9600);
+  Serial.println("Circuitspace Project Started!");
+  
+  // Initialize pins
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);
+  
+  // Initial state
+  digitalWrite(LED_PIN, LOW);
+}
+
+void loop() {
+  // Read button state
+  buttonState = digitalRead(BUTTON_PIN);
+  
+  // Check for button press
+  if (buttonState != lastButtonState) {
+    if (buttonState == LOW) {
+      // Button pressed, toggle LED
+      ledState = !ledState;
+      digitalWrite(LED_PIN, ledState);
+      
+      Serial.print("LED state changed to: ");
+      Serial.println(ledState ? "ON" : "OFF");
+    }
+    delay(50); // Debounce delay
+  }
+  
+  lastButtonState = buttonState;
+}`;
+
+	let connectedBoard = "Arduino Uno";
+	let isConnected = true;
+	let isUploading = false;
+	let isCompiling = false;
+	let compilationStatus = 'Ready';
+	let serialMonitor = '';
+	let showSerialMonitor = false;
+	let serialMessages = [];
+	let autoScroll = true;
+	
+	// Listen for code updates from chat
+	onMount(() => {
+		const handleCodeUpdate = (event: CustomEvent) => {
+			if (event.detail) {
+				codeContent = event.detail;
+				const timestamp = new Date().toLocaleTimeString();
+				if (showSerialMonitor) {
+					serialMonitor += `[${timestamp}] New code loaded from chat\n`;
+				}
+			}
+		};
+		
+		window.addEventListener('updateCode', handleCodeUpdate as EventListener);
+		
+		return () => {
+			window.removeEventListener('updateCode', handleCodeUpdate as EventListener);
+		};
+	});
+	
+	// Simulate real-time serial data
+	function startSerialSimulation() {
+		if (!showSerialMonitor) return;
+		
+		const messages = [
+			'Circuitspace Project Started!',
+			'Initializing sensors...',
+			'Button state: Released',
+			'LED state changed to: ON',
+			'Temperature: 23.5°C',
+			'Button pressed!',
+			'LED state changed to: OFF',
+			'Sensor reading: 1024',
+			'Wifi connection established',
+			'Data sent to server'
+		];
+		
+		const interval = setInterval(() => {
+			if (!showSerialMonitor) {
+				clearInterval(interval);
+				return;
+			}
+			
+			const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+			const timestamp = new Date().toLocaleTimeString();
+			const newLine = `[${timestamp}] ${randomMessage}\n`;
+			
+			serialMonitor += newLine;
+			serialMessages = [...serialMessages, {timestamp, message: randomMessage}];
+		}, 3000 + Math.random() * 4000); // Random interval between 3-7 seconds
+	}
+	
+	function uploadCode() {
+		isUploading = true;
+		// Simulate upload process with more realistic timing
+		setTimeout(() => {
+			isUploading = false;
+			const timestamp = new Date().toLocaleTimeString();
+			serialMonitor += `[${timestamp}] Code uploaded successfully to ${connectedBoard}\n`;
+			serialMonitor += `[${timestamp}] Sketch uses 924 bytes (2%) of program storage space\n`;
+			serialMonitor += `[${timestamp}] Global variables use 9 bytes (0%) of dynamic memory\n\n`;
+			
+			// Start serial simulation after upload
+			setTimeout(startSerialSimulation, 1000);
+		}, 2500);
+	}
+	
+	function selectBoard() {
+		const boards = [
+			"Arduino Uno", 
+			"Arduino Nano", 
+			"ESP32 DevKit", 
+			"Arduino Mega 2560",
+			"NodeMCU",
+			"Arduino Leonardo"
+		];
+		const currentIndex = boards.indexOf(connectedBoard);
+		const nextIndex = (currentIndex + 1) % boards.length;
+		connectedBoard = boards[nextIndex];
+		
+		// Update serial monitor header
+		if (showSerialMonitor) {
+			const timestamp = new Date().toLocaleTimeString();
+			serialMonitor += `[${timestamp}] Switched to ${connectedBoard}\n`;
+		}
+	}
+	
+	function compileCode() {
+		isCompiling = true;
+		compilationStatus = 'Compiling...';
+		
+		// Simulate compilation with realistic messages
+		setTimeout(() => {
+			const lines = codeContent.split('\n').length;
+			const size = new Blob([codeContent]).size;
+			
+			isCompiling = false;
+			compilationStatus = `Compilation successful! ${lines} lines, ${size} bytes`;
+			
+			setTimeout(() => {
+				compilationStatus = 'Ready';
+			}, 4000);
+		}, 2000 + Math.random() * 1000);
+	}
+	
+	function toggleSerialMonitor() {
+		showSerialMonitor = !showSerialMonitor;
+		if (showSerialMonitor) {
+			const timestamp = new Date().toLocaleTimeString();
+			serialMonitor = `[${timestamp}] Serial Monitor connected to ${connectedBoard}\n`;
+			serialMonitor += `[${timestamp}] Baud rate: 9600\n\n`;
+			
+			// Start simulation if connected
+			if (isConnected) {
+				startSerialSimulation();
+			}
+		}
+	}
+	
+	function clearSerialMonitor() {
+		serialMonitor = '';
+		serialMessages = [];
+		const timestamp = new Date().toLocaleTimeString();
+		serialMonitor = `[${timestamp}] Serial Monitor cleared\n\n`;
+	}
+	
+	function sendSerialCommand(event) {
+		if (event.key === 'Enter' || event.type === 'click') {
+			const input = event.target.previousElementSibling || event.target.parentElement.querySelector('input');
+			const command = input.value.trim();
+			
+			if (command) {
+				const timestamp = new Date().toLocaleTimeString();
+				serialMonitor += `[${timestamp}] > ${command}\n`;
+				
+				// Simulate device response
+				setTimeout(() => {
+					const responses = [
+						'Command received',
+						'OK',
+						'Processing...',
+						'Value updated',
+						'Error: Unknown command',
+						'Status: Ready'
+					];
+					const response = responses[Math.floor(Math.random() * responses.length)];
+					const responseTime = new Date().toLocaleTimeString();
+					serialMonitor += `[${responseTime}] < ${response}\n`;
+				}, 200 + Math.random() * 800);
+				
+				input.value = '';
+			}
+		}
+	}
+</script>
+
+<div class="ide-container">
+	<!-- IDE Header - Same style as chat header -->
+	<header class="ide-header">
+		<div class="header-left">
+			<h1>Arduino IDE</h1>
+		</div>
+		<div class="header-actions">
+			<button class="action-btn" on:click={selectBoard}>
+				{connectedBoard}
+				<div class="connection-status {isConnected ? 'connected' : 'disconnected'}"></div>
+			</button>
+			<button class="action-btn" on:click={compileCode} disabled={isCompiling}>
+				{#if isCompiling}
+					<div class="compile-spinner"></div>
+				{:else}
+					Verify
+				{/if}
+			</button>
+			<button class="action-btn" on:click={uploadCode} disabled={isUploading || isCompiling}>
+				{#if isUploading}
+					<div class="upload-spinner"></div>
+				{:else}
+					Upload
+				{/if}
+			</button>
+		</div>
+	</header>
+	
+	<!-- Code Editor Area -->
+	<div class="editor-area">
+		<div class="line-numbers">
+			{#each codeContent.split('\n') as line, i}
+				<div class="line-number">{i + 1}</div>
+			{/each}
+		</div>
+		<textarea
+			bind:value={codeContent}
+			class="code-editor"
+			spellcheck="false"
+		></textarea>
+	</div>
+	
+	<!-- IDE Footer -->
+	<footer class="ide-footer">
+		<div class="footer-left">
+			<div class="status-info">
+				<span class="status-item">Lines: {codeContent.split('\n').length}</span>
+				<span class="status-item">Size: {new Blob([codeContent]).size} bytes</span>
+			</div>
+		</div>
+		<div class="footer-right">
+			<button class="footer-btn" on:click={toggleSerialMonitor}>
+				{showSerialMonitor ? 'Hide' : 'Show'} Serial Monitor
+			</button>
+		</div>
+	</footer>
+	
+	<!-- Serial Monitor -->
+	{#if showSerialMonitor}
+		<div class="serial-monitor">
+			<div class="serial-header">
+				<h3>Serial Monitor - {connectedBoard}</h3>
+				<div class="serial-controls">
+					<select class="baud-rate">
+						<option value="9600">9600 baud</option>
+						<option value="115200">115200 baud</option>
+						<option value="57600">57600 baud</option>
+					</select>
+					<button class="serial-btn" on:click={clearSerialMonitor}>Clear</button>
+					<button class="serial-btn close" on:click={toggleSerialMonitor}>×</button>
+				</div>
+			</div>
+			<div class="serial-output">
+				<pre>{serialMonitor}</pre>
+			</div>
+			<div class="serial-input">
+				<input 
+					type="text" 
+					placeholder="Send to {connectedBoard}..." 
+					on:keypress={sendSerialCommand}
+				/>
+				<button class="send-btn" on:click={sendSerialCommand}>Send</button>
+			</div>
+		</div>
+	{/if}
+	
+	<!-- Compilation Status Overlay -->
+	{#if isCompiling || compilationStatus !== 'Ready'}
+		<div class="compilation-overlay">
+			<div class="compilation-popup">
+				{#if isCompiling}
+					<div class="compiling">
+						<div class="compile-spinner"></div>
+						<span>Compiling code...</span>
+					</div>
+				{:else}
+					<div class="status-message" class:success={compilationStatus.includes('successful')}>
+						{compilationStatus}
+					</div>
+				{/if}
+			</div>
+		</div>
+	{/if}
+</div>
+
+<style>
+	.ide-container {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		width: 100%;
+		max-width: 100%;
+		background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+		overflow: hidden;
+	}
+	
+	/* IDE Header - Same style as chat header */
+	.ide-header {
+		padding: 1.5rem 2rem;
+		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		background: rgba(15, 23, 42, 0.5);
+		backdrop-filter: blur(8px);
+	}
+	
+	.ide-header h1 {
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 1.5rem;
+		font-weight: 600;
+		margin: 0;
+		color: #00d4aa;
+	}
+	
+	.header-actions {
+		display: flex;
+		gap: 1rem;
+	}
+	
+	.action-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1rem;
+		background: rgba(0, 212, 170, 0.1);
+		border: 1px solid rgba(0, 212, 170, 0.3);
+		border-radius: 8px;
+		color: #e2e8f0;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.875rem;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		position: relative;
+	}
+	
+	.action-btn:hover:not(:disabled) {
+		background: rgba(0, 212, 170, 0.2);
+		border-color: #00d4aa;
+		transform: translateY(-2px);
+	}
+	
+	.action-btn:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+		transform: none;
+	}
+	
+	.connection-status {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		position: absolute;
+		top: 8px;
+		right: 8px;
+	}
+	
+	.connection-status.connected {
+		background: #10b981;
+		box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+	}
+	
+	.connection-status.disconnected {
+		background: #ef4444;
+		box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+	}
+	
+	.compile-spinner, .upload-spinner {
+		width: 12px;
+		height: 12px;
+		border: 2px solid transparent;
+		border-top: 2px solid #00d4aa;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
+	}
+	
+	@keyframes spin {
+		to { transform: rotate(360deg); }
+	}
+	
+	/* Editor Area */
+	.editor-area {
+		flex: 1;
+		display: flex;
+		background: #0f172a;
+		overflow: hidden;
+		min-height: 0;
+	}
+	
+	.line-numbers {
+		background: rgba(30, 41, 59, 0.5);
+		border-right: 1px solid rgba(0, 212, 170, 0.2);
+		padding: 1rem 0;
+		min-width: 60px;
+		display: flex;
+		flex-direction: column;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.9rem;
+		color: rgba(226, 232, 240, 0.4);
+		user-select: none;
+	}
+	
+	.line-number {
+		height: 1.5rem;
+		padding: 0 1rem;
+		text-align: right;
+		line-height: 1.5rem;
+	}
+	
+	.code-editor {
+		flex: 1;
+		background: transparent;
+		border: none;
+		padding: 1rem;
+		color: #e2e8f0;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.95rem;
+		line-height: 1.5;
+		resize: none;
+		outline: none;
+		overflow-y: auto;
+	}
+	
+	.code-editor::selection {
+		background: rgba(0, 212, 170, 0.3);
+	}
+	
+	/* IDE Footer */
+	.ide-footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 1rem 1.5rem;
+		background: rgba(30, 41, 59, 0.8);
+		border-top: 1px solid rgba(0, 212, 170, 0.2);
+	}
+	
+	.status-info {
+		display: flex;
+		gap: 1.5rem;
+	}
+	
+	.status-item {
+		font-size: 0.85rem;
+		color: rgba(226, 232, 240, 0.6);
+		font-family: 'IBM Plex Mono', monospace;
+	}
+	
+	.footer-right {
+		display: flex;
+		gap: 1rem;
+	}
+	
+	.footer-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.75rem 1rem;
+		background: rgba(0, 212, 170, 0.1);
+		border: 1px solid rgba(0, 212, 170, 0.3);
+		border-radius: 8px;
+		color: #e2e8f0;
+		cursor: pointer;
+		font-family: 'Space Grotesk', sans-serif;
+		font-weight: 500;
+		font-size: 0.875rem;
+		transition: all 0.3s ease;
+	}
+	
+	.footer-btn:hover:not(:disabled) {
+		background: rgba(0, 212, 170, 0.2);
+		border-color: #00d4aa;
+		transform: translateY(-2px);
+	}
+	
+	.footer-btn:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+		transform: none;
+	}
+	
+	.footer-btn.upload-btn {
+		background: linear-gradient(135deg, #00d4aa 0%, #0ea5e9 100%);
+		border: none;
+		color: #0a0f1a;
+		font-weight: 600;
+	}
+	
+	.footer-btn.upload-btn:hover:not(:disabled) {
+		background: linear-gradient(135deg, #00b894 0%, #0c7cd5 100%);
+		transform: translateY(-2px);
+	}
+	
+	/* Serial Monitor */
+	.serial-monitor {
+		background: rgba(15, 23, 42, 0.95);
+		border-top: 1px solid rgba(0, 212, 170, 0.3);
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+		min-height: 0;
+		animation: slide-down 0.4s ease-out;
+	}
+	
+	.serial-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 1rem 1.5rem;
+		background: rgba(0, 212, 170, 0.1);
+		border-bottom: 1px solid rgba(0, 212, 170, 0.3);
+		border-top-left-radius: 12px;
+		border-top-right-radius: 12px;
+	}
+	
+	.serial-header h3 {
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 1.1rem;
+		font-weight: 600;
+		margin: 0;
+		color: #00d4aa;
+	}
+	
+	.serial-controls {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+	
+	.baud-rate {
+		padding: 0.5rem;
+		background: rgba(30, 41, 59, 0.8);
+		border: 1px solid rgba(0, 212, 170, 0.3);
+		border-radius: 6px;
+		color: #e2e8f0;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.85rem;
+	}
+	
+	.serial-btn {
+		padding: 0.5rem 1rem;
+		background: rgba(0, 212, 170, 0.2);
+		border: 1px solid rgba(0, 212, 170, 0.3);
+		border-radius: 6px;
+		color: #e2e8f0;
+		cursor: pointer;
+		font-family: 'Space Grotesk', sans-serif;
+		font-weight: 500;
+		font-size: 0.85rem;
+		transition: all 0.2s ease;
+	}
+	
+	.serial-btn:hover {
+		background: rgba(0, 212, 170, 0.3);
+		border-color: #00d4aa;
+	}
+	
+	.serial-btn.close {
+		background: rgba(239, 68, 68, 0.2);
+		border-color: rgba(239, 68, 68, 0.3);
+		font-size: 1.2rem;
+		padding: 0.3rem 0.8rem;
+	}
+	
+	.serial-btn.close:hover {
+		background: rgba(239, 68, 68, 0.3);
+		border-color: #ef4444;
+	}
+	
+	.serial-output {
+		flex: 1;
+		padding: 1rem 1.5rem;
+		overflow-y: auto;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.9rem;
+		color: #e2e8f0;
+		background: rgba(0, 0, 0, 0.2);
+		line-height: 1.4;
+	}
+	
+	.serial-output pre {
+		margin: 0;
+		white-space: pre-wrap;
+		word-wrap: break-word;
+	}
+	
+	.serial-input {
+		display: flex;
+		gap: 0.5rem;
+		padding: 1rem 1.5rem;
+		background: rgba(30, 41, 59, 0.8);
+		border-top: 1px solid rgba(0, 212, 170, 0.3);
+	}
+	
+	.serial-input input {
+		flex: 1;
+		padding: 0.75rem;
+		background: rgba(15, 23, 42, 0.8);
+		border: 1px solid rgba(0, 212, 170, 0.3);
+		border-radius: 6px;
+		color: #e2e8f0;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.9rem;
+		outline: none;
+	}
+	
+	.serial-input input:focus {
+		border-color: #00d4aa;
+		box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.2);
+	}
+	
+	.send-btn {
+		padding: 0.75rem 1.5rem;
+		background: linear-gradient(135deg, #00d4aa 0%, #0ea5e9 100%);
+		border: none;
+		border-radius: 6px;
+		color: #0a0f1a;
+		cursor: pointer;
+		font-family: 'Space Grotesk', sans-serif;
+		font-weight: 600;
+		font-size: 0.9rem;
+		transition: all 0.3s ease;
+	}
+	
+	.send-btn:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(0, 212, 170, 0.3);
+	}
+	
+	/* Compilation Status */
+	.compilation-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.5);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 2000;
+		animation: fade-in 0.3s ease-out;
+	}
+	
+	.compilation-popup {
+		background: rgba(15, 23, 42, 0.95);
+		border: 1px solid rgba(0, 212, 170, 0.3);
+		border-radius: 12px;
+		padding: 2rem 3rem;
+		box-shadow: 0 8px 32px rgba(0, 212, 170, 0.3);
+		backdrop-filter: blur(10px);
+		text-align: center;
+	}
+	
+	.compiling {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 1.1rem;
+		color: #e2e8f0;
+	}
+	
+	.status-message {
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 1.1rem;
+		color: #e2e8f0;
+		padding: 1rem 2rem;
+	}
+	
+	.status-message.success {
+		color: #22c55e;
+		font-weight: 600;
+	}
+	
+	/* Animations */
+	@keyframes fade-in {
+		0% { opacity: 0; }
+		100% { opacity: 1; }
+	}
+	
+	@keyframes pulse {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0.5; }
+	}
+	
+	@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	}
+	
+	@keyframes slide-up {
+		0% {
+			transform: translateY(100%);
+			opacity: 0;
+		}
+		100% {
+			transform: translateY(0);
+			opacity: 1;
+		}
+	}
+	
+	@keyframes slide-down {
+		0% {
+			opacity: 0;
+			transform: scaleY(0);
+		}
+		100% {
+			opacity: 1;
+			transform: scaleY(1);
+		}
+	}
+	
+	/* Responsive Design */
+	@media (max-width: 768px) {
+		.ide-header {
+			padding: 0.75rem 1rem;
+			flex-direction: column;
+			gap: 1rem;
+			align-items: flex-start;
+		}
+		
+		.header-left {
+			width: 100%;
+		}
+		
+		.ide-footer {
+			padding: 0.75rem 1rem;
+			flex-direction: column;
+			gap: 1rem;
+		}
+		
+		.status-info {
+			justify-content: center;
+		}
+		
+		.upload-button {
+			width: 100%;
+			justify-content: center;
+		}
+		
+		.serial-monitor {
+			width: 100%;
+			flex: 1;
+			min-height: 200px;
+			max-height: 60%;
+		}
+	}
+</style>
