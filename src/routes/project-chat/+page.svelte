@@ -494,7 +494,7 @@ void loop() {
 									{#if message.showNextStepsButtons}
 										<div class="next-steps-container">
 											<button class="next-step-btn circuit" on:click={() => {
-												tutorialComponents = ['leonardo-keyestudio', 'breadboard', 'leuchtdiode', 'widerstand', 'poti', 'jumpercable'];
+												tutorialComponents = ['arduino-leonardo', 'breadboard', 'led', 'resistor', 'potentiometer', 'jumper-cable'];
 												isFullscreenCircuitMode = true;
 												showCircuitDiagram = true;
 											}}>
