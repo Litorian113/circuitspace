@@ -6,7 +6,7 @@
 	import CodeEditor from '$lib/components/CodeEditor.svelte';
 	import ExportModal from '$lib/components/ExportModal.svelte';
 	import CircuitDiagram from '$lib/components/CircuitDiagram.svelte';
-	import { currentProject, updateProjectCode, addChatMessage, componentLibrary, type Component } from '$lib/stores/project';
+	import { currentProject, updateProjectCode, updateProjectName, addChatMessage, componentLibrary, type Component } from '$lib/stores/project';
 	import { 
 		currentConversation, 
 		conversationStep, 
@@ -20,7 +20,8 @@
 		leonardoCodeTutorial,
 		nextTutorialStep,
 		previousTutorialStep,
-		finishTutorial
+		finishTutorial,
+		getCompleteTutorialCode
 	} from '$lib/stores/conversations';
 	
 	type Message = {
@@ -152,8 +153,22 @@
 	}
 	
 	function completeTutorial() {
+		// Get the complete tutorial code
+		const completeCode = getCompleteTutorialCode();
+		
+		// Update the project with tutorial info
+		updateProjectCode(completeCode);
+		updateProjectName('Arduino Leonardo LED Dimmer');
+		copyCodeToEditor(completeCode);
+		
 		// Add final message about next steps
-		addMessage('ai', `Perfekt! Der Code ist fertig und bereit zum Hochladen auf Ihren Arduino Leonardo.
+		addMessage('ai', `✅ Perfekt! Der komplette Arduino Leonardo LED Dimmer Code wurde erfolgreich in die IDE geladen.
+
+**Was wurde implementiert:**
+- Pin-Definitionen für Potentiometer und LED
+- Setup-Funktion mit serieller Kommunikation
+- Loop mit analogem Einlesen und PWM-Steuerung
+- Debug-Ausgabe und optimales Timing
 
 **Nächste Schritte:**
 Jetzt sind wir bereit für die praktische Umsetzung! Möchten Sie:
@@ -165,8 +180,14 @@ Wie möchten Sie fortfahren?`, {
 			showNextStepsButtons: true
 		});
 		
-		// Finish tutorial mode
+		// Finish tutorial mode AFTER updating code
 		finishTutorial();
+		
+		// Force update of CodeEditor after a brief delay to ensure store is updated
+		setTimeout(() => {
+			const event = new CustomEvent('updateCode', { detail: completeCode });
+			window.dispatchEvent(event);
+		}, 100);
 	}
 	
 	function generateAIResponse(userMessage: string) {
@@ -548,11 +569,14 @@ void loop() {
 						</div>
 						
 						<div class="tutorial-code-area">
-							<CodeEditor tutorialCode={leonardoCodeTutorial[tutorialStepIndex]?.code} />
+							<CodeEditor 
+								tutorialCode={leonardoCodeTutorial[tutorialStepIndex]?.code} 
+								isInTutorialMode={true}
+							/>
 						</div>
 					</div>
 				{:else}
-					<CodeEditor />
+					<CodeEditor isInTutorialMode={false} />
 				{/if}
 			</div>
 		</div>

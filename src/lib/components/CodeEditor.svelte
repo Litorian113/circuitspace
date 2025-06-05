@@ -4,56 +4,21 @@
 	import 'prismjs/components/prism-c';
 	import 'prismjs/components/prism-cpp';
 	import 'prismjs/themes/prism-tomorrow.css';
+	import { currentProject } from '$lib/stores/project';
 	
 	// Tutorial support
 	export let tutorialCode: string | undefined = undefined;
+	export let isInTutorialMode: boolean = false; // New prop to control when to show empty editor
 	
-	let codeContent = `// Circuitspace Auto-Generated Arduino Code
-// Project: [Your Project Name]
-// Generated on: ${new Date().toLocaleDateString()}
-
-#include <Arduino.h>
-
-// Pin definitions
-const int LED_PIN = 13;
-const int BUTTON_PIN = 2;
-
-// Variables
-bool buttonState = false;
-bool lastButtonState = false;
-bool ledState = false;
+	let codeContent = `// Willkommen bei Circuitspace!
+// Starten Sie ein Tutorial oder erstellen Sie Ihr eigenes Projekt.
 
 void setup() {
-  // Initialize serial communication
-  Serial.begin(9600);
-  Serial.println("Circuitspace Project Started!");
-  
-  // Initialize pins
-  pinMode(LED_PIN, OUTPUT);
-  pinMode(BUTTON_PIN, INPUT_PULLUP);
-  
-  // Initial state
-  digitalWrite(LED_PIN, LOW);
+  // Hier kommt Ihr Setup-Code hin
 }
 
 void loop() {
-  // Read button state
-  buttonState = digitalRead(BUTTON_PIN);
-  
-  // Check for button press
-  if (buttonState != lastButtonState) {
-    if (buttonState == LOW) {
-      // Button pressed, toggle LED
-      ledState = !ledState;
-      digitalWrite(LED_PIN, ledState);
-      
-      Serial.print("LED state changed to: ");
-      Serial.println(ledState ? "ON" : "OFF");
-    }
-    delay(50); // Debounce delay
-  }
-  
-  lastButtonState = buttonState;
+  // Hier kommt Ihr Hauptprogramm hin
 }`;
 
 	let connectedBoard = "Arduino Uno";
@@ -63,11 +28,35 @@ void loop() {
 	let compilationStatus = 'Ready';
 	let serialMonitor = '';
 	let showSerialMonitor = false;
+	let isSerialMonitorMinimized = false;
 	let serialMessages: Array<{timestamp: string, message: string}> = [];
 	let autoScroll = true;
 	let codeEditor: HTMLTextAreaElement;
+	let lineNumbers: HTMLDivElement;
 	let highlightedCode = '';
 	let syncScrolling = true;
+	let scrollAnimationFrame: number | null = null;
+	
+	// Subscribe to project store for code updates
+	$: if ($currentProject && $currentProject.code && tutorialCode === undefined) {
+		// Only update if we're not in tutorial mode and there's actual code
+		// Also check if this is from a completed tutorial (not default project code)
+		if ($currentProject.code.trim().length > 50 && 
+			!$currentProject.code.includes('// Willkommen bei Circuitspace!') && 
+			$currentProject.name !== 'Smart LED Controller') { 
+			codeContent = $currentProject.code;
+			updateHighlighting();
+			
+			// Show success message in Serial Monitor
+			const timestamp = new Date().toLocaleTimeString();
+			if (!showSerialMonitor) {
+				showSerialMonitor = true;
+				serialMonitor = `[${timestamp}] ✅ Code erfolgreich aus Tutorial übernommen!\n`;
+				serialMonitor += `[${timestamp}] 📝 ${$currentProject.name} Code geladen\n`;
+				serialMonitor += `[${timestamp}] 🔧 Bereit für Kompilierung und Upload\n\n`;
+			}
+		}
+	}
 	
 	// Listen for code updates from chat
 	onMount(() => {
@@ -77,24 +66,50 @@ void loop() {
 				updateHighlighting();
 				const timestamp = new Date().toLocaleTimeString();
 				if (showSerialMonitor) {
-					serialMonitor += `[${timestamp}] New code loaded from chat\n`;
+					serialMonitor += `[${timestamp}] ✅ Tutorial-Code erfolgreich in IDE geladen!\n`;
+					serialMonitor += `[${timestamp}] 📝 Arduino Leonardo LED Dimmer Code bereit\n`;
+					serialMonitor += `[${timestamp}] 🔧 Kompilierung und Upload möglich\n\n`;
+				} else {
+					// Show serial monitor briefly to show success message
+					showSerialMonitor = true;
+					serialMonitor = `[${timestamp}] ✅ Tutorial-Code erfolgreich in IDE geladen!\n`;
+					serialMonitor += `[${timestamp}] 📝 Arduino Leonardo LED Dimmer Code bereit\n`;
+					serialMonitor += `[${timestamp}] 🔧 Code ist bereit für Kompilierung und Upload\n\n`;
 				}
 			}
 		};
 		
+		const handleKeydown = (event: KeyboardEvent) => {
+			if (event.key === 'Escape' && showSerialMonitor) {
+				console.log('Escape pressed, closing Serial Monitor');
+				toggleSerialMonitor();
+			}
+		};
+		
 		window.addEventListener('updateCode', handleCodeUpdate as EventListener);
+		window.addEventListener('keydown', handleKeydown);
 		
 		// Initial highlighting
 		updateHighlighting();
 		
 		return () => {
 			window.removeEventListener('updateCode', handleCodeUpdate as EventListener);
+			window.removeEventListener('keydown', handleKeydown);
+			
+			// Cleanup any pending animation frame
+			if (scrollAnimationFrame) {
+				cancelAnimationFrame(scrollAnimationFrame);
+			}
 		};
 	});
 	
 	// Watch for tutorial code changes
 	$: if (tutorialCode !== undefined) {
 		codeContent = tutorialCode;
+		updateHighlighting();
+	} else if (isInTutorialMode) {
+		// Show empty code editor when in tutorial mode and no tutorial code yet
+		codeContent = '';
 		updateHighlighting();
 	}
 	
@@ -113,14 +128,33 @@ void loop() {
 	}
 	
 	function handleScroll(event: Event) {
-		if (syncScrolling) {
+		if (!syncScrolling) return;
+		
+		// Cancel any pending animation frame
+		if (scrollAnimationFrame) {
+			cancelAnimationFrame(scrollAnimationFrame);
+		}
+		
+		// Use requestAnimationFrame for smooth scrolling
+		scrollAnimationFrame = requestAnimationFrame(() => {
 			const target = event.target as HTMLTextAreaElement;
+			const scrollTop = target.scrollTop;
+			const scrollLeft = target.scrollLeft;
+			
+			// Update syntax highlighting
 			const highlightElement = document.querySelector('.syntax-highlight') as HTMLElement;
 			if (highlightElement) {
-				highlightElement.scrollTop = target.scrollTop;
-				highlightElement.scrollLeft = target.scrollLeft;
+				highlightElement.scrollTop = scrollTop;
+				highlightElement.scrollLeft = scrollLeft;
 			}
-		}
+			
+			// Update line numbers
+			if (lineNumbers) {
+				lineNumbers.scrollTop = scrollTop;
+			}
+			
+			scrollAnimationFrame = null;
+		});
 	}
 	
 	// Simulate real-time serial data
@@ -209,8 +243,12 @@ void loop() {
 	}
 	
 	function toggleSerialMonitor() {
-		showSerialMonitor = !showSerialMonitor;
-		if (showSerialMonitor) {
+		console.log('toggleSerialMonitor called, current state:', showSerialMonitor, 'minimized:', isSerialMonitorMinimized);
+		
+		if (!showSerialMonitor) {
+			// Öffnen
+			showSerialMonitor = true;
+			isSerialMonitorMinimized = false;
 			const timestamp = new Date().toLocaleTimeString();
 			serialMonitor = `[${timestamp}] Serial Monitor connected to ${connectedBoard}\n`;
 			serialMonitor += `[${timestamp}] Baud rate: 9600\n\n`;
@@ -219,7 +257,22 @@ void loop() {
 			if (isConnected) {
 				startSerialSimulation();
 			}
+		} else if (!isSerialMonitorMinimized) {
+			// Minimieren
+			isSerialMonitorMinimized = true;
+		} else {
+			// Vollständig schließen
+			showSerialMonitor = false;
+			isSerialMonitorMinimized = false;
 		}
+		
+		console.log('toggleSerialMonitor new state:', showSerialMonitor, 'minimized:', isSerialMonitorMinimized);
+	}
+	
+	function minimizeSerialMonitor() {
+		console.log('minimizeSerialMonitor called, current minimized state:', isSerialMonitorMinimized);
+		isSerialMonitorMinimized = !isSerialMonitorMinimized;
+		console.log('minimizeSerialMonitor new state:', isSerialMonitorMinimized);
 	}
 	
 	function clearSerialMonitor() {
@@ -294,7 +347,7 @@ void loop() {
 	
 	<!-- Code Editor Area -->
 	<div class="editor-area">
-		<div class="line-numbers">
+		<div class="line-numbers" bind:this={lineNumbers}>
 			{#each codeContent.split('\n') as line, i}
 				<div class="line-number">{i + 1}</div>
 			{/each}
@@ -324,37 +377,44 @@ void loop() {
 		</div>
 		<div class="footer-right">
 			<button class="footer-btn" on:click={toggleSerialMonitor}>
-				{showSerialMonitor ? 'Hide' : 'Show'} Serial Monitor
+				{showSerialMonitor ? (isSerialMonitorMinimized ? 'Maximize' : 'Minimize') : 'Show'} Serial Monitor
 			</button>
 		</div>
 	</footer>
 	
 	<!-- Serial Monitor -->
 	{#if showSerialMonitor}
-		<div class="serial-monitor">
+		<div class="serial-monitor" class:minimized={isSerialMonitorMinimized}>
 			<div class="serial-header">
 				<h3>Serial Monitor - {connectedBoard}</h3>
 				<div class="serial-controls">
-					<select class="baud-rate">
-						<option value="9600">9600 baud</option>
-						<option value="115200">115200 baud</option>
-						<option value="57600">57600 baud</option>
-					</select>
-					<button class="serial-btn" on:click={clearSerialMonitor}>Clear</button>
+					{#if !isSerialMonitorMinimized}
+						<select class="baud-rate">
+							<option value="9600">9600 baud</option>
+							<option value="115200">115200 baud</option>
+							<option value="57600">57600 baud</option>
+						</select>
+						<button class="serial-btn" on:click={clearSerialMonitor}>Clear</button>
+					{/if}
+					<button class="serial-btn minimize" on:click={minimizeSerialMonitor}>
+						{isSerialMonitorMinimized ? '↑' : '↓'}
+					</button>
 					<button class="serial-btn close" on:click={toggleSerialMonitor}>×</button>
 				</div>
 			</div>
-			<div class="serial-output">
-				<pre>{serialMonitor}</pre>
-			</div>
-			<div class="serial-input">
-				<input 
-					type="text" 
-					placeholder="Send to {connectedBoard}..." 
-					on:keypress={sendSerialCommand}
-				/>
-				<button class="send-btn" on:click={sendSerialCommand}>Send</button>
-			</div>
+			{#if !isSerialMonitorMinimized}
+				<div class="serial-output">
+					<pre>{serialMonitor}</pre>
+				</div>
+				<div class="serial-input">
+					<input 
+						type="text" 
+						placeholder="Send to {connectedBoard}..." 
+						on:keypress={sendSerialCommand}
+					/>
+					<button class="send-btn" on:click={sendSerialCommand}>Send</button>
+				</div>
+			{/if}
 		</div>
 	{/if}
 	
@@ -489,16 +549,21 @@ void loop() {
 		display: flex;
 		flex-direction: column;
 		font-family: 'IBM Plex Mono', monospace;
-		font-size: 0.9rem;
+		font-size: 0.95rem;
 		color: rgba(226, 232, 240, 0.4);
 		user-select: none;
+		overflow: hidden;
+		flex-shrink: 0;
+		will-change: scroll-position;
+		transform: translate3d(0, 0, 0);
 	}
 	
 	.line-number {
 		height: 1.5rem;
 		padding: 0 1rem;
 		text-align: right;
-		line-height: 1.5rem;
+		line-height: 1.5;
+		white-space: nowrap;
 	}
 	
 	.editor-container {
@@ -526,6 +591,8 @@ void loop() {
 		word-wrap: break-word;
 		overflow-wrap: break-word;
 		z-index: 1;
+		will-change: scroll-position;
+		transform: translate3d(0, 0, 0);
 	}
 	
 	.syntax-highlight code {
@@ -622,6 +689,8 @@ void loop() {
 		word-wrap: break-word;
 		overflow-wrap: break-word;
 		z-index: 2;
+		will-change: scroll-position;
+		transform: translate3d(0, 0, 0);
 	}
 	
 	.code-editor::selection {
@@ -697,6 +766,15 @@ void loop() {
 		flex: 1;
 		min-height: 0;
 		animation: slide-down 0.4s ease-out;
+		transition: all 0.3s ease;
+	}
+	
+	/* Minimized Serial Monitor */
+	.serial-monitor.minimized {
+		flex: 0;
+		min-height: auto;
+		height: auto;
+		overflow: hidden;
 	}
 	
 	.serial-header {
@@ -722,6 +800,8 @@ void loop() {
 		display: flex;
 		align-items: center;
 		gap: 1rem;
+		z-index: 100;
+		position: relative;
 	}
 	
 	.baud-rate {
@@ -757,11 +837,36 @@ void loop() {
 		border-color: rgba(239, 68, 68, 0.3);
 		font-size: 1.2rem;
 		padding: 0.3rem 0.8rem;
+		z-index: 1000;
+		position: relative;
+		min-width: 32px;
+		min-height: 32px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 	
 	.serial-btn.close:hover {
 		background: rgba(239, 68, 68, 0.3);
 		border-color: #ef4444;
+	}
+	
+	.serial-btn.minimize {
+		background: rgba(0, 212, 170, 0.2);
+		border-color: rgba(0, 212, 170, 0.3);
+		font-size: 1.1rem;
+		padding: 0.4rem 0.8rem;
+		min-width: 32px;
+		min-height: 32px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: bold;
+	}
+	
+	.serial-btn.minimize:hover {
+		background: rgba(0, 212, 170, 0.3);
+		border-color: #00d4aa;
 	}
 	
 	.serial-output {
@@ -938,5 +1043,17 @@ void loop() {
 			min-height: 200px;
 			max-height: 60%;
 		}
+	}
+	
+	.close-serial-btn {
+		background: rgba(239, 68, 68, 0.1) !important;
+		border-color: rgba(239, 68, 68, 0.3) !important;
+		color: #ef4444 !important;
+	}
+	
+	.close-serial-btn:hover:not(:disabled) {
+		background: rgba(239, 68, 68, 0.2) !important;
+		border-color: #ef4444 !important;
+		color: #ffffff !important;
 	}
 </style>

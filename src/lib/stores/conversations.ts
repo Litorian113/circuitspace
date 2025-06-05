@@ -410,3 +410,10 @@ export function finishTutorial() {
 	isTutorialActive.set(false);
 	currentTutorialStep.set(0);
 }
+
+// Funktion um den kompletten Tutorial-Code zu generieren
+export function getCompleteTutorialCode(): string {
+	// Return the complete code from the last tutorial step
+	const lastStep = leonardoCodeTutorial[leonardoCodeTutorial.length - 1];
+	return lastStep.code;
+}

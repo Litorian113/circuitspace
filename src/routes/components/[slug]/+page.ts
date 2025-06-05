@@ -1,5 +1,5 @@
 import type { PageLoad } from './$types';
-import { componentLibrary } from '$lib/stores/components.ts';
+import { componentLibrary } from '$lib/stores/components';
 import { error } from '@sveltejs/kit';
 
 export const load: PageLoad = ({ params }) => {
