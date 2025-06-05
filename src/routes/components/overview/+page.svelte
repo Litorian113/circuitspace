@@ -113,9 +113,9 @@
 		</div>
 		
 		<nav class="sidebar-nav">
-			<button class="nav-item" on:click={goHome}>
+			<!-- <button class="nav-item" on:click={goHome}>
 				🏠 Home
-			</button>
+			</button> -->
 			<button class="nav-item" on:click={goToProjects}>
 				⚡ IDE / Projects
 			</button>

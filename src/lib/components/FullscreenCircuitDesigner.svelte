@@ -33,6 +33,26 @@
 		pins: Array<{name: string, x: number, y: number}>;
 		connections: Array<{from: string, to: string}>;
 	}
+
+	interface Connection {
+		id: string;
+		fromComponent: string;
+		fromPin: string;
+		toComponent: string;
+		toPin: string;
+		fromPos: {x: number, y: number};
+		toPos: {x: number, y: number};
+	}
+
+	interface ConnectionStep {
+		id: string;
+		description: string;
+		fromComponent: string;
+		fromPin: string;
+		toComponent: string;
+		toPin: string;
+		completed: boolean;
+	}
 	
 	// Available components for the project
 	const availableComponents: Component[] = [
@@ -116,16 +136,90 @@
 			width: 80,
 			height: 60,
 			description: 'Compact Arduino board'
+		}	];
+
+	// Tutorial connection steps
+	const tutorialConnectionSteps: ConnectionStep[] = [
+		{
+			id: 'power-connections',
+			description: 'Verbinde 5V und GND vom Arduino mit dem Breadboard',
+			fromComponent: 'arduino-leonardo',
+			fromPin: '5V',
+			toComponent: 'breadboard',
+			toPin: 'Power+',
+			completed: false
+		},
+		{
+			id: 'pot-power',
+			description: 'Verbinde Potentiometer VCC mit 5V Schiene',
+			fromComponent: 'breadboard',
+			fromPin: 'Power+',
+			toComponent: 'potentiometer',
+			toPin: 'VCC',
+			completed: false
+		},
+		{
+			id: 'pot-ground',
+			description: 'Verbinde Potentiometer GND mit Ground Schiene',
+			fromComponent: 'breadboard',
+			fromPin: 'Power-',
+			toComponent: 'potentiometer',
+			toPin: 'GND',
+			completed: false
+		},
+		{
+			id: 'pot-signal',
+			description: 'Verbinde Potentiometer Wiper mit Arduino A0',
+			fromComponent: 'potentiometer',
+			fromPin: 'Wiper',
+			toComponent: 'arduino-leonardo',
+			toPin: 'A0',
+			completed: false
+		},
+		{
+			id: 'led-resistor',
+			description: 'Verbinde LED Anode mit Widerstand',
+			fromComponent: 'led',
+			fromPin: 'Anode',
+			toComponent: 'resistor',
+			toPin: 'Pin1',
+			completed: false
+		},
+		{
+			id: 'resistor-arduino',
+			description: 'Verbinde Widerstand mit Arduino Pin 9 (PWM)',
+			fromComponent: 'resistor',
+			fromPin: 'Pin2',
+			toComponent: 'arduino-leonardo',
+			toPin: 'D9',
+			completed: false
+		},
+		{
+			id: 'led-ground',
+			description: 'Verbinde LED Cathode mit Ground',
+			fromComponent: 'led',
+			fromPin: 'Cathode',
+			toComponent: 'breadboard',
+			toPin: 'Power-',
+			completed: false
 		}
 	];
-	
+
 	let placedComponents: PlacedComponent[] = [];
+	let connections: Connection[] = [];
+	let connectionSteps = [...tutorialConnectionSteps];
+	let currentConnectionStep = 0;
 	let selectedComponent: PlacedComponent | null = null;
 	let isDragging = false;
 	let dragOffset = {x: 0, y: 0};
 	let componentImages: Map<string, HTMLImageElement> = new Map();
 	let gridSize = 20;
 	let snapToGrid = true;
+	
+	// Connection/Wiring state
+	let isDraggingConnection = false;
+	let connectionStart: {component: PlacedComponent, pin: {name: string, x: number, y: number}} | null = null;
+	let mousePos = {x: 0, y: 0};
 	
 	// Component categories for filtering
 	const categories = [...new Set(availableComponents.map(c => c.category))];
@@ -284,6 +378,11 @@
 		placedComponents.forEach(component => {
 			drawComponent(component);
 		});
+		
+		// Draw connections in tutorial mode
+		if (tutorialComponents) {
+			drawConnections();
+		}
 	}
 	
 	function drawGrid() {
@@ -324,21 +423,33 @@
 	}
 	
 	function drawComponent(component: PlacedComponent) {
-		// Draw component shadow
-		ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-		ctx.shadowBlur = 8;
-		ctx.shadowOffsetX = 0;
-		ctx.shadowOffsetY = 4;
+		// Enhanced component rendering with better quality
 		
-		// Draw component background
-		ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-		ctx.fillRect(component.x - 2, component.y - 2, component.width + 4, component.height + 4);
-		
-		// Reset shadow
-		ctx.shadowColor = 'transparent';
-		ctx.shadowBlur = 0;
-		ctx.shadowOffsetX = 0;
-		ctx.shadowOffsetY = 0;
+		// Draw component image if loaded (without white background)
+		const img = componentImages.get(component.componentId);
+		if (img) {
+			// Save context state
+			ctx.save();
+			
+			// Draw component with improved rendering quality
+			ctx.imageSmoothingEnabled = true;
+			ctx.imageSmoothingQuality = 'high';
+			
+			// Optional: Remove white background using composite operation
+			ctx.globalCompositeOperation = 'multiply';
+			ctx.drawImage(img, component.x, component.y, component.width, component.height);
+			ctx.globalCompositeOperation = 'source-over';
+			
+			// Restore context state
+			ctx.restore();
+		} else {
+			// Fallback rectangle with pattern (no white background)
+			const gradient = ctx.createLinearGradient(component.x, component.y, component.x + component.width, component.y + component.height);
+			gradient.addColorStop(0, 'rgba(0, 212, 170, 0.2)');
+			gradient.addColorStop(1, 'rgba(0, 212, 170, 0.1)');
+			ctx.fillStyle = gradient;
+			ctx.fillRect(component.x, component.y, component.width, component.height);
+		}
 		
 		// Draw component border with selection highlight
 		if (selectedComponent?.id === component.id) {
@@ -352,82 +463,158 @@
 		}
 		ctx.strokeRect(component.x - 2, component.y - 2, component.width + 4, component.height + 4);
 		ctx.setLineDash([]);
-		
-		// Draw component image if loaded
-		const img = componentImages.get(component.componentId);
-		if (img) {
-			ctx.drawImage(img, component.x, component.y, component.width, component.height);
-		} else {
-			// Fallback rectangle with pattern
-			const gradient = ctx.createLinearGradient(component.x, component.y, component.x + component.width, component.y + component.height);
-			gradient.addColorStop(0, 'rgba(0, 212, 170, 0.2)');
-			gradient.addColorStop(1, 'rgba(0, 212, 170, 0.1)');
-			ctx.fillStyle = gradient;
-			ctx.fillRect(component.x, component.y, component.width, component.height);
+
+		// Only draw pins in tutorial mode - focus on pin-outs only
+		if (tutorialComponents) {
+			component.pins.forEach((pin, index) => {
+				// Pin background circle
+				ctx.fillStyle = '#1e293b';
+				ctx.beginPath();
+				ctx.arc(pin.x, pin.y, 8, 0, 2 * Math.PI);
+				ctx.fill();
+				
+				// Pin circle with connection state highlighting
+				const isCurrentStepPin = isCurrentStepRelatedPin(component, pin);
+				if (isCurrentStepPin) {
+					ctx.fillStyle = '#fbbf24'; // Highlight current step pins
+				} else if (selectedComponent?.id === component.id) {
+					ctx.fillStyle = '#00d4aa';
+				} else {
+					ctx.fillStyle = '#64748b';
+				}
+				ctx.beginPath();
+				ctx.arc(pin.x, pin.y, 6, 0, 2 * Math.PI);
+				ctx.fill();
+				
+				// Pin border
+				ctx.strokeStyle = '#ffffff';
+				ctx.lineWidth = 2;
+				ctx.stroke();
+				
+				// Pin label with better positioning (only pin names)
+				ctx.fillStyle = '#ffffff';
+				ctx.font = 'bold 10px IBM Plex Mono';
+				ctx.textAlign = 'center';
+				
+				// Position label based on pin location relative to component
+				let labelX = pin.x;
+				let labelY = pin.y - 12;
+				
+				// Adjust label position for better readability
+				if (pin.x <= component.x + 15) { // Left side pin
+					labelX = pin.x - 18;
+					ctx.textAlign = 'right';
+				} else if (pin.x >= component.x + component.width - 15) { // Right side pin
+					labelX = pin.x + 18;
+					ctx.textAlign = 'left';
+				}
+				
+				// Label background for better visibility
+				const labelWidth = ctx.measureText(pin.name).width;
+				const bgX = labelX - (ctx.textAlign === 'center' ? labelWidth/2 : ctx.textAlign === 'right' ? labelWidth : 0) - 3;
+				ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+				ctx.fillRect(bgX, labelY - 12, labelWidth + 6, 14);
+				
+				// Label text
+				ctx.fillStyle = isCurrentStepPin ? '#fbbf24' : '#00d4aa';
+				ctx.fillText(pin.name, labelX, labelY);
+			});
 		}
+	}
+	
+	// Helper function to check if a pin is related to current connection step
+	function isCurrentStepRelatedPin(component: PlacedComponent, pin: {name: string, x: number, y: number}): boolean {
+		if (!tutorialComponents || currentConnectionStep >= connectionSteps.length) return false;
 		
-		// Draw component label with background
-		const labelY = component.y + component.height + 25;
-		const labelText = component.name;
-		ctx.font = '11px IBM Plex Mono';
-		ctx.textAlign = 'center';
-		const textWidth = ctx.measureText(labelText).width;
-		
-		// Label background
-		ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
-		ctx.fillRect(component.x + component.width/2 - textWidth/2 - 4, labelY - 14, textWidth + 8, 16);
-		
-		// Label text
-		ctx.fillStyle = '#e2e8f0';
-		ctx.fillText(labelText, component.x + component.width/2, labelY);
-		
-		// Draw pins with enhanced visibility
-		component.pins.forEach((pin, index) => {
-			// Pin background circle
-			ctx.fillStyle = '#1e293b';
-			ctx.beginPath();
-			ctx.arc(pin.x, pin.y, 6, 0, 2 * Math.PI);
-			ctx.fill();
+		const step = connectionSteps[currentConnectionStep];
+		return (
+			(component.componentId === step.fromComponent && pin.name === step.fromPin) ||
+			(component.componentId === step.toComponent && pin.name === step.toPin)
+		);
+	}
+	
+	// Draw connections between pins
+	function drawConnections() {
+		connections.forEach(connection => {
+			ctx.strokeStyle = '#00d4aa';
+			ctx.lineWidth = 3;
+			ctx.setLineDash([]);
 			
-			// Pin circle
-			ctx.fillStyle = selectedComponent?.id === component.id ? '#00d4aa' : '#64748b';
 			ctx.beginPath();
-			ctx.arc(pin.x, pin.y, 4, 0, 2 * Math.PI);
-			ctx.fill();
-			
-			// Pin border
-			ctx.strokeStyle = '#ffffff';
-			ctx.lineWidth = 1;
+			ctx.moveTo(connection.fromPos.x, connection.fromPos.y);
+			ctx.lineTo(connection.toPos.x, connection.toPos.y);
 			ctx.stroke();
 			
-			// Pin label with better positioning
-			ctx.fillStyle = '#ffffff';
-			ctx.font = '9px IBM Plex Mono';
-			ctx.textAlign = 'center';
-			
-			// Position label based on pin location relative to component
-			let labelX = pin.x;
-			let labelY = pin.y - 10;
-			
-			// Adjust label position for better readability
-			if (pin.x <= component.x + 10) { // Left side pin
-				labelX = pin.x - 15;
-				ctx.textAlign = 'right';
-			} else if (pin.x >= component.x + component.width - 10) { // Right side pin
-				labelX = pin.x + 15;
-				ctx.textAlign = 'left';
-			}
-			
-			// Label background
-			const labelWidth = ctx.measureText(pin.name).width;
-			const bgX = labelX - (ctx.textAlign === 'center' ? labelWidth/2 : ctx.textAlign === 'right' ? labelWidth : 0) - 2;
-			ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-			ctx.fillRect(bgX, labelY - 10, labelWidth + 4, 12);
-			
-			// Label text
+			// Draw connection endpoints
 			ctx.fillStyle = '#00d4aa';
-			ctx.fillText(pin.name, labelX, labelY);
+			ctx.beginPath();
+			ctx.arc(connection.fromPos.x, connection.fromPos.y, 4, 0, 2 * Math.PI);
+			ctx.fill();
+			ctx.beginPath();
+			ctx.arc(connection.toPos.x, connection.toPos.y, 4, 0, 2 * Math.PI);
+			ctx.fill();
 		});
+		
+		// Draw active connection being dragged
+		if (isDraggingConnection && connectionStart) {
+			ctx.strokeStyle = '#fbbf24';
+			ctx.lineWidth = 3;
+			ctx.setLineDash([5, 5]);
+			
+			ctx.beginPath();
+			ctx.moveTo(connectionStart.pin.x, connectionStart.pin.y);
+			ctx.lineTo(mousePos.x, mousePos.y);
+			ctx.stroke();
+			ctx.setLineDash([]);
+		}
+	}
+	
+	// Get pin at specific coordinates
+	function getPinAt(x: number, y: number): {component: PlacedComponent, pin: {name: string, x: number, y: number}} | null {
+		for (const component of placedComponents) {
+			for (const pin of component.pins) {
+				const distance = Math.sqrt((x - pin.x) ** 2 + (y - pin.y) ** 2);
+				if (distance <= 10) { // Pin hit radius
+					return { component, pin };
+				}
+			}
+		}
+		return null;
+	}
+	
+	// Complete a connection step
+	function completeConnectionStep(fromComponent: PlacedComponent, fromPin: {name: string, x: number, y: number}, 
+									toComponent: PlacedComponent, toPin: {name: string, x: number, y: number}) {
+		// Check if this matches current step
+		const step = connectionSteps[currentConnectionStep];
+		if (step && 
+			((fromComponent.componentId === step.fromComponent && fromPin.name === step.fromPin &&
+			  toComponent.componentId === step.toComponent && toPin.name === step.toPin) ||
+			 (fromComponent.componentId === step.toComponent && fromPin.name === step.toPin &&
+			  toComponent.componentId === step.fromComponent && toPin.name === step.fromPin))) {
+			
+			// Mark step as completed
+			connectionSteps[currentConnectionStep].completed = true;
+			
+			// Add connection
+			const connection: Connection = {
+				id: `conn-${Date.now()}`,
+				fromComponent: fromComponent.id,
+				fromPin: fromPin.name,
+				toComponent: toComponent.id,
+				toPin: toPin.name,
+				fromPos: { x: fromPin.x, y: fromPin.y },
+				toPos: { x: toPin.x, y: toPin.y }
+			};
+			connections.push(connection);
+			
+			// Move to next step
+			currentConnectionStep++;
+			
+			drawBoard();
+			return true;
+		}
+		return false;
 	}
 	
 	function getComponentAt(x: number, y: number): PlacedComponent | null {
@@ -436,12 +623,45 @@
 			y >= component.y && y <= component.y + component.height
 		) || null;
 	}
-	
-	function handleMouseDown(event: MouseEvent) {
+		function handleMouseDown(event: MouseEvent) {
 		const rect = canvas.getBoundingClientRect();
 		const x = event.clientX - rect.left;
 		const y = event.clientY - rect.top;
 		
+		// Check if clicking on a pin for connection in tutorial mode
+		if (tutorialComponents) {
+			const pinHit = getPinAt(x, y);
+			if (pinHit) {
+				if (!isDraggingConnection) {
+					// Start a new connection
+					connectionStart = pinHit;
+					isDraggingConnection = true;
+					mousePos = { x, y };
+					canvas.style.cursor = 'crosshair';
+					return;
+				} else if (connectionStart && pinHit.component.id !== connectionStart.component.id) {
+					// Complete connection
+					const success = completeConnectionStep(
+						connectionStart.component, 
+						connectionStart.pin,
+						pinHit.component, 
+						pinHit.pin
+					);
+					
+					isDraggingConnection = false;
+					connectionStart = null;
+					canvas.style.cursor = 'default';
+					
+					if (success) {
+						console.log('Connection completed successfully!');
+					} else {
+						console.log('Connection does not match current step.');
+					}
+					return;
+				}
+			}
+		}
+
 		selectedComponent = getComponentAt(x, y);
 		if (selectedComponent) {
 			isDragging = true;
@@ -451,12 +671,14 @@
 		}
 		drawBoard();
 	}
-	
-	function handleMouseMove(event: MouseEvent) {
+		function handleMouseMove(event: MouseEvent) {
 		const rect = canvas.getBoundingClientRect();
 		const x = event.clientX - rect.left;
 		const y = event.clientY - rect.top;
 		
+		// Update mouse position for connection dragging
+		mousePos = { x, y };
+
 		if (isDragging && selectedComponent) {
 			selectedComponent.x = x - dragOffset.x;
 			selectedComponent.y = y - dragOffset.y;
@@ -465,10 +687,23 @@
 			selectedComponent.pins = generatePins(selectedComponent);
 			
 			drawBoard();
+		} else if (isDraggingConnection) {
+			// Update connection preview
+			drawBoard();
 		} else {
-			// Update cursor
-			const componentUnderMouse = getComponentAt(x, y);
-			canvas.style.cursor = componentUnderMouse ? 'grab' : 'default';
+			// Update cursor based on what's under mouse
+			if (tutorialComponents) {
+				const pinHit = getPinAt(x, y);
+				if (pinHit) {
+					canvas.style.cursor = 'crosshair';
+				} else {
+					const componentUnderMouse = getComponentAt(x, y);
+					canvas.style.cursor = componentUnderMouse ? 'grab' : 'default';
+				}
+			} else {
+				const componentUnderMouse = getComponentAt(x, y);
+				canvas.style.cursor = componentUnderMouse ? 'grab' : 'default';
+			}
 		}
 	}
 	
@@ -480,6 +715,12 @@
 			selectedComponent.y = snappedPosition.y;
 			selectedComponent.pins = generatePins(selectedComponent);
 			drawBoard();
+		}
+		
+		// Cancel connection dragging on mouse up without hitting a pin
+		if (isDraggingConnection) {
+			isDraggingConnection = false;
+			connectionStart = null;
 		}
 		
 		isDragging = false;
@@ -669,6 +910,48 @@
 		
 		<div class="canvas-container">
 			<canvas bind:this={canvas} class="circuit-canvas"></canvas>
+			
+			<!-- Tutorial Connection Steps Panel (Top Right) -->
+			{#if tutorialComponents}
+				<div class="connection-steps-panel">
+					<div class="steps-header">
+						<h3>Verbindungsschritte</h3>
+						<div class="progress">
+							{currentConnectionStep} / {connectionSteps.length}
+						</div>
+					</div>
+					
+					<div class="current-step">
+						{#if currentConnectionStep < connectionSteps.length}
+							<div class="step-instruction">
+								<div class="step-number">Schritt {currentConnectionStep + 1}</div>
+								<div class="step-description">
+									{connectionSteps[currentConnectionStep].description}
+								</div>
+								<div class="step-details">
+									<span class="from-pin">{connectionSteps[currentConnectionStep].fromComponent}.{connectionSteps[currentConnectionStep].fromPin}</span>
+									<span class="arrow">→</span>
+									<span class="to-pin">{connectionSteps[currentConnectionStep].toComponent}.{connectionSteps[currentConnectionStep].toPin}</span>
+								</div>
+							</div>
+						{:else}
+							<div class="completion-message">
+								<div class="success-icon">✅</div>
+								<div class="success-text">Alle Verbindungen abgeschlossen!</div>
+							</div>
+						{/if}
+					</div>
+					
+					<div class="completed-steps">
+						{#each connectionSteps.slice(0, currentConnectionStep) as step, index}
+							<div class="completed-step">
+								<span class="check">✓</span>
+								<span class="step-text">{step.description}</span>
+							</div>
+						{/each}
+					</div>
+				</div>
+			{/if}
 			
 			{#if placedComponents.length === 0}
 				<div class="empty-state">
@@ -984,6 +1267,139 @@
 		flex: 1;
 		position: relative;
 		overflow: hidden;
+	}
+	
+	/* Tutorial Connection Steps Panel */
+	.connection-steps-panel {
+		position: absolute;
+		top: 1rem;
+		right: 1rem;
+		width: 320px;
+		max-height: 400px;
+		background: rgba(15, 23, 42, 0.95);
+		border: 1px solid rgba(0, 212, 170, 0.3);
+		border-radius: 12px;
+		backdrop-filter: blur(12px);
+		overflow: hidden;
+		z-index: 100;
+	}
+	
+	.steps-header {
+		padding: 1rem 1.5rem;
+		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+	
+	.steps-header h3 {
+		margin: 0;
+		color: #00d4aa;
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 1.1rem;
+		font-weight: 600;
+	}
+	
+	.progress {
+		background: rgba(0, 212, 170, 0.1);
+		color: #00d4aa;
+		padding: 0.25rem 0.75rem;
+		border-radius: 20px;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.8rem;
+		font-weight: 600;
+	}
+	
+	.current-step {
+		padding: 1.5rem;
+		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
+	}
+	
+	.step-instruction {
+		text-align: center;
+	}
+	
+	.step-number {
+		color: #fbbf24;
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 0.9rem;
+		font-weight: 600;
+		margin-bottom: 0.5rem;
+	}
+	
+	.step-description {
+		color: #e2e8f0;
+		font-size: 0.9rem;
+		margin-bottom: 1rem;
+		line-height: 1.4;
+	}
+	
+	.step-details {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.8rem;
+	}
+	
+	.from-pin, .to-pin {
+		background: rgba(0, 212, 170, 0.1);
+		color: #00d4aa;
+		padding: 0.25rem 0.5rem;
+		border-radius: 4px;
+		border: 1px solid rgba(0, 212, 170, 0.3);
+	}
+	
+	.arrow {
+		color: #fbbf24;
+		font-weight: bold;
+	}
+	
+	.completion-message {
+		text-align: center;
+		padding: 1rem 0;
+	}
+	
+	.success-icon {
+		font-size: 2rem;
+		margin-bottom: 0.5rem;
+	}
+	
+	.success-text {
+		color: #10b981;
+		font-weight: 600;
+		font-size: 1.1rem;
+	}
+	
+	.completed-steps {
+		padding: 1rem 1.5rem;
+		max-height: 200px;
+		overflow-y: auto;
+	}
+	
+	.completed-step {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 0.5rem 0;
+		border-bottom: 1px solid rgba(100, 116, 139, 0.1);
+		font-size: 0.8rem;
+	}
+	
+	.completed-step:last-child {
+		border-bottom: none;
+	}
+	
+	.check {
+		color: #10b981;
+		font-weight: bold;
+		flex-shrink: 0;
+	}
+	
+	.step-text {
+		color: #94a3b8;
+		flex: 1;
 	}
 	
 	.circuit-canvas {
