@@ -1,10 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { currentProject } from '$lib/stores/project';
+	import { createEventDispatcher } from 'svelte';
+	
+	const dispatch = createEventDispatcher();
+	
+	// Props
+	export let tutorialComponents: string[] | null = null; // IDs of components to show for tutorial mode
 	
 	let canvas: HTMLCanvasElement;
 	let ctx: CanvasRenderingContext2D;
-	let showComponentPanel = false;
+	let selectedComponentId: string | null = null;
 	
 	interface Component {
 		id: string;
@@ -13,6 +18,7 @@
 		category: string;
 		width: number;
 		height: number;
+		description: string;
 	}
 	
 	interface PlacedComponent {
@@ -34,57 +40,82 @@
 			id: 'arduino-leonardo',
 			name: 'Arduino Leonardo',
 			image: '/components/leonardoKeyestudio.png',
-			category: 'microcontroller',
+			category: 'Microcontroller',
 			width: 100,
-			height: 80
+			height: 80,
+			description: 'Main development board with USB connectivity'
 		},
 		{
 			id: 'breadboard',
 			name: 'Breadboard',
 			image: '/components/breadboard.png',
-			category: 'prototyping',
+			category: 'Prototyping',
 			width: 120,
-			height: 60
+			height: 60,
+			description: 'Solderless prototyping board'
 		},
 		{
 			id: 'led',
 			name: 'LED',
 			image: '/components/leuchtdiode.png',
-			category: 'output',
+			category: 'Output',
 			width: 40,
-			height: 40
+			height: 40,
+			description: 'Light-emitting diode for visual feedback'
 		},
 		{
 			id: 'potentiometer',
 			name: 'Potentiometer',
 			image: '/components/poti.png',
-			category: 'input',
+			category: 'Input',
 			width: 50,
-			height: 50
+			height: 50,
+			description: 'Variable resistor for analog input'
 		},
 		{
 			id: 'pushbutton',
 			name: 'Push Button',
 			image: '/components/pushbutton.png',
-			category: 'input',
+			category: 'Input',
 			width: 40,
-			height: 40
+			height: 40,
+			description: 'Momentary switch for user input'
 		},
 		{
 			id: 'resistor',
 			name: 'Resistor',
 			image: '/components/widerstand.png',
-			category: 'passive',
+			category: 'Passive',
 			width: 60,
-			height: 20
+			height: 20,
+			description: 'Current limiting resistor'
 		},
 		{
 			id: 'jumper-cable',
 			name: 'Jumper Cable',
 			image: '/components/jumpercable.png',
-			category: 'connection',
+			category: 'Connection',
 			width: 80,
-			height: 10
+			height: 10,
+			description: 'Wire for connections between components'
+		},
+		{
+			id: '5v-motor',
+			name: '5V Motor',
+			image: '/components/5vMotor.png',
+			category: 'Output',
+			width: 60,
+			height: 60,
+			description: 'Small DC motor for movement'
+		},
+		{
+			id: 'arduino-micro',
+			name: 'Arduino Micro',
+			image: '/components/arduinomicro.png',
+			category: 'Microcontroller',
+			width: 80,
+			height: 60,
+			description: 'Compact Arduino board'
 		}
 	];
 	
@@ -95,6 +126,10 @@
 	let componentImages: Map<string, HTMLImageElement> = new Map();
 	let gridSize = 20;
 	let snapToGrid = true;
+	
+	// Component categories for filtering
+	const categories = [...new Set(availableComponents.map(c => c.category))];
+	let selectedCategory = 'All';
 	
 	// Snap position to grid
 	function snapToGridPosition(x: number, y: number) {
@@ -108,8 +143,7 @@
 	onMount(() => {
 		if (canvas) {
 			ctx = canvas.getContext('2d')!;
-			canvas.width = canvas.offsetWidth;
-			canvas.height = canvas.offsetHeight;
+			resizeCanvas();
 			
 			// Load component images
 			loadComponentImages();
@@ -125,8 +159,7 @@
 			
 			// Handle window resize
 			const handleResize = () => {
-				canvas.width = canvas.offsetWidth;
-				canvas.height = canvas.offsetHeight;
+				resizeCanvas();
 				drawBoard();
 			};
 			window.addEventListener('resize', handleResize);
@@ -144,6 +177,14 @@
 		}
 	});
 	
+	function resizeCanvas() {
+		const container = canvas.parentElement;
+		if (container) {
+			canvas.width = container.offsetWidth;
+			canvas.height = container.offsetHeight;
+		}
+	}
+	
 	function loadComponentImages() {
 		availableComponents.forEach(component => {
 			const img = new Image();
@@ -156,10 +197,9 @@
 	}
 	
 	function generatePins(component: PlacedComponent): Array<{name: string, x: number, y: number}> {
-		const pins: Array<{name: string, x: number, y: number}> = [];
-		
 		switch(component.componentId) {
 			case 'arduino-leonardo':
+			case 'arduino-micro':
 				return [
 					{name: 'VCC', x: component.x + component.width, y: component.y + 10},
 					{name: 'GND', x: component.x + component.width, y: component.y + 30},
@@ -181,6 +221,11 @@
 				return [
 					{name: 'Pin1', x: component.x, y: component.y + component.height/2},
 					{name: 'Pin2', x: component.x + component.width, y: component.y + component.height/2}
+				];
+			case '5v-motor':
+				return [
+					{name: '+', x: component.x + component.width/4, y: component.y},
+					{name: '-', x: component.x + 3*component.width/4, y: component.y}
 				];
 			default:
 				return [
@@ -221,7 +266,6 @@
 		newComponent.pins = generatePins(newComponent);
 		placedComponents.push(newComponent);
 		drawBoard();
-		showComponentPanel = false;
 		
 		// Auto-select the newly added component
 		selectedComponent = newComponent;
@@ -240,16 +284,11 @@
 		placedComponents.forEach(component => {
 			drawComponent(component);
 		});
-		
-		// Draw connections
-		drawConnections();
 	}
 	
 	function drawGrid() {
 		ctx.strokeStyle = 'rgba(148, 163, 184, 0.08)';
 		ctx.lineWidth = 1;
-		
-		const gridSize = 20;
 		
 		// Major grid lines every 100px
 		ctx.strokeStyle = 'rgba(148, 163, 184, 0.15)';
@@ -391,10 +430,6 @@
 		});
 	}
 	
-	function drawConnections() {
-		// TODO: Implement connection drawing when components are connected
-	}
-	
 	function getComponentAt(x: number, y: number): PlacedComponent | null {
 		return placedComponents.find(component => 
 			x >= component.x && x <= component.x + component.width &&
@@ -423,17 +458,8 @@
 		const y = event.clientY - rect.top;
 		
 		if (isDragging && selectedComponent) {
-			const newX = x - dragOffset.x;
-			const newY = y - dragOffset.y;
-			
-			// Apply grid snapping
-			const snappedPosition = snapToGridPosition(newX, newY);
-			selectedComponent.x = snappedPosition.x;
-			selectedComponent.y = snappedPosition.y;
-			
-			// Keep component within canvas bounds
-			selectedComponent.x = Math.max(10, Math.min(canvas.width - selectedComponent.width - 10, selectedComponent.x));
-			selectedComponent.y = Math.max(10, Math.min(canvas.height - selectedComponent.height - 50, selectedComponent.y));
+			selectedComponent.x = x - dragOffset.x;
+			selectedComponent.y = y - dragOffset.y;
 			
 			// Update pin positions
 			selectedComponent.pins = generatePins(selectedComponent);
@@ -471,15 +497,10 @@
 		if (clickedComponent) {
 			selectedComponent = selectedComponent?.id === clickedComponent.id ? null : clickedComponent;
 			drawBoard();
-			console.log('Selected component:', clickedComponent.name);
 		} else {
 			selectedComponent = null;
 			drawBoard();
 		}
-	}
-	
-	function toggleComponentPanel() {
-		showComponentPanel = !showComponentPanel;
 	}
 	
 	function clearBoard() {
@@ -521,104 +542,98 @@
 			drawBoard();
 		} else if (event.key === 'Escape') {
 			selectedComponent = null;
-			showComponentPanel = false;
 			drawBoard();
 		} else if (event.ctrlKey || event.metaKey) {
 			if (event.key === 's') {
 				event.preventDefault();
 				exportBoard();
-			} else if (event.key === 'a') {
-				event.preventDefault();
-				showComponentPanel = true;
 			}
 		}
 	}
+	
+	// Filter components by category
+	$: filteredComponents = tutorialComponents 
+		? availableComponents.filter(c => tutorialComponents.includes(c.id))
+		: selectedCategory === 'All' 
+			? availableComponents 
+			: availableComponents.filter(c => c.category === selectedCategory);
+	
+	function exitFullscreen() {
+		dispatch('exit');
+	}
 </script>
 
-<div class="diagram-container">
-	<!-- Circuit Header -->
-	<header class="diagram-header">
-		<div class="header-left">
-			<h1>Interactive Circuit Designer</h1>
-			<p class="diagram-description">Design your circuit by adding and connecting components</p>
+<div class="fullscreen-designer">
+	<!-- Left Sidebar: Components -->
+	<aside class="components-sidebar">
+		<div class="sidebar-header">
+			<button class="back-btn" on:click={exitFullscreen}>
+				← Back to Chat
+			</button>
+			<h2>{tutorialComponents ? 'Tutorial Circuit Designer' : 'Circuit Designer'}</h2>
+			{#if tutorialComponents}
+				<p class="tutorial-note">Verwende nur die Komponenten aus dem Tutorial: Arduino Leonardo, LED, Potentiometer, Resistor</p>
+			{/if}
 		</div>
-		<div class="header-actions">
-			<button class="action-btn" on:click={toggleComponentPanel}>
-				<span>Add Component</span>
-				<span class="shortcut">Ctrl+A</span>
-			</button>
-			<button class="action-btn secondary" on:click={toggleGridSnap}>
-				<span>{snapToGrid ? 'Grid: ON' : 'Grid: OFF'}</span>
-			</button>
-			<button class="action-btn" on:click={clearBoard}>
-				Clear Board
-			</button>
-			<button class="action-btn" on:click={exportBoard}>
-				<span>Export PNG</span>
-				<span class="shortcut">Ctrl+S</span>
-			</button>
-		</div>
-	</header>
-	
-	<!-- Component Selection Panel -->
-	{#if showComponentPanel}
-		<div class="component-panel">
-			<div class="panel-header">
-				<h3>Available Components</h3>
-				<button class="close-btn" on:click={toggleComponentPanel}>×</button>
-			</div>
-			<div class="component-grid">
-				{#each availableComponents as component}
-					<div class="component-item" on:click={() => addComponentToBoard(component.id)}>
-						<div class="component-preview">
-							<img src={component.image} alt={component.name} />
-						</div>
-						<span class="component-name">{component.name}</span>
-						<span class="component-category">{component.category}</span>
-					</div>
-				{/each}
-			</div>
-		</div>
-	{/if}
-	
-	<div class="diagram-canvas-container">
-		<canvas bind:this={canvas} class="diagram-canvas"></canvas>
 		
-		<!-- Canvas Overlay Info -->
-		{#if placedComponents.length === 0}
-			<div class="empty-state">
-				<h3>Start Building Your Circuit</h3>
-				<p>Click "Add Component" to begin designing your circuit</p>
-				<div class="shortcuts">
-					<div class="shortcut-item">
-						<kbd>Ctrl+A</kbd> Add Component
+		<!-- Category Filter -->
+		<div class="category-filter">
+			<select bind:value={selectedCategory}>
+				<option value="All">All Components</option>
+				{#each categories as category}
+					<option value={category}>{category}</option>
+				{/each}
+			</select>
+		</div>
+		
+		<!-- Components Grid -->
+		<div class="components-grid">
+			{#each filteredComponents as component}
+				<div 
+					class="component-card"
+					class:selected={selectedComponentId === component.id}
+					on:click={() => addComponentToBoard(component.id)}
+					draggable="true"
+				>
+					<div class="component-image">
+						<img src={component.image} alt={component.name} />
 					</div>
-					<div class="shortcut-item">
-						<kbd>Del</kbd> Delete Selected
-					</div>
-					<div class="shortcut-item">
-						<kbd>Esc</kbd> Deselect
+					<div class="component-info">
+						<h4>{component.name}</h4>
+						<p class="category">{component.category}</p>
+						<p class="description">{component.description}</p>
 					</div>
 				</div>
-			</div>
-		{/if}
+			{/each}
+		</div>
 		
-		<!-- Component Info Panel -->
+		<!-- Tools -->
+		<div class="tools-section">
+			<h3>Tools</h3>
+			<button class="tool-btn" on:click={clearBoard}>
+				🗑️ Clear Board
+			</button>
+			<button class="tool-btn" on:click={toggleGridSnap}>
+				{snapToGrid ? '📐' : '🎯'} Grid: {snapToGrid ? 'ON' : 'OFF'}
+			</button>
+			<button class="tool-btn" on:click={exportBoard}>
+				💾 Export PNG
+			</button>
+		</div>
+		
+		<!-- Component Info -->
 		{#if selectedComponent}
-			<div class="component-info-panel">
+			<div class="selected-component-info">
+				<h3>Selected Component</h3>
 				<h4>{selectedComponent.name}</h4>
-				<div class="info-grid">
-					<div class="info-item">
-						<span class="label">Type:</span>
-						<span class="value">{selectedComponent.componentId}</span>
+				<div class="component-details">
+					<div class="detail-row">
+						<span>Position:</span>
+						<span>{selectedComponent.x}, {selectedComponent.y}</span>
 					</div>
-					<div class="info-item">
-						<span class="label">Position:</span>
-						<span class="value">{selectedComponent.x}, {selectedComponent.y}</span>
-					</div>
-					<div class="info-item">
-						<span class="label">Pins:</span>
-						<span class="value">{selectedComponent.pins.length}</span>
+					<div class="detail-row">
+						<span>Pins:</span>
+						<span>{selectedComponent.pins.length}</span>
 					</div>
 				</div>
 				<div class="pin-list">
@@ -638,299 +653,263 @@
 				</button>
 			</div>
 		{/if}
-	</div>
+	</aside>
 	
-	<div class="diagram-info">
-		<p>Drag components to move • Click "Add Component" to place new parts • Components show pins for connections</p>
-	</div>
+	<!-- Main Canvas Area -->
+	<main class="canvas-area">
+		<div class="canvas-header">
+			<h1>Interactive Circuit Board</h1>
+			<div class="canvas-stats">
+				<span>{placedComponents.length} components placed</span>
+				{#if selectedComponent}
+					<span>• {selectedComponent.name} selected</span>
+				{/if}
+			</div>
+		</div>
+		
+		<div class="canvas-container">
+			<canvas bind:this={canvas} class="circuit-canvas"></canvas>
+			
+			{#if placedComponents.length === 0}
+				<div class="empty-state">
+					<h3>Start Building Your Circuit</h3>
+					<p>Click components from the sidebar to add them to your board</p>
+					<div class="shortcuts">
+						<div class="shortcut-item">
+							<kbd>Click</kbd> Select component
+						</div>
+						<div class="shortcut-item">
+							<kbd>Drag</kbd> Move component
+						</div>
+						<div class="shortcut-item">
+							<kbd>Del</kbd> Delete selected
+						</div>
+					</div>
+				</div>
+			{/if}
+		</div>
+	</main>
 </div>
 
 <style>
-	.diagram-container {
+	.fullscreen-designer {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+		display: flex;
+		z-index: 1000;
+	}
+	
+	/* Components Sidebar */
+	.components-sidebar {
+		width: 320px;
+		background: rgba(15, 23, 42, 0.95);
+		border-right: 1px solid rgba(0, 212, 170, 0.3);
+		overflow-y: auto;
 		display: flex;
 		flex-direction: column;
-		height: 100%;
-		background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
 	}
 	
-	/* Circuit Header - Same style as IDE and chat headers */
-	.diagram-header {
-		padding: 1.5rem 2rem;
+	.sidebar-header {
+		padding: 1.5rem;
 		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		background: rgba(15, 23, 42, 0.5);
-		backdrop-filter: blur(8px);
 	}
 	
-	.diagram-header h1 {
-		font-family: 'Space Grotesk', sans-serif;
-		font-size: 1.5rem;
-		font-weight: 600;
-		margin: 0;
-		color: #00d4aa;
-	}
-	
-	.diagram-description {
-		margin: 0;
-		color: #94a3b8;
-		font-size: 0.875rem;
-	}
-	
-	.header-actions {
-		display: flex;
-		gap: 1rem;
-	}
-	
-	.action-btn {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 0.5rem;
-		padding: 0.75rem 1rem;
+	.back-btn {
 		background: rgba(0, 212, 170, 0.1);
 		border: 1px solid rgba(0, 212, 170, 0.3);
 		border-radius: 8px;
-		color: #e2e8f0;
+		color: #00d4aa;
+		padding: 0.5rem 1rem;
 		font-family: 'IBM Plex Mono', monospace;
 		font-size: 0.875rem;
 		cursor: pointer;
 		transition: all 0.3s ease;
-		min-width: 120px;
+		margin-bottom: 1rem;
+		width: 100%;
 	}
 	
-	.action-btn.secondary {
-		background: rgba(100, 116, 139, 0.1);
-		border-color: rgba(100, 116, 139, 0.3);
-	}
-	
-	.action-btn.secondary:hover {
-		background: rgba(100, 116, 139, 0.2);
-		border-color: #64748b;
-	}
-	
-	.shortcut {
-		font-size: 0.7rem;
-		background: rgba(0, 0, 0, 0.3);
-		padding: 0.2rem 0.4rem;
-		border-radius: 4px;
-		color: #94a3b8;
-	}
-	
-	.action-btn:hover {
+	.back-btn:hover {
 		background: rgba(0, 212, 170, 0.2);
-		border-color: #00d4aa;
-		transform: translateY(-2px);
+		transform: translateY(-1px);
 	}
 	
-	/* Component Panel Styles */
-	.component-panel {
-		position: absolute;
-		top: 100px;
-		left: 2rem;
-		width: 320px;
-		max-height: 500px;
-		background: rgba(15, 23, 42, 0.95);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 12px;
-		backdrop-filter: blur(12px);
-		z-index: 100;
-		overflow: hidden;
+	.sidebar-header h2 {
+		margin: 0;
+		color: #00d4aa;
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 1.5rem;
+		font-weight: 600;
 	}
 	
-	.panel-header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
+	.category-filter {
 		padding: 1rem 1.5rem;
 		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
 	}
 	
-	.panel-header h3 {
-		margin: 0;
-		color: #00d4aa;
-		font-family: 'Space Grotesk', sans-serif;
-		font-size: 1.1rem;
-		font-weight: 600;
+	.category-filter select {
+		width: 100%;
+		background: rgba(30, 41, 59, 0.8);
+		border: 1px solid rgba(0, 212, 170, 0.3);
+		border-radius: 6px;
+		color: #e2e8f0;
+		padding: 0.5rem;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.875rem;
 	}
 	
-	.close-btn {
-		background: none;
-		border: none;
-		color: #94a3b8;
-		font-size: 1.5rem;
-		cursor: pointer;
-		padding: 0;
-		width: 24px;
-		height: 24px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		border-radius: 4px;
-		transition: all 0.2s ease;
-	}
-	
-	.close-btn:hover {
-		background: rgba(0, 212, 170, 0.1);
-		color: #00d4aa;
-	}
-	
-	.component-grid {
+	.components-grid {
+		flex: 1;
 		padding: 1rem;
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 0.75rem;
-		max-height: 400px;
-		overflow-y: auto;
-	}
-	
-	.component-item {
 		display: flex;
 		flex-direction: column;
-		align-items: center;
-		padding: 0.75rem;
-		background: rgba(30, 41, 59, 0.5);
-		border: 1px solid rgba(0, 212, 170, 0.1);
-		border-radius: 8px;
-		cursor: pointer;
-		transition: all 0.3s ease;
+		gap: 0.75rem;
 	}
 	
-	.component-item:hover {
+	.component-card {
+		background: rgba(30, 41, 59, 0.6);
+		border: 1px solid rgba(0, 212, 170, 0.2);
+		border-radius: 8px;
+		padding: 1rem;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		display: flex;
+		gap: 0.75rem;
+		align-items: center;
+	}
+	
+	.component-card:hover {
 		background: rgba(0, 212, 170, 0.1);
-		border-color: rgba(0, 212, 170, 0.3);
+		border-color: rgba(0, 212, 170, 0.4);
 		transform: translateY(-2px);
 	}
 	
-	.component-preview {
-		width: 60px;
-		height: 60px;
+	.component-card.selected {
+		background: rgba(0, 212, 170, 0.15);
+		border-color: #00d4aa;
+	}
+	
+	.component-image {
+		width: 50px;
+		height: 50px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		margin-bottom: 0.5rem;
-		border: 2px solid rgba(0, 212, 170, 0.2);
+		background: rgba(255, 255, 255, 0.9);
 		border-radius: 6px;
-		background: rgba(0, 212, 170, 0.05);
+		border: 2px solid rgba(0, 212, 170, 0.3);
 	}
 	
-	.component-preview img {
-		max-width: 50px;
-		max-height: 50px;
+	.component-image img {
+		max-width: 40px;
+		max-height: 40px;
 		object-fit: contain;
 	}
 	
-	.component-name {
-		font-size: 0.8rem;
-		font-weight: 500;
+	.component-info {
+		flex: 1;
+		min-width: 0;
+	}
+	
+	.component-info h4 {
+		margin: 0 0 0.25rem 0;
 		color: #e2e8f0;
-		text-align: center;
-		margin-bottom: 0.25rem;
-	}
-	
-	.component-category {
-		font-size: 0.7rem;
-		color: #94a3b8;
-		text-transform: capitalize;
-	}
-	
-	/* Empty State */
-	.empty-state {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		text-align: center;
-		color: #64748b;
-	}
-	
-	.empty-state h3 {
-		margin: 0 0 0.5rem 0;
-		font-family: 'Space Grotesk', sans-serif;
-		font-size: 1.25rem;
-		color: #94a3b8;
-	}
-	
-	.empty-state p {
-		margin: 0 0 1.5rem 0;
 		font-size: 0.9rem;
-	}
-	
-	.shortcuts {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-		margin-top: 1rem;
-	}
-	
-	.shortcut-item {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		font-size: 0.8rem;
-		color: #94a3b8;
-	}
-	
-	kbd {
-		background: rgba(0, 0, 0, 0.3);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 4px;
-		padding: 0.2rem 0.4rem;
-		font-family: 'IBM Plex Mono', monospace;
-		font-size: 0.7rem;
-		color: #00d4aa;
-	}
-	
-	/* Component Info Panel */
-	.component-info-panel {
-		position: absolute;
-		top: 1rem;
-		right: 1rem;
-		width: 280px;
-		background: rgba(15, 23, 42, 0.95);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 12px;
-		backdrop-filter: blur(12px);
-		padding: 1.5rem;
-		z-index: 50;
-	}
-	
-	.component-info-panel h4 {
-		margin: 0 0 1rem 0;
-		color: #00d4aa;
-		font-family: 'Space Grotesk', sans-serif;
-		font-size: 1.1rem;
 		font-weight: 600;
 	}
 	
-	.info-grid {
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
+	.component-info .category {
+		margin: 0 0 0.25rem 0;
+		color: #00d4aa;
+		font-size: 0.75rem;
+		font-weight: 500;
+		text-transform: uppercase;
+	}
+	
+	.component-info .description {
+		margin: 0;
+		color: #94a3b8;
+		font-size: 0.75rem;
+		line-height: 1.3;
+	}
+	
+	.tools-section {
+		padding: 1.5rem;
+		border-top: 1px solid rgba(0, 212, 170, 0.1);
+	}
+	
+	.tools-section h3 {
+		margin: 0 0 1rem 0;
+		color: #00d4aa;
+		font-size: 1rem;
+		font-weight: 600;
+	}
+	
+	.tool-btn {
+		width: 100%;
+		background: rgba(30, 41, 59, 0.8);
+		border: 1px solid rgba(0, 212, 170, 0.3);
+		border-radius: 6px;
+		color: #e2e8f0;
+		padding: 0.75rem;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.8rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		margin-bottom: 0.5rem;
+		text-align: left;
+	}
+	
+	.tool-btn:hover {
+		background: rgba(0, 212, 170, 0.1);
+		border-color: rgba(0, 212, 170, 0.5);
+	}
+	
+	.selected-component-info {
+		padding: 1.5rem;
+		border-top: 1px solid rgba(0, 212, 170, 0.1);
+		background: rgba(0, 0, 0, 0.2);
+	}
+	
+	.selected-component-info h3 {
+		margin: 0 0 0.5rem 0;
+		color: #00d4aa;
+		font-size: 0.9rem;
+		font-weight: 600;
+		text-transform: uppercase;
+	}
+	
+	.selected-component-info h4 {
+		margin: 0 0 1rem 0;
+		color: #e2e8f0;
+		font-size: 1.1rem;
+	}
+	
+	.component-details {
 		margin-bottom: 1rem;
 	}
 	
-	.info-item {
+	.detail-row {
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
+		margin-bottom: 0.5rem;
+		font-size: 0.8rem;
 	}
 	
-	.info-item .label {
-		font-size: 0.8rem;
+	.detail-row span:first-child {
 		color: #94a3b8;
-		font-weight: 500;
 	}
 	
-	.info-item .value {
-		font-size: 0.8rem;
+	.detail-row span:last-child {
 		color: #e2e8f0;
 		font-family: 'IBM Plex Mono', monospace;
 	}
 	
 	.pin-list {
-		max-height: 150px;
+		max-height: 120px;
 		overflow-y: auto;
 		margin-bottom: 1rem;
 		border: 1px solid rgba(0, 212, 170, 0.1);
@@ -973,32 +952,91 @@
 		border-color: #ef4444;
 	}
 	
-
+	/* Main Canvas Area */
+	.canvas-area {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		position: relative;
+	}
 	
-	.diagram-canvas-container {
+	.canvas-header {
+		padding: 1.5rem 2rem;
+		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
+		background: rgba(15, 23, 42, 0.8);
+		backdrop-filter: blur(8px);
+	}
+	
+	.canvas-header h1 {
+		margin: 0 0 0.5rem 0;
+		color: #00d4aa;
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 1.75rem;
+		font-weight: 600;
+	}
+	
+	.canvas-stats {
+		color: #94a3b8;
+		font-size: 0.875rem;
+	}
+	
+	.canvas-container {
 		flex: 1;
 		position: relative;
 		overflow: hidden;
 	}
 	
-	.diagram-canvas {
+	.circuit-canvas {
 		width: 100%;
 		height: 100%;
 		background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
 		cursor: default;
 	}
 	
-	.diagram-info {
-		padding: 1rem 1.5rem;
-		border-top: 1px solid rgba(0, 212, 170, 0.3);
-		background: rgba(30, 41, 59, 0.8);
-		border-radius: 0 0 16px 16px;
+	.empty-state {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		text-align: center;
+		color: #64748b;
+		pointer-events: none;
 	}
 	
-	.diagram-info p {
-		margin: 0;
+	.empty-state h3 {
+		margin: 0 0 0.5rem 0;
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 1.5rem;
 		color: #94a3b8;
-		font-size: 0.85rem;
-		text-align: center;
+	}
+	
+	.empty-state p {
+		margin: 0 0 1.5rem 0;
+		font-size: 1rem;
+	}
+	
+	.shortcuts {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		margin-top: 1rem;
+	}
+	
+	.shortcut-item {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		font-size: 0.9rem;
+		color: #94a3b8;
+	}
+	
+	kbd {
+		background: rgba(0, 0, 0, 0.3);
+		border: 1px solid rgba(0, 212, 170, 0.3);
+		border-radius: 4px;
+		padding: 0.3rem 0.5rem;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.8rem;
+		color: #00d4aa;
 	}
 </style>

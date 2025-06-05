@@ -6,6 +6,7 @@
 	import CodeEditor from '$lib/components/CodeEditor.svelte';
 	import ExportModal from '$lib/components/ExportModal.svelte';
 	import CircuitDiagram from '$lib/components/CircuitDiagram.svelte';
+	import FullscreenCircuitDesigner from '$lib/components/FullscreenCircuitDesigner.svelte';
 	import { currentProject, updateProjectCode, updateProjectName, addChatMessage, componentLibrary, type Component } from '$lib/stores/project';
 	import { 
 		currentConversation, 
@@ -43,7 +44,9 @@
 	let chatHistory: string[] = [];
 	let showExportModal = false;
 	let showCircuitDiagram = false;
+	let isFullscreenCircuitMode = false;
 	let isStructuredConversation = false;
+	let tutorialComponents: string[] | undefined = undefined;
 	
 	// Subscribe to current project and conversation
 	$: projectName = $currentProject.name;
@@ -339,7 +342,22 @@ void loop() {
 	}
 	
 	function toggleCircuitDiagram() {
-		showCircuitDiagram = !showCircuitDiagram;
+		if (isFullscreenCircuitMode) {
+			// Exit fullscreen mode
+			isFullscreenCircuitMode = false;
+			showCircuitDiagram = false;
+		} else {
+			// Enter fullscreen circuit mode - reset tutorial components for normal mode
+			tutorialComponents = undefined;
+			isFullscreenCircuitMode = true;
+			showCircuitDiagram = true;
+		}
+	}
+	
+	function exitCircuitFullscreen() {
+		isFullscreenCircuitMode = false;
+		showCircuitDiagram = false;
+		tutorialComponents = undefined;
 	}
 </script>
 
@@ -349,239 +367,249 @@ void loop() {
 	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 </svelte:head>
 
-<div class="app-container">
-	<!-- Sidebar -->
-	<aside class="sidebar">
-		<div class="sidebar-header">
-			<button class="home-link" on:click={goHome}>
-				<h2>Circuitspace</h2>
-			</button>
-			<div class="status-indicator"></div>
-		</div>
-		
-		<nav class="sidebar-nav">
-			<button class="nav-item" on:click={newProject}>
-				New Project +
-			</button>
-            <button class="nav-item active">
-				Current Project
-			</button>
-			<!-- <button class="nav-item" on:click={goHome}>
-				Home
-			</button> -->
-		</nav>
-		
-		<div class="sidebar-footer">
-			<div class="project-info">
-				<h4>Current Session</h4>
-				<p>{messages.length} messages</p>
-				<p class="timestamp">Started {new Date().toLocaleTimeString()}</p>
-			</div>
-		</div>
-	</aside>
-	
-	<!-- Main Content Area with Two Columns -->
-	<main class="main-content">
-		<div class="columns-wrapper">
-			<!-- Left Column: Chat Area -->
-			<div class="chat-column">
-				<!-- Chat Header -->
-				<header class="chat-header">
-					<div class="header-left">
-						<h1>Project: {projectName}</h1>
-						<p class="project-description">AI-powered circuit design assistant</p>
-					</div>
-					<div class="header-actions">
-						<button class="action-btn" on:click={toggleCircuitDiagram}>
-							{showCircuitDiagram ? 'Code' : '⚡ Circuit'}
-						</button>
-						<button class="action-btn" on:click={exportChat}>Export Chat</button>
-						<button class="action-btn" on:click={shareProject}>Share Project</button>
-					</div>
-				</header>
-				
-				<!-- Messages Area -->
-				<div class="chat-messages">
-					{#each messages as message (message.id)}
-						<div class="message {message.type}">
-							<div class="message-avatar">
-								{#if message.type === 'user'}
-									<div class="user-avatar">👤</div>
-								{:else if message.type === 'ai'}
-									<div class="ai-avatar">🤖</div>
-								{:else}
-									<div class="system-avatar">⚡</div>
-								{/if}
-							</div>
-							<div class="message-content">
-								<div class="message-text">
-									{@html message.content.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')}
-								</div>
-								
-								{#if message.componentImages && message.componentImages.length > 0}
-									<div class="component-images">
-										<h4>Benötigte Komponenten:</h4>
-										<div class="images-grid">
-											{#each message.componentImages as imagePath}
-												<div class="component-image">
-													<img src={imagePath} alt="Component" />
-												</div>
-											{/each}
-										</div>
-									</div>
-								{/if}
-								
-								{#if message.componentSuggestions && message.componentSuggestions.length > 0}
-									<div class="component-suggestions">
-										<h4>Recommended Components:</h4>
-										<div class="component-grid">
-											{#each message.componentSuggestions as component}
-												<div class="component-card">
-													<h5>{component.name}</h5>
-													<p>{component.description}</p>
-													{#if component.price}
-														<span class="price">{component.price}</span>
-													{/if}
-												</div>
-											{/each}
-										</div>
-									</div>
-								{/if}
-								
-								{#if message.codeGenerated}
-									<div class="code-block">
-										<div class="code-header">
-											<span>Generated Arduino Code</span>
-											<button class="copy-code-btn" on:click={() => copyCodeToEditor(message.codeGenerated || '')}>
-												Copy to Editor
-											</button>
-										</div>
-										<pre><code>{message.codeGenerated}</code></pre>
-									</div>
-								{/if}
-								
-								{#if message.showTutorialButton}
-									<div class="tutorial-button-container">
-										<button class="tutorial-start-btn" on:click={startTutorial}>
-											💻 Code Tutorial starten
-										</button>
-									</div>
-								{/if}
-								
-								{#if message.showNextStepsButtons}
-									<div class="next-steps-container">
-										<button class="next-step-btn circuit" on:click={() => showCircuitDiagram = true}>
-											⚡ Circuit Designer
-										</button>
-										<button class="next-step-btn real-table" on:click={() => addMessage('ai', 'Perfekt! Gehen Sie zu Ihrem realen Arbeitsplatz und bauen Sie die Schaltung physisch auf.')}>
-											🔧 Realer Tisch
-										</button>
-									</div>
-								{/if}
-								
-								<div class="message-timestamp">
-									{message.timestamp.toLocaleTimeString()}
-								</div>
-							</div>
-						</div>
-					{/each}
-					
-					{#if isLoading}
-						<div class="message ai">
-							<div class="message-avatar">
-								<div class="ai-avatar">🤖</div>
-							</div>
-							<div class="message-content">
-								<div class="typing-indicator">
-									<span></span>
-									<span></span>
-									<span></span>
-								</div>
-							</div>
-						</div>
-					{/if}
-				</div>
-				
-				<!-- Input Area -->
-				<PromptInput 
-					bind:value={currentInput}
-					onSend={handleSendMessage}
-					disabled={isLoading || (isStructuredConversation && tutorialActive)}
-					placeholder={isStructuredConversation ? "Strukturierte Konversation läuft..." : "Describe your circuit requirements, ask questions, or request component suggestions..."}
-				/>
+{#if isFullscreenCircuitMode}
+	<!-- Fullscreen Circuit Designer Mode -->
+	<FullscreenCircuitDesigner {tutorialComponents} on:exit={exitCircuitFullscreen} />
+{:else}
+	<!-- Normal Chat/Code Mode -->
+	<div class="app-container">
+		<!-- Sidebar -->
+		<aside class="sidebar">
+			<div class="sidebar-header">
+				<button class="home-link" on:click={goHome}>
+					<h2>Circuitspace</h2>
+				</button>
+				<div class="status-indicator"></div>
 			</div>
 			
-			<!-- Right Column: IDE/Circuit Area -->
-			<div class="ide-column">
-				{#if showCircuitDiagram}
-					<div class="circuit-diagram-container">
-						<div class="diagram-header">
-							<h3>Circuit Diagram</h3>
-							<p class="diagram-description">Interactive circuit design for your project</p>
+			<nav class="sidebar-nav">
+				<button class="nav-item" on:click={newProject}>
+					New Project +
+				</button>
+				<button class="nav-item active">
+					Current Project
+				</button>
+				<!-- <button class="nav-item" on:click={goHome}>
+					Home
+				</button> -->
+			</nav>
+			
+			<div class="sidebar-footer">
+				<div class="project-info">
+					<h4>Current Session</h4>
+					<p>{messages.length} messages</p>
+					<p class="timestamp">Started {new Date().toLocaleTimeString()}</p>
+				</div>
+			</div>
+		</aside>
+		
+		<!-- Main Content Area with Two Columns -->
+		<main class="main-content">
+			<div class="columns-wrapper">
+				<!-- Left Column: Chat Area -->
+				<div class="chat-column">
+					<!-- Chat Header -->
+					<header class="chat-header">
+						<div class="header-left">
+							<h1>Project: {projectName}</h1>
+							<p class="project-description">AI-powered circuit design assistant</p>
 						</div>
-						<CircuitDiagram />
-					</div>
-				{:else if tutorialActive}
-					<!-- Tutorial Mode -->
-					<div class="tutorial-container">
-						<div class="tutorial-header">
-							<h3>Code Tutorial</h3>
-							<p class="tutorial-description">Schritt-für-Schritt Arduino Programmierung</p>
-							<div class="tutorial-progress">
-								Schritt {tutorialStepIndex + 1} von {leonardoCodeTutorial.length}
+						<div class="header-actions">
+							<button class="action-btn" on:click={toggleCircuitDiagram}>
+								{isFullscreenCircuitMode ? '💬 Back to Chat' : '⚡ Circuit Designer'}
+							</button>
+							<button class="action-btn" on:click={exportChat}>Export Chat</button>
+							<button class="action-btn" on:click={shareProject}>Share Project</button>
+						</div>
+					</header>
+					
+					<!-- Messages Area -->
+					<div class="chat-messages">
+						{#each messages as message (message.id)}
+							<div class="message {message.type}">
+								<div class="message-avatar">
+									{#if message.type === 'user'}
+										<div class="user-avatar">👤</div>
+									{:else if message.type === 'ai'}
+										<div class="ai-avatar">🤖</div>
+									{:else}
+										<div class="system-avatar">⚡</div>
+									{/if}
+								</div>
+								<div class="message-content">
+									<div class="message-text">
+										{@html message.content.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')}
+									</div>
+									
+									{#if message.componentImages && message.componentImages.length > 0}
+										<div class="component-images">
+											<h4>Benötigte Komponenten:</h4>
+											<div class="images-grid">
+												{#each message.componentImages as imagePath}
+													<div class="component-image">
+														<img src={imagePath} alt="Component" />
+													</div>
+												{/each}
+											</div>
+										</div>
+									{/if}
+									
+									{#if message.componentSuggestions && message.componentSuggestions.length > 0}
+										<div class="component-suggestions">
+											<h4>Recommended Components:</h4>
+											<div class="component-grid">
+												{#each message.componentSuggestions as component}
+													<div class="component-card">
+														<h5>{component.name}</h5>
+														<p>{component.description}</p>
+														{#if component.price}
+															<span class="price">{component.price}</span>
+														{/if}
+													</div>
+												{/each}
+											</div>
+										</div>
+									{/if}
+									
+									{#if message.codeGenerated}
+										<div class="code-block">
+											<div class="code-header">
+												<span>Generated Arduino Code</span>
+												<button class="copy-code-btn" on:click={() => copyCodeToEditor(message.codeGenerated || '')}>
+													Copy to Editor
+												</button>
+											</div>
+											<pre><code>{message.codeGenerated}</code></pre>
+										</div>
+									{/if}
+									
+									{#if message.showTutorialButton}
+										<div class="tutorial-button-container">
+											<button class="tutorial-start-btn" on:click={startTutorial}>
+												💻 Code Tutorial starten
+											</button>
+										</div>
+									{/if}
+									
+									{#if message.showNextStepsButtons}
+										<div class="next-steps-container">
+											<button class="next-step-btn circuit" on:click={() => {
+												tutorialComponents = ['leonardo-keyestudio', 'breadboard', 'leuchtdiode', 'widerstand', 'poti', 'jumpercable'];
+												isFullscreenCircuitMode = true;
+												showCircuitDiagram = true;
+											}}>
+												⚡ Circuit Designer
+											</button>
+											<button class="next-step-btn real-table" on:click={() => addMessage('ai', 'Perfekt! Gehen Sie zu Ihrem realen Arbeitsplatz und bauen Sie die Schaltung physisch auf.')}>
+												🔧 Realer Tisch
+											</button>
+										</div>
+									{/if}
+									
+									<div class="message-timestamp">
+										{message.timestamp.toLocaleTimeString()}
+									</div>
+								</div>
 							</div>
-						</div>
+						{/each}
 						
-						<div class="tutorial-content">
-							<div class="tutorial-step">
-								<h4>{leonardoCodeTutorial[tutorialStepIndex]?.title}</h4>
-								<p class="step-description">{leonardoCodeTutorial[tutorialStepIndex]?.description}</p>
-								<div class="step-explanation">
-									{leonardoCodeTutorial[tutorialStepIndex]?.explanation}
+						{#if isLoading}
+							<div class="message ai">
+								<div class="message-avatar">
+									<div class="ai-avatar">🤖</div>
+								</div>
+								<div class="message-content">
+									<div class="typing-indicator">
+										<span></span>
+										<span></span>
+										<span></span>
+									</div>
+								</div>
+							</div>
+						{/if}
+					</div>
+					
+					<!-- Input Area -->
+					<PromptInput 
+						bind:value={currentInput}
+						onSend={handleSendMessage}
+						disabled={isLoading || (isStructuredConversation && tutorialActive)}
+						placeholder={isStructuredConversation ? "Strukturierte Konversation läuft..." : "Describe your circuit requirements, ask questions, or request component suggestions..."}
+					/>
+				</div>
+				
+				<!-- Right Column: IDE/Circuit Area -->
+				<div class="ide-column">
+					{#if showCircuitDiagram}
+						<div class="circuit-diagram-container">
+							<div class="diagram-header">
+								<h3>Circuit Diagram</h3>
+								<p class="diagram-description">Interactive circuit design for your project</p>
+							</div>
+							<CircuitDiagram />
+						</div>
+					{:else if tutorialActive}
+						<!-- Tutorial Mode -->
+						<div class="tutorial-container">
+							<div class="tutorial-header">
+								<h3>Code Tutorial</h3>
+								<p class="tutorial-description">Schritt-für-Schritt Arduino Programmierung</p>
+								<div class="tutorial-progress">
+									Schritt {tutorialStepIndex + 1} von {leonardoCodeTutorial.length}
 								</div>
 							</div>
 							
-							<div class="tutorial-navigation">
-								<button 
-									class="nav-btn prev"
-									on:click={previousTutorialStep}
-									disabled={tutorialStepIndex === 0}
-								>
-									← Zurück
-								</button>
+							<div class="tutorial-content">
+								<div class="tutorial-step">
+									<h4>{leonardoCodeTutorial[tutorialStepIndex]?.title}</h4>
+									<p class="step-description">{leonardoCodeTutorial[tutorialStepIndex]?.description}</p>
+									<div class="step-explanation">
+										{leonardoCodeTutorial[tutorialStepIndex]?.explanation}
+									</div>
+								</div>
 								
-								{#if tutorialStepIndex < leonardoCodeTutorial.length - 1}
+								<div class="tutorial-navigation">
 									<button 
-										class="nav-btn next"
-										on:click={nextTutorialStep}
+										class="nav-btn prev"
+										on:click={previousTutorialStep}
+										disabled={tutorialStepIndex === 0}
 									>
-										Weiter →
+										← Zurück
 									</button>
-								{:else}
-									<button 
-										class="nav-btn finish"
-										on:click={completeTutorial}
-									>
-										Tutorial beenden
-									</button>
-								{/if}
+									
+									{#if tutorialStepIndex < leonardoCodeTutorial.length - 1}
+										<button 
+											class="nav-btn next"
+											on:click={nextTutorialStep}
+										>
+											Weiter →
+										</button>
+									{:else}
+										<button 
+											class="nav-btn finish"
+											on:click={completeTutorial}
+										>
+											Tutorial beenden
+										</button>
+									{/if}
+								</div>
+							</div>
+							
+							<div class="tutorial-code-area">
+								<CodeEditor 
+									tutorialCode={leonardoCodeTutorial[tutorialStepIndex]?.code} 
+									isInTutorialMode={true}
+								/>
 							</div>
 						</div>
-						
-						<div class="tutorial-code-area">
-							<CodeEditor 
-								tutorialCode={leonardoCodeTutorial[tutorialStepIndex]?.code} 
-								isInTutorialMode={true}
-							/>
-						</div>
-					</div>
-				{:else}
-					<CodeEditor isInTutorialMode={false} />
-				{/if}
+					{:else}
+						<CodeEditor isInTutorialMode={false} />
+					{/if}
+				</div>
 			</div>
-		</div>
-	</main>
-</div>
+		</main>
+	</div>
+{/if}
 
 <!-- Export Modal -->
 <ExportModal bind:isOpen={showExportModal} />
