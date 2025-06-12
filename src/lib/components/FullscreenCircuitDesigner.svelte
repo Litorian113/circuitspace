@@ -220,6 +220,7 @@
 	let isDraggingConnection = false;
 	let connectionStart: {component: PlacedComponent, pin: {name: string, x: number, y: number}} | null = null;
 	let mousePos = {x: 0, y: 0};
+	let highlightedPin: {component: PlacedComponent, pin: {name: string, x: number, y: number}} | null = null;
 	
 	// Component categories for filtering
 	const categories = [...new Set(availableComponents.map(c => c.category))];
@@ -379,10 +380,8 @@
 			drawComponent(component);
 		});
 		
-		// Draw connections in tutorial mode
-		if (tutorialComponents) {
-			drawConnections();
-		}
+		// Draw connections (in both tutorial and normal mode)
+		drawConnections();
 	}
 	
 	function drawGrid() {
@@ -464,18 +463,26 @@
 		ctx.strokeRect(component.x - 2, component.y - 2, component.width + 4, component.height + 4);
 		ctx.setLineDash([]);
 
-		// Only draw pins in tutorial mode - focus on pin-outs only
-		if (tutorialComponents) {
+		// Draw pins (in tutorial mode show all pins, in normal mode show pins when component is selected or when dragging connection)
+		if (tutorialComponents || selectedComponent?.id === component.id || isDraggingConnection) {
 			component.pins.forEach((pin, index) => {
-				// Pin background circle
-				ctx.fillStyle = '#1e293b';
+				// Check if this pin should be highlighted
+				const isHighlighted = highlightedPin && 
+					highlightedPin.component.id === component.id && 
+					highlightedPin.pin.name === pin.name;
+				
+				// Pin background circle (larger for highlighted pins)
+				const pinRadius = isHighlighted ? 10 : 8;
+				ctx.fillStyle = isHighlighted ? '#fbbf24' : '#1e293b';
 				ctx.beginPath();
-				ctx.arc(pin.x, pin.y, 8, 0, 2 * Math.PI);
+				ctx.arc(pin.x, pin.y, pinRadius, 0, 2 * Math.PI);
 				ctx.fill();
 				
 				// Pin circle with connection state highlighting
 				const isCurrentStepPin = isCurrentStepRelatedPin(component, pin);
-				if (isCurrentStepPin) {
+				if (isHighlighted) {
+					ctx.fillStyle = '#fbbf24'; // Bright yellow for highlighted target
+				} else if (isCurrentStepPin) {
 					ctx.fillStyle = '#fbbf24'; // Highlight current step pins
 				} else if (selectedComponent?.id === component.id) {
 					ctx.fillStyle = '#00d4aa';
@@ -483,13 +490,24 @@
 					ctx.fillStyle = '#64748b';
 				}
 				ctx.beginPath();
-				ctx.arc(pin.x, pin.y, 6, 0, 2 * Math.PI);
+				ctx.arc(pin.x, pin.y, pinRadius - 2, 0, 2 * Math.PI);
 				ctx.fill();
 				
-				// Pin border
-				ctx.strokeStyle = '#ffffff';
-				ctx.lineWidth = 2;
+				// Pin border (thicker for highlighted)
+				ctx.strokeStyle = isHighlighted ? '#fbbf24' : '#ffffff';
+				ctx.lineWidth = isHighlighted ? 3 : 2;
 				ctx.stroke();
+				
+				// Pulsing effect for highlighted pin
+				if (isHighlighted) {
+					const time = Date.now() * 0.005;
+					const pulseRadius = pinRadius + Math.sin(time) * 3;
+					ctx.strokeStyle = 'rgba(251, 191, 36, 0.5)';
+					ctx.lineWidth = 2;
+					ctx.beginPath();
+					ctx.arc(pin.x, pin.y, pulseRadius, 0, 2 * Math.PI);
+					ctx.stroke();
+				}
 				
 				// Pin label with better positioning (only pin names)
 				ctx.fillStyle = '#ffffff';
@@ -498,14 +516,14 @@
 				
 				// Position label based on pin location relative to component
 				let labelX = pin.x;
-				let labelY = pin.y - 12;
+				let labelY = pin.y - 15;
 				
 				// Adjust label position for better readability
 				if (pin.x <= component.x + 15) { // Left side pin
-					labelX = pin.x - 18;
+					labelX = pin.x - 20;
 					ctx.textAlign = 'right';
 				} else if (pin.x >= component.x + component.width - 15) { // Right side pin
-					labelX = pin.x + 18;
+					labelX = pin.x + 20;
 					ctx.textAlign = 'left';
 				}
 				
@@ -515,8 +533,8 @@
 				ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
 				ctx.fillRect(bgX, labelY - 12, labelWidth + 6, 14);
 				
-				// Label text
-				ctx.fillStyle = isCurrentStepPin ? '#fbbf24' : '#00d4aa';
+				// Label text (highlighted if this is the target pin)
+				ctx.fillStyle = isHighlighted ? '#fbbf24' : (isCurrentStepPin ? '#fbbf24' : '#00d4aa');
 				ctx.fillText(pin.name, labelX, labelY);
 			});
 		}
@@ -555,31 +573,81 @@
 			ctx.fill();
 		});
 		
-		// Draw active connection being dragged
+		// Draw active connection being dragged with better visual feedback
 		if (isDraggingConnection && connectionStart) {
-			ctx.strokeStyle = '#fbbf24';
-			ctx.lineWidth = 3;
-			ctx.setLineDash([5, 5]);
+			// Gradient line effect
+			const gradient = ctx.createLinearGradient(
+				connectionStart.pin.x, connectionStart.pin.y, 
+				mousePos.x, mousePos.y
+			);
+			gradient.addColorStop(0, '#00d4aa');
+			gradient.addColorStop(1, highlightedPin ? '#10b981' : '#fbbf24');
+			
+			ctx.strokeStyle = gradient;
+			ctx.lineWidth = highlightedPin ? 5 : 4;
+			ctx.setLineDash(highlightedPin ? [10, 2] : [8, 4]);
 			
 			ctx.beginPath();
 			ctx.moveTo(connectionStart.pin.x, connectionStart.pin.y);
 			ctx.lineTo(mousePos.x, mousePos.y);
 			ctx.stroke();
 			ctx.setLineDash([]);
+			
+			// Draw starting point with pulsing effect
+			const time = Date.now() * 0.008;
+			const pulseRadius = 6 + Math.sin(time) * 2;
+			ctx.fillStyle = '#00d4aa';
+			ctx.beginPath();
+			ctx.arc(connectionStart.pin.x, connectionStart.pin.y, pulseRadius, 0, 2 * Math.PI);
+			ctx.fill();
+			
+			// Draw target point if snapped to a pin
+			if (highlightedPin) {
+				const targetPulseRadius = 8 + Math.sin(time * 1.2) * 3;
+				ctx.fillStyle = '#10b981';
+				ctx.beginPath();
+				ctx.arc(mousePos.x, mousePos.y, targetPulseRadius, 0, 2 * Math.PI);
+				ctx.fill();
+				
+				// Draw snap indicator ring
+				ctx.strokeStyle = '#10b981';
+				ctx.lineWidth = 2;
+				ctx.beginPath();
+				ctx.arc(mousePos.x, mousePos.y, targetPulseRadius + 8, 0, 2 * Math.PI);
+				ctx.stroke();
+			}
 		}
 	}
 	
-	// Get pin at specific coordinates
+	// Get pin at specific coordinates with improved snapping
 	function getPinAt(x: number, y: number): {component: PlacedComponent, pin: {name: string, x: number, y: number}} | null {
 		for (const component of placedComponents) {
 			for (const pin of component.pins) {
 				const distance = Math.sqrt((x - pin.x) ** 2 + (y - pin.y) ** 2);
-				if (distance <= 10) { // Pin hit radius
+				if (distance <= 15) { // Increased hit radius for better usability
 					return { component, pin };
 				}
 			}
 		}
 		return null;
+	}
+	
+	// Get nearest pin for snapping (within snapping distance)
+	function getNearestSnapPin(x: number, y: number, maxDistance: number = 30): {component: PlacedComponent, pin: {name: string, x: number, y: number}} | null {
+		let nearestPin = null;
+		let minDistance = maxDistance;
+		
+		for (const component of placedComponents) {
+			for (const pin of component.pins) {
+				const distance = Math.sqrt((x - pin.x) ** 2 + (y - pin.y) ** 2);
+				if (distance < minDistance) {
+					minDistance = distance;
+					nearestPin = { component, pin };
+				}
+			}
+		}
+		
+		return nearestPin;
 	}
 	
 	// Complete a connection step
@@ -628,19 +696,26 @@
 		const x = event.clientX - rect.left;
 		const y = event.clientY - rect.top;
 		
-		// Check if clicking on a pin for connection in tutorial mode
-		if (tutorialComponents) {
-			const pinHit = getPinAt(x, y);
-			if (pinHit) {
-				if (!isDraggingConnection) {
-					// Start a new connection
-					connectionStart = pinHit;
-					isDraggingConnection = true;
-					mousePos = { x, y };
-					canvas.style.cursor = 'crosshair';
-					return;
-				} else if (connectionStart && pinHit.component.id !== connectionStart.component.id) {
-					// Complete connection
+		// Check if clicking on a pin for connection (works in both tutorial and normal mode)
+		let pinHit = getPinAt(x, y);
+		
+		// If no direct hit, try snapping to nearest pin
+		if (!pinHit) {
+			pinHit = getNearestSnapPin(x, y, 25);
+		}
+		
+		if (pinHit) {
+			if (!isDraggingConnection) {
+				// Start a new connection
+				connectionStart = pinHit;
+				isDraggingConnection = true;
+				mousePos = { x: pinHit.pin.x, y: pinHit.pin.y }; // Start from pin position
+				canvas.style.cursor = 'crosshair';
+				return;
+			} else if (connectionStart && pinHit.component.id !== connectionStart.component.id) {
+				// Complete connection
+				if (tutorialComponents) {
+					// Tutorial mode: use step validation
 					const success = completeConnectionStep(
 						connectionStart.component, 
 						connectionStart.pin,
@@ -648,17 +723,32 @@
 						pinHit.pin
 					);
 					
-					isDraggingConnection = false;
-					connectionStart = null;
-					canvas.style.cursor = 'default';
-					
 					if (success) {
 						console.log('Connection completed successfully!');
 					} else {
 						console.log('Connection does not match current step.');
 					}
-					return;
+				} else {
+					// Normal mode: allow any connection
+					const connection: Connection = {
+						id: `conn-${Date.now()}`,
+						fromComponent: connectionStart.component.id,
+						fromPin: connectionStart.pin.name,
+						toComponent: pinHit.component.id,
+						toPin: pinHit.pin.name,
+						fromPos: { x: connectionStart.pin.x, y: connectionStart.pin.y },
+						toPos: { x: pinHit.pin.x, y: pinHit.pin.y }
+					};
+					connections.push(connection);
+					console.log('Free connection created!');
 				}
+				
+				isDraggingConnection = false;
+				connectionStart = null;
+				highlightedPin = null;
+				canvas.style.cursor = 'default';
+				drawBoard();
+				return;
 			}
 		}
 
@@ -688,24 +778,62 @@
 			
 			drawBoard();
 		} else if (isDraggingConnection) {
+			// Enhanced target pin highlighting with snapping (works in both modes)
+			if (connectionStart) {
+				// First try to get exact pin hit
+				let targetPin = getPinAt(x, y);
+				
+				// If no direct hit, try snapping to nearest pin
+				if (!targetPin) {
+					const snapPin = getNearestSnapPin(x, y, 40);
+					if (snapPin && snapPin.component.id !== connectionStart.component.id) {
+						targetPin = snapPin;
+						// Update mouse position to snap to the pin
+						mousePos = { x: snapPin.pin.x, y: snapPin.pin.y };
+					}
+				}
+				
+				if (targetPin && targetPin.component.id !== connectionStart.component.id) {
+					if (tutorialComponents) {
+						// Tutorial mode: check if this matches the current step
+						const step = connectionSteps[currentConnectionStep];
+						if (step && 
+							((targetPin.component.componentId === step.toComponent && targetPin.pin.name === step.toPin) ||
+							 (targetPin.component.componentId === step.fromComponent && targetPin.pin.name === step.fromPin))) {
+							highlightedPin = targetPin;
+							canvas.style.cursor = 'crosshair';
+						} else {
+							highlightedPin = null;
+							canvas.style.cursor = 'not-allowed';
+						}
+					} else {
+						// Normal mode: allow any valid pin connection
+						highlightedPin = targetPin;
+						canvas.style.cursor = 'crosshair';
+					}
+				} else {
+					highlightedPin = null;
+					canvas.style.cursor = 'crosshair';
+				}
+			}
+			
 			// Update connection preview
 			drawBoard();
 		} else {
+			// Reset highlighted pin when not dragging
+			highlightedPin = null;
+			
 			// Update cursor based on what's under mouse
-			if (tutorialComponents) {
-				const pinHit = getPinAt(x, y);
-				if (pinHit) {
-					canvas.style.cursor = 'crosshair';
-				} else {
-					const componentUnderMouse = getComponentAt(x, y);
-					canvas.style.cursor = componentUnderMouse ? 'grab' : 'default';
-				}
+			const pinHit = getPinAt(x, y);
+			if (pinHit) {
+				canvas.style.cursor = 'crosshair';
 			} else {
 				const componentUnderMouse = getComponentAt(x, y);
 				canvas.style.cursor = componentUnderMouse ? 'grab' : 'default';
 			}
 		}
 	}
+	
 	
 	function handleMouseUp() {
 		if (isDragging && selectedComponent) {
@@ -721,6 +849,7 @@
 		if (isDraggingConnection) {
 			isDraggingConnection = false;
 			connectionStart = null;
+			highlightedPin = null; // Clear highlighted pin
 		}
 		
 		isDragging = false;
@@ -813,7 +942,7 @@
 			</button>
 			<h2>{tutorialComponents ? 'Tutorial Circuit Designer' : 'Circuit Designer'}</h2>
 			{#if tutorialComponents}
-				<p class="tutorial-note">Verwende nur die Komponenten aus dem Tutorial: Arduino Leonardo, LED, Potentiometer, Resistor</p>
+				<p class="tutorial-note">🎯 Tutorial-Modus aktiv: Verwende nur die verfügbaren Komponenten und folge den Verbindungsschritten.</p>
 			{/if}
 		</div>
 		
@@ -1028,6 +1157,17 @@
 		font-weight: 600;
 	}
 	
+	.tutorial-note {
+		margin: 0.75rem 0 0 0;
+		color: #fbbf24;
+		font-size: 0.8rem;
+		line-height: 1.4;
+		padding: 0.75rem;
+		background: rgba(251, 191, 36, 0.1);
+		border: 1px solid rgba(251, 191, 36, 0.3);
+		border-radius: 6px;
+	}
+	
 	.category-filter {
 		padding: 1rem 1.5rem;
 		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
@@ -1081,15 +1221,19 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: rgba(255, 255, 255, 0.9);
+		background: rgba(30, 41, 59, 0.4);
 		border-radius: 6px;
 		border: 2px solid rgba(0, 212, 170, 0.3);
+		position: relative;
+		overflow: hidden;
 	}
 	
 	.component-image img {
 		max-width: 40px;
 		max-height: 40px;
 		object-fit: contain;
+		mix-blend-mode: multiply;
+		filter: brightness(1.2) contrast(1.1);
 	}
 	
 	.component-info {
