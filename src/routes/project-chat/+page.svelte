@@ -37,14 +37,16 @@
 		showNextStepsButtons?: boolean;
 	};
 	
+	// App state
+	type ViewMode = 'chat' | 'designer' | 'code';
+	let currentView: ViewMode = 'chat';
+	
 	let messages: Message[] = [];
 	let currentInput = '';
 	let isLoading = false;
 	let messageId = 0;
 	let chatHistory: string[] = [];
 	let showExportModal = false;
-	let showCircuitDiagram = false;
-	let isFullscreenCircuitMode = false;
 	let isStructuredConversation = false;
 	let tutorialComponents: string[] | undefined = undefined;
 	
@@ -55,28 +57,24 @@
 	$: tutorialActive = $isTutorialActive;
 	$: tutorialStepIndex = $currentTutorialStep;
 	
-	// Mock AI responses for different types of queries
-	const aiResponses = {
-		components: [
-			"For an LED controller project, I'd recommend these components:\n\n• **Arduino Uno** - Main microcontroller ($25)\n• **LED Strip (WS2812B)** - Addressable RGB LEDs ($15)\n• **Potentiometer** - For brightness control ($2)\n• **Push Buttons** - Mode switching ($3)\n• **Breadboard & Jumper Wires** - Prototyping ($8)\n\nWould you like me to generate the Arduino code for this setup?",
-			
-			"Based on your requirements, here are some additional components to consider:\n\n• **ESP32** - For WiFi connectivity ($12)\n• **OLED Display** - Status information ($8)\n• **Rotary Encoder** - Better user interface ($5)\n• **Power Supply** - 5V 2A adapter ($10)\n\nThis setup will give you remote control capabilities through WiFi.",
-			
-			"For advanced features, you might want:\n\n• **PIR Motion Sensor** - Automatic activation ($4)\n• **LDR Sensor** - Ambient light detection ($2)\n• **Real-time Clock Module** - Scheduling features ($6)\n• **Relay Module** - High-power switching ($8)"
-		],
-		
-		code: [
-			"Here's a basic Arduino sketch for your LED controller:\n\n```cpp\n#include <FastLED.h>\n\n#define LED_PIN 6\n#define NUM_LEDS 30\n#define BRIGHTNESS 100\n\nCRGB leds[NUM_LEDS];\n\nvoid setup() {\n  FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, NUM_LEDS);\n  FastLED.setBrightness(BRIGHTNESS);\n}\n\nvoid loop() {\n  // Rainbow effect\n  for(int i = 0; i < NUM_LEDS; i++) {\n    leds[i] = CHSV(i * 8, 255, 255);\n  }\n  FastLED.show();\n  delay(50);\n}\n```\n\nThis creates a rainbow effect. Would you like me to add button controls or other features?",
-			
-			"I'll add button controls and multiple modes:\n\n```cpp\n#include <FastLED.h>\n\n#define LED_PIN 6\n#define BUTTON_PIN 2\n#define NUM_LEDS 30\n\nCRGB leds[NUM_LEDS];\nint currentMode = 0;\nint buttonState = 0;\nint lastButtonState = 0;\n\nvoid setup() {\n  FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, NUM_LEDS);\n  pinMode(BUTTON_PIN, INPUT_PULLUP);\n  FastLED.setBrightness(100);\n}\n\nvoid loop() {\n  checkButton();\n  \n  switch(currentMode) {\n    case 0: rainbowMode(); break;\n    case 1: breathingMode(); break;\n    case 2: strobeMode(); break;\n  }\n  \n  FastLED.show();\n  delay(50);\n}\n\nvoid checkButton() {\n  buttonState = digitalRead(BUTTON_PIN);\n  if (buttonState != lastButtonState && buttonState == LOW) {\n    currentMode = (currentMode + 1) % 3;\n    delay(200); // Debounce\n  }\n  lastButtonState = buttonState;\n}\n```\n\nThis adds three different lighting modes that you can cycle through with a button."
-		],
-		
-		help: [
-			"I'm here to help you with your circuit projects! I can assist with:\n\n• **Component Selection** - Find the right parts for your project\n• **Circuit Design** - Plan connections and power requirements with interactive diagrams\n• **Code Generation** - Arduino sketches and programming\n• **Troubleshooting** - Debug hardware and software issues\n• **Project Ideas** - Inspiration for new builds\n\n💡 **Tip**: Use the '⚡ Circuit' button to switch to the interactive circuit diagram view!\n\nWhat would you like to work on today?",
-			
-			"Let me help you plan your next steps:\n\n1. **Define Requirements** - What should your circuit do?\n2. **Select Components** - Choose the right parts\n3. **Design Circuit** - Plan connections using the circuit diagram tool\n4. **Write Code** - Program the microcontroller\n5. **Test & Debug** - Verify everything works\n\nWhich step would you like to focus on? I can guide you through each one!"
-		]
-	};
+	// Navigation functions
+	function switchToView(view: ViewMode) {
+		currentView = view;
+		if (view === 'designer') {
+			tutorialComponents = ['arduino-leonardo', 'breadboard', 'led', 'resistor', 'potentiometer', 'jumper-cable'];
+		}
+	}
+	
+	function goBackHome() {
+		goto('/');
+	}
+	
+	function exportCode() {
+		// Export code functionality
+		showExportModal = true;
+	}
+	
+	// ... (Rest of the functions remain the same as in original file)
 	
 	onMount(() => {
 		// Check if there's an initial prompt from the URL
@@ -147,12 +145,12 @@
 		startCodeTutorial();
 		
 		// Add confirmation message
-		addMessage('ai', '🚀 Perfekt! Das Code Tutorial wurde gestartet. Schauen Sie in die rechte Spalte für die Schritt-für-Schritt Anleitung.');
+		addMessage('ai', '🚀 Perfekt! Das Code Tutorial wurde gestartet. Wechseln Sie zur "Circuit Code" Ansicht für die Schritt-für-Schritt Anleitung.');
 		
-		// Switch to code view if we're in circuit view
-		if (showCircuitDiagram) {
-			showCircuitDiagram = false;
-		}
+		// Switch to code view
+		setTimeout(() => {
+			switchToView('code');
+		}, 1500);
 	}
 	
 	function completeTutorial() {
@@ -200,7 +198,7 @@ Wie möchten Sie fortfahren?`, {
 		let componentSuggestions: Array<{name: string, description: string, price?: string}> = [];
 		
 		if (lowercaseMessage.includes('component') || lowercaseMessage.includes('part') || lowercaseMessage.includes('buy')) {
-			response = aiResponses.components[Math.floor(Math.random() * aiResponses.components.length)];
+			response = "For an LED controller project, I'd recommend these components:\n\n• **Arduino Uno** - Main microcontroller ($25)\n• **LED Strip (WS2812B)** - Addressable RGB LEDs ($15)\n• **Potentiometer** - For brightness control ($2)\n• **Push Buttons** - Mode switching ($3)\n• **Breadboard & Jumper Wires** - Prototyping ($8)\n\nWould you like me to generate the Arduino code for this setup?";
 			// Get relevant components from library
 			const relevantComponents = componentLibrary.slice(0, 3).map(comp => ({
 				name: comp.name,
@@ -209,7 +207,7 @@ Wie möchten Sie fortfahren?`, {
 			}));
 			componentSuggestions = relevantComponents;
 		} else if (lowercaseMessage.includes('code') || lowercaseMessage.includes('program') || lowercaseMessage.includes('sketch')) {
-			response = aiResponses.code[Math.floor(Math.random() * aiResponses.code.length)];
+			response = "Here's a basic Arduino sketch for your LED controller:\n\n```cpp\n#include <FastLED.h>\n\n#define LED_PIN 6\n#define NUM_LEDS 30\n#define BRIGHTNESS 100\n\nCRGB leds[NUM_LEDS];\n\nvoid setup() {\n  FastLED.addLeds<WS2812B, LED_PIN, GRB>(leds, NUM_LEDS);\n  FastLED.setBrightness(BRIGHTNESS);\n}\n\nvoid loop() {\n  // Rainbow effect\n  for(int i = 0; i < NUM_LEDS; i++) {\n    leds[i] = CHSV(i * 8, 255, 255);\n  }\n  FastLED.show();\n  delay(50);\n}\n```\n\nThis creates a rainbow effect. Would you like me to add button controls or other features?";
 			codeGenerated = `#include <FastLED.h>
 
 #define LED_PIN 6
@@ -227,14 +225,14 @@ void loop() {
   delay(50);
 }`;
 		} else if (lowercaseMessage.includes('circuit') || lowercaseMessage.includes('diagram') || lowercaseMessage.includes('connection') || lowercaseMessage.includes('wiring')) {
-			response = "I can help you design the circuit layout! **Click the '⚡ Circuit' button** in the top-right to open the interactive circuit diagram. There you can:\n\n• **Drag and drop components** onto the canvas\n• **Auto-generate connections** between components\n• **Export your circuit design** as an image\n• **Switch back to code view** anytime\n\nWould you like me to suggest which components to add for your specific project?";
+			response = "I can help you design the circuit layout! **Switch to 'Circuit Designer'** to open the interactive circuit diagram. There you can:\n\n• **Drag and drop components** onto the canvas\n• **Auto-generate connections** between components\n• **Export your circuit design** as an image\n• **Switch back to other views** anytime\n\nWould you like me to suggest which components to add for your specific project?";
 			
-			// Auto-switch to circuit diagram view after a short delay
+			// Auto-switch to circuit designer view after a short delay
 			setTimeout(() => {
-				showCircuitDiagram = true;
+				switchToView('designer');
 			}, 2000);
 		} else if (lowercaseMessage.includes('help') || lowercaseMessage.includes('start')) {
-			response = aiResponses.help[Math.floor(Math.random() * aiResponses.help.length)];
+			response = "I'm here to help you with your circuit projects! I can assist with:\n\n• **Component Selection** - Find the right parts for your project\n• **Circuit Design** - Plan connections and power requirements with interactive diagrams\n• **Code Generation** - Arduino sketches and programming\n• **Troubleshooting** - Debug hardware and software issues\n• **Project Ideas** - Inspiration for new builds\n\n💡 **Tip**: Use the sidebar to switch between different views!\n\nWhat would you like to work on today?";
 		} else {
 			response = "I understand you're working on a circuit project. Could you tell me more about what you'd like to build? I can help with component selection, circuit design, or Arduino programming.";
 		}
@@ -295,9 +293,9 @@ void loop() {
 			
 		} else if (lowerMessage.includes('circuit') || lowerMessage.includes('schaltung')) {
 			// User wants to go to circuit designer
-			addMessage('ai', 'Perfekt! Ich öffne den Circuit Designer für Sie. Dort können Sie die Schaltung virtuell aufbauen und testen.');
+			addMessage('ai', 'Perfekt! Ich wechsle zum Circuit Designer für Sie. Dort können Sie die Schaltung virtuell aufbauen und testen.');
 			setTimeout(() => {
-				showCircuitDiagram = true;
+				switchToView('designer');
 			}, 1000);
 		} else {
 			// Default response for unrecognized input in structured conversation
@@ -317,47 +315,8 @@ void loop() {
 		window.dispatchEvent(event);
 	}
 	
-	function handleKeyPress(event: KeyboardEvent) {
-		if (event.key === 'Enter' && !event.shiftKey) {
-			event.preventDefault();
-			handleSendMessage(currentInput);
-			currentInput = '';
-		}
-	}
-	
-	function goHome() {
-		goto('/');
-	}
-	
-	function newProject() {
-		goto('/');
-	}
-	
 	function exportChat() {
 		showExportModal = true;
-	}
-	
-	function shareProject() {
-		showExportModal = true;
-	}
-	
-	function toggleCircuitDiagram() {
-		if (isFullscreenCircuitMode) {
-			// Exit fullscreen mode
-			isFullscreenCircuitMode = false;
-			showCircuitDiagram = false;
-		} else {
-			// Enter fullscreen circuit mode - reset tutorial components for normal mode
-			tutorialComponents = undefined;
-			isFullscreenCircuitMode = true;
-			showCircuitDiagram = true;
-		}
-	}
-	
-	function exitCircuitFullscreen() {
-		isFullscreenCircuitMode = false;
-		showCircuitDiagram = false;
-		tutorialComponents = undefined;
 	}
 </script>
 
@@ -367,64 +326,93 @@ void loop() {
 	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 </svelte:head>
 
-{#if isFullscreenCircuitMode}
-	<!-- Fullscreen Circuit Designer Mode -->
-	<FullscreenCircuitDesigner {tutorialComponents} on:exit={exitCircuitFullscreen} />
-{:else}
-	<!-- Normal Chat/Code Mode -->
-	<div class="app-container">
-		<!-- Sidebar -->
-		<aside class="sidebar">
-			<div class="sidebar-header">
-				<button class="home-link" on:click={goHome}>
-					<h2>Circuitspace</h2>
-				</button>
-				<div class="status-indicator"></div>
+<div class="app-container">
+	<!-- Sidebar Navigation -->
+	<aside class="sidebar">
+		<div class="sidebar-header">
+			<button class="home-link" on:click={goBackHome}>
+				<h2>← Circuitspace</h2>
+			</button>
+			<div class="project-name">
+				<h3>{projectName}</h3>
+				<p>Circuit Project</p>
 			</div>
-			
-			<nav class="sidebar-nav">
-				<button class="nav-item" on:click={newProject}>
-					New Project +
-				</button>
-				<button class="nav-item active">
-					Current Project
-				</button>
-				<!-- <button class="nav-item" on:click={goHome}>
-					Home
-				</button> -->
-			</nav>
-			
-			<div class="sidebar-footer">
-				<div class="project-info">
-					<h4>Current Session</h4>
-					<p>{messages.length} messages</p>
-					<p class="timestamp">Started {new Date().toLocaleTimeString()}</p>
-				</div>
-			</div>
-		</aside>
+		</div>
 		
-		<!-- Main Content Area with Two Columns -->
-		<main class="main-content">
-			<div class="columns-wrapper">
-				<!-- Left Column: Chat Area -->
-				<div class="chat-column">
-					<!-- Chat Header -->
-					<header class="chat-header">
-						<div class="header-left">
-							<h1>Project: {projectName}</h1>
-							<p class="project-description">AI-powered circuit design assistant</p>
-						</div>
-						<div class="header-actions">
-							<button class="action-btn" on:click={toggleCircuitDiagram}>
-								{isFullscreenCircuitMode ? '💬 Back to Chat' : '⚡ Circuit Designer'}
-							</button>
-							<button class="action-btn" on:click={exportChat}>Export Chat</button>
-							<button class="action-btn" on:click={shareProject}>Share Project</button>
-						</div>
-					</header>
-					
-					<!-- Messages Area -->
-					<div class="chat-messages">
+		<nav class="view-navigation">
+			<h4>Navigation</h4>
+			<button 
+				class="nav-item" 
+				class:active={currentView === 'chat'}
+				on:click={() => switchToView('chat')}
+			>
+				<span class="nav-icon">💬</span>
+				Circuit Chat
+			</button>
+			<button 
+				class="nav-item" 
+				class:active={currentView === 'designer'}
+				on:click={() => switchToView('designer')}
+			>
+				<span class="nav-icon">⚡</span>
+				Circuit Designer
+			</button>
+			<button 
+				class="nav-item" 
+				class:active={currentView === 'code'}
+				on:click={() => switchToView('code')}
+			>
+				<span class="nav-icon">💻</span>
+				Circuit Code
+			</button>
+		</nav>
+		
+		<div class="sidebar-info">
+			<div class="session-info">
+				<h4>Current Session</h4>
+				<p>{messages.length} messages</p>
+				<p class="timestamp">Started {new Date().toLocaleTimeString()}</p>
+			</div>
+			
+			{#if tutorialActive}
+				<div class="tutorial-info">
+					<h4>Tutorial Progress</h4>
+					<p>Step {tutorialStepIndex + 1} of {leonardoCodeTutorial.length}</p>
+					<div class="progress-bar">
+						<div class="progress" style="width: {((tutorialStepIndex + 1) / leonardoCodeTutorial.length) * 100}%"></div>
+					</div>
+				</div>
+			{/if}
+		</div>
+	</aside>
+
+	<!-- Main Content Area -->
+	<main class="main-content">
+		<!-- Circuit Chat View -->
+		{#if currentView === 'chat'}
+			<div class="chat-view">
+				<!-- Chat Header -->
+				<header class="view-header">
+					<div class="header-left">
+						<h1>Circuit Chat</h1>
+						<p>AI-powered circuit design assistant</p>
+					</div>
+					<div class="header-actions">
+						<button class="action-btn" on:click={() => switchToView('designer')}>
+							⚡ Circuit Designer
+						</button>
+						<button class="action-btn" on:click={() => switchToView('code')}>
+							💻 Circuit Code
+						</button>
+						<button class="action-btn secondary" on:click={exportChat}>
+							Export Chat
+						</button>
+					</div>
+				</header>
+
+				<!-- Messages Area -->
+				<div class="chat-messages">
+					<div class="chat-container">
 						{#each messages as message (message.id)}
 							<div class="message {message.type}">
 								<div class="message-avatar">
@@ -437,120 +425,151 @@ void loop() {
 									{/if}
 								</div>
 								<div class="message-content">
-									<div class="message-text">
-										{@html message.content.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')}
+								<div class="message-text">
+									{@html message.content.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')}
+								</div>
+								
+								{#if message.componentImages && message.componentImages.length > 0}
+									<div class="component-images">
+										<h4>Benötigte Komponenten:</h4>
+										<div class="images-grid">
+											{#each message.componentImages as imagePath}
+												<div class="component-image">
+													<img src={imagePath} alt="Component" />
+												</div>
+											{/each}
+										</div>
 									</div>
-									
-									{#if message.componentImages && message.componentImages.length > 0}
-										<div class="component-images">
-											<h4>Benötigte Komponenten:</h4>
-											<div class="images-grid">
-												{#each message.componentImages as imagePath}
-													<div class="component-image">
-														<img src={imagePath} alt="Component" />
-													</div>
-												{/each}
-											</div>
+								{/if}
+								
+								{#if message.componentSuggestions && message.componentSuggestions.length > 0}
+									<div class="component-suggestions">
+										<h4>Recommended Components:</h4>
+										<div class="component-grid">
+											{#each message.componentSuggestions as component}
+												<div class="component-card">
+													<h5>{component.name}</h5>
+													<p>{component.description}</p>
+													{#if component.price}
+														<span class="price">{component.price}</span>
+													{/if}
+												</div>
+											{/each}
 										</div>
-									{/if}
-									
-									{#if message.componentSuggestions && message.componentSuggestions.length > 0}
-										<div class="component-suggestions">
-											<h4>Recommended Components:</h4>
-											<div class="component-grid">
-												{#each message.componentSuggestions as component}
-													<div class="component-card">
-														<h5>{component.name}</h5>
-														<p>{component.description}</p>
-														{#if component.price}
-															<span class="price">{component.price}</span>
-														{/if}
-													</div>
-												{/each}
-											</div>
-										</div>
-									{/if}
-									
-									{#if message.codeGenerated}
-										<div class="code-block">
-											<div class="code-header">
-												<span>Generated Arduino Code</span>
-												<button class="copy-code-btn" on:click={() => copyCodeToEditor(message.codeGenerated || '')}>
-													Copy to Editor
-												</button>
-											</div>
-											<pre><code>{message.codeGenerated}</code></pre>
-										</div>
-									{/if}
-									
-									{#if message.showTutorialButton}
-										<div class="tutorial-button-container">
-											<button class="tutorial-start-btn" on:click={startTutorial}>
-												💻 Code Tutorial starten
-											</button>
-										</div>
-									{/if}
-									
-									{#if message.showNextStepsButtons}
-										<div class="next-steps-container">
-											<button class="next-step-btn circuit" on:click={() => {
-												tutorialComponents = ['arduino-leonardo', 'breadboard', 'led', 'resistor', 'potentiometer', 'jumper-cable'];
-												isFullscreenCircuitMode = true;
-												showCircuitDiagram = true;
-											}}>
-												⚡ Circuit Designer
-											</button>
-											<button class="next-step-btn real-table" on:click={() => addMessage('ai', 'Perfekt! Gehen Sie zu Ihrem realen Arbeitsplatz und bauen Sie die Schaltung physisch auf.')}>
-												🔧 Realer Tisch
-											</button>
-										</div>
-									{/if}
-									
-									<div class="message-timestamp">
-										{message.timestamp.toLocaleTimeString()}
 									</div>
+								{/if}
+								
+								{#if message.codeGenerated}
+									<div class="code-block">
+										<div class="code-header">
+											<span>Generated Arduino Code</span>
+											<button class="copy-code-btn" on:click={() => copyCodeToEditor(message.codeGenerated || '')}>
+												Copy to Editor
+											</button>
+										</div>
+										<pre><code>{message.codeGenerated}</code></pre>
+									</div>
+								{/if}
+								
+								{#if message.showTutorialButton}
+									<div class="tutorial-button-container">
+										<button class="tutorial-start-btn" on:click={startTutorial}>
+											💻 Code Tutorial starten
+										</button>
+									</div>
+								{/if}
+								
+								{#if message.showNextStepsButtons}
+									<div class="next-steps-container">
+										<button class="next-step-btn circuit" on:click={() => switchToView('designer')}>
+											⚡ Circuit Designer
+										</button>
+										<button class="next-step-btn real-table" on:click={() => addMessage('ai', 'Perfekt! Gehen Sie zu Ihrem realen Arbeitsplatz und bauen Sie die Schaltung physisch auf.')}>
+											🔧 Realer Tisch
+										</button>
+									</div>
+								{/if}
+								
+								<div class="message-timestamp">
+									{message.timestamp.toLocaleTimeString()}
 								</div>
 							</div>
-						{/each}
-						
-						{#if isLoading}
-							<div class="message ai">
-								<div class="message-avatar">
-									<div class="ai-avatar">🤖</div>
-								</div>
-								<div class="message-content">
-									<div class="typing-indicator">
-										<span></span>
-										<span></span>
-										<span></span>
-									</div>
-								</div>
-							</div>
-						{/if}
-					</div>
+						</div>
+					{/each}
 					
-					<!-- Input Area -->
-					<PromptInput 
-						bind:value={currentInput}
-						onSend={handleSendMessage}
-						disabled={isLoading || (isStructuredConversation && tutorialActive)}
-						placeholder={isStructuredConversation ? "Strukturierte Konversation läuft..." : "Describe your circuit requirements, ask questions, or request component suggestions..."}
-					/>
+					{#if isLoading}
+						<div class="message ai">
+							<div class="message-avatar">
+								<div class="ai-avatar">🤖</div>
+							</div>
+							<div class="message-content">
+								<div class="typing-indicator">
+									<span></span>
+									<span></span>
+									<span></span>
+								</div>
+							</div>
+						</div>
+					{/if}
+					</div>
 				</div>
 				
-				<!-- Right Column: IDE/Circuit Area -->
-				<div class="ide-column">
-					{#if showCircuitDiagram}
-						<div class="circuit-diagram-container">
-							<div class="diagram-header">
-								<h3>Circuit Diagram</h3>
-								<p class="diagram-description">Interactive circuit design for your project</p>
-							</div>
-							<CircuitDiagram />
-						</div>
-					{:else if tutorialActive}
-						<!-- Tutorial Mode -->
-						<div class="tutorial-container">
+				<!-- Input Area -->
+				<div class="chat-input">
+					<div class="chat-container">
+						<PromptInput 
+							bind:value={currentInput}
+							onSend={handleSendMessage}
+							disabled={isLoading || (isStructuredConversation && tutorialActive)}
+							placeholder={isStructuredConversation ? "Strukturierte Konversation läuft..." : "Describe your circuit requirements, ask questions, or request component suggestions..."}
+						/>
+					</div>
+				</div>
+			</div>
+		{/if}
+
+		<!-- Circuit Designer View -->
+		{#if currentView === 'designer'}
+			<div class="designer-view">
+				<FullscreenCircuitDesigner 
+					{tutorialComponents} 
+					on:exit={() => switchToView('chat')} 
+				/>
+			</div>
+		{/if}
+
+		<!-- Circuit Code View -->
+		{#if currentView === 'code'}
+			<div class="code-view">
+				<!-- Code Header -->
+				<header class="view-header">
+					<div class="header-left">
+						<h1>Circuit Code</h1>
+						<p>Arduino IDE Environment</p>
+					</div>
+					<div class="header-actions">
+						<button class="action-btn" on:click={() => switchToView('chat')}>
+							💬 Back to Chat
+						</button>
+						<button class="action-btn" on:click={() => switchToView('designer')}>
+							⚡ Circuit Designer
+						</button>
+						{#if tutorialActive}
+							<button class="action-btn tutorial" on:click={completeTutorial}>
+								Finish Tutorial
+							</button>
+						{/if}
+						<button class="action-btn secondary" on:click={exportCode}>
+							Export Code
+						</button>
+					</div>
+				</header>
+
+				<!-- Code Content -->
+				{#if tutorialActive}
+					<!-- Tutorial Mode -->
+					<div class="tutorial-code-container">
+						<div class="tutorial-sidebar">
 							<div class="tutorial-header">
 								<h3>Code Tutorial</h3>
 								<p class="tutorial-description">Schritt-für-Schritt Arduino Programmierung</p>
@@ -594,22 +613,25 @@ void loop() {
 									{/if}
 								</div>
 							</div>
-							
-							<div class="tutorial-code-area">
-								<CodeEditor 
-									tutorialCode={leonardoCodeTutorial[tutorialStepIndex]?.code} 
-									isInTutorialMode={true}
-								/>
-							</div>
 						</div>
-					{:else}
-						<CodeEditor isInTutorialMode={false} />
-					{/if}
-				</div>
+						
+						<div class="code-editor-area">
+							<CodeEditor 
+								tutorialCode={leonardoCodeTutorial[tutorialStepIndex]?.code} 
+								isInTutorialMode={true}
+							/>
+						</div>
+					</div>
+				{:else}
+					<!-- Normal Code Editor -->
+					<div class="code-editor-container">
+						<CodeEditor />
+					</div>
+				{/if}
 			</div>
-		</main>
-	</div>
-{/if}
+		{/if}
+	</main>
+</div>
 
 <!-- Export Modal -->
 <ExportModal bind:isOpen={showExportModal} />
@@ -643,9 +665,6 @@ void loop() {
 	.sidebar-header {
 		padding: 1.5rem;
 		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
 	}
 	
 	.home-link {
@@ -656,6 +675,7 @@ void loop() {
 		transition: all 0.2s ease;
 		border-radius: 8px;
 		padding: 0.5rem 1rem;
+		margin-bottom: 1rem;
 	}
 	
 	.home-link:hover {
@@ -676,18 +696,37 @@ void loop() {
 		color: #ffffff;
 	}
 	
-	.status-indicator {
-		width: 8px;
-		height: 8px;
-		background: #00d4aa;
-		border-radius: 50%;
-		box-shadow: 0 0 8px #00d4aa;
-		animation: pulse 2s infinite;
+	.project-name {
+		text-align: center;
 	}
 	
-	.sidebar-nav {
-		padding: 1rem;
+	.project-name h3 {
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 1.1rem;
+		font-weight: 600;
+		margin: 0 0 0.25rem 0;
+		color: #e2e8f0;
+	}
+	
+	.project-name p {
+		font-size: 0.8rem;
+		margin: 0;
+		color: #94a3b8;
+	}
+	
+	.view-navigation {
+		padding: 1.5rem;
 		flex: 1;
+	}
+	
+	.view-navigation h4 {
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 0.9rem;
+		font-weight: 600;
+		margin: 0 0 1rem 0;
+		color: #00d4aa;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
 	}
 	
 	.nav-item {
@@ -704,6 +743,7 @@ void loop() {
 		transition: all 0.2s ease;
 		margin-bottom: 0.5rem;
 		font-family: 'IBM Plex Mono', monospace;
+		text-align: left;
 	}
 	
 	.nav-item:hover {
@@ -715,18 +755,19 @@ void loop() {
 		background: rgba(0, 212, 170, 0.15);
 		color: #00d4aa;
 		border: 1px solid rgba(0, 212, 170, 0.3);
+		box-shadow: 0 0 12px rgba(0, 212, 170, 0.1);
 	}
 	
 	.nav-icon {
 		font-size: 1rem;
 	}
 	
-	.sidebar-footer {
+	.sidebar-info {
 		padding: 1.5rem;
 		border-top: 1px solid rgba(0, 212, 170, 0.1);
 	}
 	
-	.project-info h4 {
+	.session-info h4, .tutorial-info h4 {
 		font-family: 'Space Grotesk', sans-serif;
 		font-size: 0.9rem;
 		font-weight: 600;
@@ -734,7 +775,7 @@ void loop() {
 		color: #00d4aa;
 	}
 	
-	.project-info p {
+	.session-info p, .tutorial-info p {
 		font-size: 0.8rem;
 		margin: 0.25rem 0;
 		opacity: 0.7;
@@ -745,44 +786,40 @@ void loop() {
 		opacity: 0.5 !important;
 	}
 	
+	.tutorial-info {
+		margin-top: 1rem;
+		padding-top: 1rem;
+		border-top: 1px solid rgba(0, 212, 170, 0.1);
+	}
+	
+	.progress-bar {
+		width: 100%;
+		height: 4px;
+		background: rgba(0, 212, 170, 0.2);
+		border-radius: 2px;
+		overflow: hidden;
+		margin-top: 0.5rem;
+	}
+	
+	.progress {
+		height: 100%;
+		background: linear-gradient(90deg, #00d4aa, #0ea5e9);
+		border-radius: 2px;
+		transition: width 0.3s ease;
+	}
+	
 	/* Main Content Area */
 	.main-content {
 		flex: 1;
 		display: flex;
-		background: #0a0f1a;
-		min-height: 0; /* Important for proper flex behavior */
-		width: 100%;
-	}
-	
-	/* Columns Wrapper - Contains both chat and IDE columns */
-	.columns-wrapper {
-		display: flex;
-		width: 100%;
-		height: 100%;
-		flex: 1;
-	}
-	
-	/* Chat Column (Left) - Exactly 50% */
-	.chat-column {
-		width: 50%;
-		flex: 0 0 50%;
-		display: flex;
 		flex-direction: column;
-		border-right: 1px solid rgba(0, 212, 170, 0.2);
-		min-width: 0; /* Important for proper flex behavior */
+		background: #0a0f1a;
+		min-height: 0;
+		overflow: hidden;
 	}
 	
-	/* IDE Column (Right) - Exactly 50% */
-	.ide-column {
-		width: 50%;
-		flex: 0 0 50%;
-		display: flex;
-		min-width: 0; /* Important for proper flex behavior */
-		max-width: 50%; /* Prevent expansion beyond 50% */
-		overflow: hidden; /* Contain content within bounds */
-	}
-	
-	.chat-header {
+	/* View Headers */
+	.view-header {
 		padding: 1.5rem 2rem;
 		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
 		display: flex;
@@ -790,14 +827,21 @@ void loop() {
 		justify-content: space-between;
 		background: rgba(15, 23, 42, 0.5);
 		backdrop-filter: blur(8px);
+		flex-shrink: 0;
 	}
 	
-	.chat-header h1 {
+	.view-header h1 {
 		font-family: 'Space Grotesk', sans-serif;
-		font-size: 1.5rem;
+		font-size: 1.75rem;
 		font-weight: 600;
 		margin: 0;
 		color: #00d4aa;
+	}
+	
+	.view-header p {
+		font-size: 0.9rem;
+		margin: 0.25rem 0 0 0;
+		color: #94a3b8;
 	}
 	
 	.header-actions {
@@ -822,7 +866,37 @@ void loop() {
 		border-color: #00d4aa;
 	}
 	
-	/* Messages Area */
+	.action-btn.secondary {
+		background: rgba(30, 41, 59, 0.5);
+		border-color: rgba(100, 116, 139, 0.3);
+		color: #94a3b8;
+	}
+	
+	.action-btn.secondary:hover {
+		background: rgba(30, 41, 59, 0.8);
+		border-color: rgba(100, 116, 139, 0.5);
+		color: #e2e8f0;
+	}
+	
+	.action-btn.tutorial {
+		background: linear-gradient(135deg, #00d4aa 0%, #0ea5e9 100%);
+		color: #0a0f1a;
+		border-color: transparent;
+	}
+	
+	.action-btn.tutorial:hover {
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(0, 212, 170, 0.3);
+	}
+	
+	/* Chat View */
+	.chat-view {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+	}
+	
 	.chat-messages {
 		flex: 1;
 		overflow-y: auto;
@@ -830,17 +904,54 @@ void loop() {
 		display: flex;
 		flex-direction: column;
 		gap: 1.5rem;
+		max-width: 100%;
+		/* margin: 0 auto; */
+	}
+	
+	.chat-container {
+		max-width: 900px;
+		margin: 0 auto;
+		width: 100%;
+		padding: 0 1rem;
 	}
 	
 	.message {
 		display: flex;
 		gap: 1rem;
-		max-width: 800px;
+		width: 100%;
+		max-width: 700px;
 	}
 	
 	.message.user {
+		justify-content: flex-end;
+		margin-left: auto;
+		margin-right: 0;
+		max-width: 600px;
 		align-self: flex-end;
-		flex-direction: row-reverse;
+	}
+	
+	.message.user .message-content {
+		order: 1;
+	}
+	
+	.message.user .message-avatar {
+		order: 2;
+	}
+	
+	.message.ai {
+		justify-content: flex-start;
+		margin-left: 0;
+		margin-right: auto;
+		max-width: 650px;
+		align-self: flex-start;
+	}
+	
+	.message.system {
+		justify-content: flex-start;
+		margin-left: 0;
+		margin-right: auto;
+		max-width: 700px;
+		align-self: flex-start;
 	}
 	
 	.message-avatar {
@@ -877,6 +988,7 @@ void loop() {
 	.message-content {
 		flex: 1;
 		min-width: 0;
+		margin-bottom: 16px;
 	}
 	
 	.message-text {
@@ -895,6 +1007,29 @@ void loop() {
 	.message.system .message-text {
 		background: rgba(124, 58, 237, 0.1);
 		border-color: rgba(124, 58, 237, 0.3);
+	}
+	
+	.chat-input {
+		flex-shrink: 0;
+		padding: 1rem 2rem 2rem 2rem;
+		background: rgba(15, 23, 42, 0.5);
+		border-top: 1px solid rgba(0, 212, 170, 0.1);
+	}
+	
+	.chat-input :global(.chat-container) {
+		max-width: 900px;
+		margin: 0 auto;
+		padding: 0;
+	}
+	
+	.chat-input :global(.prompt-input) {
+		width: 100%;
+		max-width: none;
+	}
+	
+	.chat-input :global(.prompt-input) {
+		width: 100%;
+		max-width: none;
 	}
 	
 	/* Component Suggestions */
@@ -1052,47 +1187,6 @@ void loop() {
 		animation-delay: 0.4s;
 	}
 	
-	/* Animations */
-	@keyframes pulse {
-		0%, 100% { opacity: 1; }
-		50% { opacity: 0.5; }
-	}
-	
-	@keyframes typing {
-		0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
-		40% { transform: scale(1); opacity: 1; }
-	}
-	
-	/* Circuit Diagram Styles */
-	.circuit-diagram-container {
-		display: flex;
-		flex-direction: column;
-		height: 100%;
-		width: 100%;
-		background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-	}
-	
-	.diagram-header {
-		padding: 1.5rem 2rem;
-		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
-		background: rgba(15, 23, 42, 0.5);
-		backdrop-filter: blur(8px);
-	}
-	
-	.diagram-header h3 {
-		font-family: 'Space Grotesk', sans-serif;
-		font-size: 1.25rem;
-		font-weight: 600;
-		margin: 0 0 0.5rem 0;
-		color: #00d4aa;
-	}
-	
-	.diagram-description {
-		margin: 0;
-		color: #94a3b8;
-		font-size: 0.875rem;
-	}
-	
 	/* Component Images */
 	.component-images {
 		margin-top: 1rem;
@@ -1142,6 +1236,8 @@ void loop() {
 		max-height: 100%;
 		object-fit: contain;
 		border-radius: 4px;
+		mix-blend-mode: multiply;
+		filter: brightness(1.2) contrast(1.1);
 	}
 	
 	/* Tutorial Button */
@@ -1206,19 +1302,43 @@ void loop() {
 		box-shadow: 0 8px 24px rgba(0, 212, 170, 0.3);
 	}
 	
-	/* Tutorial Container */
-	.tutorial-container {
+	/* Designer View */
+	.designer-view {
+		flex: 1;
+		display: flex;
+		min-height: 0;
+	}
+	
+	/* Code View */
+	.code-view {
+		flex: 1;
 		display: flex;
 		flex-direction: column;
-		height: 100%;
-		background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+		min-height: 0;
+	}
+	
+	.code-editor-container {
+		flex: 1;
+		min-height: 0;
+	}
+	
+	.tutorial-code-container {
+		flex: 1;
+		display: flex;
+		min-height: 0;
+	}
+	
+	.tutorial-sidebar {
+		width: 320px;
+		background: rgba(15, 23, 42, 0.8);
+		border-right: 1px solid rgba(0, 212, 170, 0.2);
+		display: flex;
+		flex-direction: column;
 	}
 	
 	.tutorial-header {
-		padding: 1.5rem 2rem;
+		padding: 1.5rem;
 		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
-		background: rgba(15, 23, 42, 0.5);
-		backdrop-filter: blur(8px);
 	}
 	
 	.tutorial-header h3 {
@@ -1247,9 +1367,15 @@ void loop() {
 	}
 	
 	.tutorial-content {
-		padding: 2rem;
-		flex: 0 0 auto;
-		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
+		padding: 1.5rem;
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+	}
+	
+	.tutorial-step {
+		flex: 1;
+		margin-bottom: 1.5rem;
 	}
 	
 	.tutorial-step h4 {
@@ -1271,15 +1397,16 @@ void loop() {
 		padding: 1rem;
 		border-radius: 8px;
 		border: 1px solid rgba(0, 212, 170, 0.1);
-		margin-bottom: 1.5rem;
 		line-height: 1.6;
 		color: #e2e8f0;
+		font-size: 0.9rem;
 	}
 	
 	.tutorial-navigation {
 		display: flex;
 		gap: 1rem;
 		justify-content: center;
+		margin-top: auto;
 	}
 	
 	.nav-btn {
@@ -1319,34 +1446,55 @@ void loop() {
 		cursor: not-allowed;
 	}
 	
-	.tutorial-code-area {
+	.code-editor-area {
 		flex: 1;
 		min-height: 0;
 	}
 	
+	/* Animations */
+	@keyframes typing {
+		0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+		40% { transform: scale(1); opacity: 1; }
+	}
+	
 	/* Responsive Design */
 	@media (max-width: 1200px) {
-		.main-content {
+		.tutorial-code-container {
 			flex-direction: column;
 		}
 		
-		.columns-wrapper {
-			flex-direction: column;
+		.tutorial-sidebar {
+			width: 100%;
+			height: 40vh;
 		}
 		
-		.chat-column {
-			width: 100% !important;
-			flex: 0 0 auto;
-			border-right: none;
-			border-bottom: 1px solid rgba(0, 212, 170, 0.2);
-			min-height: 50vh;
+		.code-editor-area {
+			height: 60vh;
 		}
 		
-		.ide-column {
-			width: 100% !important;
-			flex: 0 0 auto;
-			min-height: 50vh;
-			max-width: 100% !important; /* Override desktop max-width */
+		.chat-messages {
+			padding: 2rem 1.5rem;
+		}
+		
+		.chat-container {
+			max-width: 700px;
+			padding: 0 0.5rem;
+		}
+		
+		.chat-input {
+			padding: 1rem 1.5rem 2rem 1.5rem;
+		}
+		
+		.message.user {
+			max-width: 500px;
+		}
+		
+		.message.ai {
+			max-width: 550px;
+		}
+		
+		.message.system {
+			max-width: 600px;
 		}
 	}
 	
@@ -1359,12 +1507,41 @@ void loop() {
 			padding: 1rem;
 		}
 		
-		.chat-header {
+		.chat-container {
+			max-width: 100%;
+			padding: 0;
+		}
+		
+		.chat-input {
+			padding: 1rem;
+		}
+		
+		.message.user {
+			max-width: 85%;
+		}
+		
+		.message.ai {
+			max-width: 90%;
+		}
+		
+		.message.system {
+			max-width: 95%;
+		}
+		
+		.view-header {
 			padding: 1rem;
 		}
 		
 		.header-actions {
 			display: none;
+		}
+		
+		.tutorial-sidebar {
+			height: 50vh;
+		}
+		
+		.code-editor-area {
+			height: 50vh;
 		}
 	}
 	
@@ -1381,40 +1558,109 @@ void loop() {
 			border-bottom: 1px solid rgba(0, 212, 170, 0.2);
 		}
 		
-		.sidebar-nav {
+		.view-navigation {
 			display: flex;
 			gap: 0.5rem;
 			padding: 0.5rem;
 		}
 		
-		.nav-item {
-			margin-bottom: 0;
-			white-space: nowrap;
-		}
-		
-		.sidebar-footer {
+		.view-navigation h4 {
 			display: none;
 		}
 		
-		.main-content {
+		.nav-item {
+			margin-bottom: 0;
+			white-space: nowrap;
+			flex: 1;
+			justify-content: center;
+		}
+		
+		.sidebar-info {
+			display: none;
+		}
+		
+		.chat-messages {
+			padding: 0.75rem;
+		}
+		
+		.chat-input {
+			padding: 0.75rem;
+		}
+		
+		.message.user {
+			margin-left: 5%;
+		}
+		
+		.message.ai, .message.system {
+			margin-right: 0%;
+				}
+		
+		.message-text {
+			padding: 0.75rem 1rem;
+		}
+	}
+	
+	@media (max-width: 640px) {
+		.app-container {
 			flex-direction: column;
 		}
 		
-		.columns-wrapper {
-			flex-direction: column;
+		.sidebar {
+			width: 100%;
+			height: auto;
+			flex-direction: row;
+			border-right: none;
+			border-bottom: 1px solid rgba(0, 212, 170, 0.2);
 		}
 		
-		.chat-column {
-			width: 100% !important;
-			flex: 0 0 auto;
-			min-height: 60vh;
+		.view-navigation {
+			display: flex;
+			gap: 0.5rem;
+			padding: 0.5rem;
 		}
 		
-		.ide-column {
-			width: 100% !important;
-			flex: 0 0 auto;
-			min-height: 40vh;
-			max-width: 100% !important; /* Override desktop max-width */
+		.view-navigation h4 {
+			display: none;
+		}
+		
+		.nav-item {
+			margin-bottom: 0;
+			white-space: nowrap;
+			flex: 1;
+			justify-content: center;
+		}
+		
+		.sidebar-info {
+			display: none;
+		}
+		
+		.chat-messages {
+			padding: 0.75rem;
+		}
+		
+		.chat-container {
+			max-width: 100%;
+			padding: 0;
+		}
+		
+		.chat-input {
+			padding: 0.75rem;
+		}
+		
+		.message.user {
+			max-width: 90%;
+		}
+		
+		.message.ai, .message.system {
+			max-width: 95%;
+		}
+		
+		.message-text {
+			padding: 0.75rem 1rem;
+		}
+		
+		.sidebar-header {
+			padding: 1rem;
 		}
 	}
 </style>
