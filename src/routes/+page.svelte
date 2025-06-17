@@ -5,6 +5,7 @@
 	let showConnectionModal = true;
 	let autoConnect = false;
 	let projectInput = '';
+	let isTransitioning = false;
 	
 	onMount(() => {
 		// Check if user has previously set auto-connect
@@ -21,8 +22,14 @@
 		}
 	}
 	
-	function handleProjectSubmit() {
-		if (projectInput.trim()) {
+	async function handleProjectSubmit() {
+		if (projectInput.trim() && !isTransitioning) {
+			isTransitioning = true;
+			
+			// Start the page transition animation
+			await new Promise(resolve => setTimeout(resolve, 600)); // Wait for animation
+			
+			// Navigate to the new page
 			goto(`/project-chat?prompt=${encodeURIComponent(projectInput)}`);
 		}
 	}
@@ -67,6 +74,25 @@
 	</div>
 {/if}
 
+<!-- Page Transition Overlay -->
+{#if isTransitioning}
+	<div class="transition-overlay">
+		<div class="transition-content">
+			<div class="loading-circuit">
+				<div class="circuit-wave wave-1"></div>
+				<div class="circuit-wave wave-2"></div>
+				<div class="circuit-wave wave-3"></div>
+			</div>
+			<h3 class="transition-text">Initializing Project...</h3>
+			<div class="loading-dots">
+				<div class="dot"></div>
+				<div class="dot"></div>
+				<div class="dot"></div>
+			</div>
+		</div>
+	</div>
+{/if}
+
 <!-- Animated Background -->
 <div class="circuit-bg">
 	<div class="circuit-line line-1"></div>
@@ -98,10 +124,16 @@
 				></textarea>
 				<button 
 					class="btn-secondary" 
+					class:transitioning={isTransitioning}
 					on:click={handleProjectSubmit}
-					disabled={!projectInput.trim()}
+					disabled={!projectInput.trim() || isTransitioning}
 				>
-					Start Planning
+					{#if isTransitioning}
+						<span class="button-spinner"></span>
+						Launching...
+					{:else}
+						Start Planning
+					{/if}
 				</button>
 			</div>
 		</div>
@@ -230,6 +262,91 @@
 		margin-top: 2rem;
 	}
 	
+	/* Page Transition Styles */
+	.transition-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		background: linear-gradient(135deg, #0a0f1a 0%, #1e293b 50%, #0f172a 100%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 9999;
+		animation: fadeInOverlay 0.3s ease-out;
+	}
+	
+	.transition-content {
+		text-align: center;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 2rem;
+	}
+	
+	.loading-circuit {
+		position: relative;
+		width: 120px;
+		height: 120px;
+		border: 2px solid rgba(0, 212, 170, 0.2);
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	
+	.circuit-wave {
+		position: absolute;
+		border: 2px solid #00d4aa;
+		border-radius: 50%;
+		animation: circuitPulse 2s infinite ease-out;
+	}
+	
+	.wave-1 {
+		width: 60px;
+		height: 60px;
+		animation-delay: 0s;
+	}
+	
+	.wave-2 {
+		width: 80px;
+		height: 80px;
+		animation-delay: 0.3s;
+	}
+	
+	.wave-3 {
+		width: 100px;
+		height: 100px;
+		animation-delay: 0.6s;
+	}
+	
+	.transition-text {
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 1.5rem;
+		font-weight: 600;
+		color: #00d4aa;
+		margin: 0;
+		animation: textGlow 2s infinite ease-in-out;
+	}
+	
+	.loading-dots {
+		display: flex;
+		gap: 0.5rem;
+	}
+	
+	.dot {
+		width: 8px;
+		height: 8px;
+		background: #00d4aa;
+		border-radius: 50%;
+		animation: dotBounce 1.4s infinite ease-in-out both;
+	}
+	
+	.dot:nth-child(1) { animation-delay: -0.32s; }
+	.dot:nth-child(2) { animation-delay: -0.16s; }
+	.dot:nth-child(3) { animation-delay: 0s; }
+	
 	/* Circuit Background Animation */
 	.circuit-bg {
 		position: fixed;
@@ -311,7 +428,7 @@
 		position: relative;
 		z-index: 1;
 		min-height: 100vh;
-		padding: 2rem;
+		padding: 4rem;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -349,10 +466,15 @@
 	
 	.content-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+		grid-template-columns: 1fr 1fr;
+		grid-template-rows: auto auto;
 		gap: 2rem;
 		max-width: 1200px;
 		width: 100%;
+	}
+	
+	.project-card {
+		grid-column: 1 / -1; /* Nimmt die gesamte erste Zeile ein */
 	}
 	
 	.card {
@@ -439,6 +561,8 @@
 		background: rgba(0, 212, 170, 0.1);
 		color: #00d4aa;
 		border: 1px solid rgba(0, 212, 170, 0.3);
+		width: fit-content;
+		align-self: flex-start;
 	}
 	
 	.btn-secondary:hover:not(:disabled) {
@@ -449,6 +573,25 @@
 	.btn-secondary:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
+	}
+	
+	.btn-secondary.transitioning {
+		background: rgba(0, 212, 170, 0.3);
+		border-color: #00d4aa;
+		transform: scale(0.98);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+	}
+	
+	.button-spinner {
+		width: 16px;
+		height: 16px;
+		border: 2px solid rgba(0, 212, 170, 0.3);
+		border-top: 2px solid #00d4aa;
+		border-radius: 50%;
+		animation: spin 1s linear infinite;
 	}
 	
 	.btn-outline {
@@ -490,11 +633,71 @@
 		50% { opacity: 0.3; }
 	}
 	
+	/* Transition Animations */
+	@keyframes fadeInOverlay {
+		from {
+			opacity: 0;
+			backdrop-filter: blur(0px);
+		}
+		to {
+			opacity: 1;
+			backdrop-filter: blur(8px);
+		}
+	}
+	
+	@keyframes circuitPulse {
+		0% {
+			transform: scale(0.8);
+			opacity: 1;
+			border-color: #00d4aa;
+		}
+		50% {
+			transform: scale(1.1);
+			opacity: 0.6;
+			border-color: #0ea5e9;
+		}
+		100% {
+			transform: scale(1.3);
+			opacity: 0;
+			border-color: #00d4aa;
+		}
+	}
+	
+	@keyframes textGlow {
+		0%, 100% {
+			text-shadow: 0 0 10px rgba(0, 212, 170, 0.5);
+		}
+		50% {
+			text-shadow: 0 0 20px rgba(0, 212, 170, 0.8), 0 0 30px rgba(0, 212, 170, 0.4);
+		}
+	}
+	
+	@keyframes dotBounce {
+		0%, 80%, 100% {
+			transform: scale(0);
+			opacity: 0.5;
+		}
+		40% {
+			transform: scale(1);
+			opacity: 1;
+		}
+	}
+	
+	@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	}
+	
 	/* Responsive Design */
 	@media (max-width: 768px) {
 		.content-grid {
 			grid-template-columns: 1fr;
+			grid-template-rows: auto auto auto;
 			gap: 1.5rem;
+		}
+		
+		.project-card {
+			grid-column: 1; /* Auf mobilen Geräten normale Spalte */
 		}
 		
 		.main-container {
