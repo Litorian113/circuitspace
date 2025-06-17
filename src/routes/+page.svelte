@@ -147,6 +147,20 @@
 			</button>
 		</div>
 		
+		<!-- Demo Circuit Designer -->
+		<div class="card demo-card">
+			<h2>🔧 Circuit Designer Demo</h2>
+			<p>Test the new Pin-Out system with the LED Dimmer project. See how components connect with Arduino Leonardo.</p>
+			<div class="demo-buttons">
+				<button class="btn-outline" on:click={() => goto('/demo-connections')}>
+					📋 View Pin-Out Demo
+				</button>
+				<button class="btn-outline" on:click={() => goto('/test-circuit')}>
+					🛠️ Test Circuit Designer
+				</button>
+			</div>
+		</div>
+		
 		<!-- Third Column: Project Templates -->
 		<div class="card templates-card">
 			<h2>Need inspiration?</h2>
@@ -166,6 +180,8 @@
 		background: #0a0f1a;
 		color: #e2e8f0;
 		overflow-x: hidden;
+		overflow-y: auto;
+		min-height: 100vh;
 	}
 	
 	/* Modal Styles */
@@ -432,6 +448,8 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		width: 100%;
+		box-sizing: border-box;
 	}
 	
 	.header-section {
@@ -475,6 +493,12 @@
 	
 	.project-card {
 		grid-column: 1 / -1; /* Nimmt die gesamte erste Zeile ein */
+	}
+	
+	.demo-buttons {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
 	}
 	
 	.card {
@@ -701,11 +725,30 @@
 		}
 		
 		.main-container {
-			padding: 1rem;
+			padding: 2rem 1rem;
+			min-height: calc(100vh - 4rem);
 		}
 		
 		.card {
 			padding: 1.5rem;
+		}
+		
+		.header-section {
+			margin-bottom: 2rem;
+		}
+	}
+	
+	@media (max-width: 480px) {
+		.main-container {
+			padding: 1rem 0.5rem;
+		}
+		
+		.card {
+			padding: 1rem;
+		}
+		
+		.demo-buttons {
+			gap: 0.75rem;
 		}
 	}
 </style>

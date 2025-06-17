@@ -280,105 +280,6 @@
 		};
 	}
 
-	// Koordinatentransformation für Zoom und Pan
-	function screenToWorld(screenX: number, screenY: number) {
-		return {
-			x: (screenX - panX) / zoomLevel,
-			y: (screenY - panY) / zoomLevel
-		};
-	}
-
-	function worldToScreen(worldX: number, worldY: number) {
-		return {
-			x: worldX * zoomLevel + panX,
-			y: worldY * zoomLevel + panY
-		};
-	}
-
-	// Zoom-Funktionen
-	function zoomIn(centerX?: number, centerY?: number) {
-		const newZoom = Math.min(zoomLevel + ZOOM_SENSITIVITY, MAX_ZOOM);
-		applyZoom(newZoom, centerX, centerY);
-	}
-
-	function zoomOut(centerX?: number, centerY?: number) {
-		const newZoom = Math.max(zoomLevel - ZOOM_SENSITIVITY, MIN_ZOOM);
-		applyZoom(newZoom, centerX, centerY);
-	}
-
-	function applyZoom(newZoom: number, centerX?: number, centerY?: number) {
-		if (centerX !== undefined && centerY !== undefined) {
-			// Zoom zu einem bestimmten Punkt
-			const worldPos = screenToWorld(centerX, centerY);
-			zoomLevel = newZoom;
-			const newScreenPos = worldToScreen(worldPos.x, worldPos.y);
-			panX += centerX - newScreenPos.x;
-			panY += centerY - newScreenPos.y;
-		} else {
-			// Zoom zum Canvas-Zentrum
-			const centerX = canvas.width / 2;
-			const centerY = canvas.height / 2;
-			const worldPos = screenToWorld(centerX, centerY);
-			zoomLevel = newZoom;
-			const newScreenPos = worldToScreen(worldPos.x, worldPos.y);
-			panX += centerX - newScreenPos.x;
-			panY += centerY - newScreenPos.y;
-		}
-		drawBoard();
-	}
-
-	function resetView() {
-		zoomLevel = 1.0;
-		panX = 0;
-		panY = 0;
-		drawBoard();
-	}
-
-	function fitToView() {
-		if (placedComponents.length === 0) {
-			resetView();
-			return;
-		}
-
-		// Berechne Bounding Box aller Komponenten
-		let minX = placedComponents[0].x;
-		let minY = placedComponents[0].y;
-		let maxX = placedComponents[0].x + placedComponents[0].width;
-		let maxY = placedComponents[0].y + placedComponents[0].height;
-
-		placedComponents.forEach(comp => {
-			minX = Math.min(minX, comp.x);
-			minY = Math.min(minY, comp.y);
-			maxX = Math.max(maxX, comp.x + comp.width);
-			maxY = Math.max(maxY, comp.y + comp.height);
-		});
-
-		// Füge Padding hinzu
-		const padding = 100;
-		minX -= padding;
-		minY -= padding;
-		maxX += padding;
-		maxY += padding;
-
-		// Berechne Zoom Level
-		const contentWidth = maxX - minX;
-		const contentHeight = maxY - minY;
-		const canvasWidth = canvas.width;
-		const canvasHeight = canvas.height;
-
-		const zoomX = canvasWidth / contentWidth;
-		const zoomY = canvasHeight / contentHeight;
-		zoomLevel = Math.min(zoomX, zoomY, MAX_ZOOM);
-
-		// Zentriere den Inhalt
-		const scaledWidth = contentWidth * zoomLevel;
-		const scaledHeight = contentHeight * zoomLevel;
-		panX = (canvasWidth - scaledWidth) / 2 - minX * zoomLevel;
-		panY = (canvasHeight - scaledHeight) / 2 - minY * zoomLevel;
-
-		drawBoard();
-	}
-
 	function drawBoard() {
 		if (!ctx) return;
 		
@@ -525,15 +426,9 @@
 					highlightedPin.component.id === component.id && 
 					highlightedPin.pin.name === pin.name;
 				
-				// Check if this pin is already connected
-				const isConnected = connections.some(conn => 
-					(conn.fromComponent === component.id && conn.fromPin === pin.name) ||
-					(conn.toComponent === component.id && conn.toPin === pin.name)
-				);
-				
 				// Enhanced pin radius for better connectivity
-				const pinRadius = isHighlighted ? 18 : (isConnected ? 16 : 14); // Vergrößert für bessere Klickbarkeit
-				ctx.fillStyle = isHighlighted ? '#fbbf24' : (isConnected ? '#1e293b' : '#1e293b');
+				const pinRadius = isHighlighted ? 12 : 10;
+				ctx.fillStyle = isHighlighted ? '#fbbf24' : '#1e293b';
 				ctx.beginPath();
 				ctx.arc(pin.x, pin.y, pinRadius, 0, 2 * Math.PI);
 				ctx.fill();
@@ -541,16 +436,6 @@
 				// Pin circle with type-based coloring
 				if (isHighlighted) {
 					ctx.fillStyle = '#fbbf24';
-				} else if (isConnected) {
-					// Connected pins get a brighter color with border
-					switch (pin.type) {
-						case 'power': ctx.fillStyle = '#f87171'; break;
-						case 'ground': ctx.fillStyle = '#6b7280'; break;
-						case 'digital': ctx.fillStyle = '#60a5fa'; break;
-						case 'analog': ctx.fillStyle = '#34d399'; break;
-						case 'pwm': ctx.fillStyle = '#fbbf24'; break;
-						default: ctx.fillStyle = '#94a3b8';
-					}
 				} else {
 					switch (pin.type) {
 						case 'power': ctx.fillStyle = '#ef4444'; break;
@@ -562,47 +447,28 @@
 					}
 				}
 				ctx.beginPath();
-				ctx.arc(pin.x, pin.y, pinRadius - 4, 0, 2 * Math.PI); // Angepasst für größere Pins
+				ctx.arc(pin.x, pin.y, pinRadius - 2, 0, 2 * Math.PI);
 				ctx.fill();
 				
-				// Pin border - special styling for connected pins
-				if (isHighlighted) {
-					ctx.strokeStyle = '#fbbf24';
-					ctx.lineWidth = 5; // Vergrößert für bessere Sichtbarkeit
-				} else if (isConnected) {
-					ctx.strokeStyle = '#00d4aa';
-					ctx.lineWidth = 4;
-				} else {
-					ctx.strokeStyle = '#ffffff';
-					ctx.lineWidth = 3;
-				}
+				// Pin border with enhanced visibility
+				ctx.strokeStyle = isHighlighted ? '#fbbf24' : '#ffffff';
+				ctx.lineWidth = isHighlighted ? 4 : 3;
 				ctx.stroke();
 				
-				// Add connection indicator for connected pins
-				if (isConnected && !isHighlighted) {
-					ctx.beginPath();
-					ctx.arc(pin.x, pin.y, pinRadius + 4, 0, 2 * Math.PI); // Angepasst für größere Pins
-					ctx.strokeStyle = '#00d4aa';
-					ctx.lineWidth = 3; // Vergrößert für bessere Sichtbarkeit
-					ctx.setLineDash([4, 4]);
-					ctx.stroke();
-					ctx.setLineDash([]);
-				}
-				
-				// Pin label with enhanced spacing and readability
-				ctx.fillStyle = isConnected ? '#00d4aa' : '#ffffff';
-				ctx.font = 'bold 13px IBM Plex Mono'; // Vergrößert von 12px für bessere Lesbarkeit
+				// Pin label with enhanced spacing
+				ctx.fillStyle = '#ffffff';
+				ctx.font = 'bold 11px IBM Plex Mono';
 				ctx.textAlign = 'center';
 				
 				let labelX = pin.x;
-				let labelY = pin.y - 25; // Mehr Abstand für größere Pins
+				let labelY = pin.y - 18;
 				
 				// Adjust label position for better readability with more spacing
-				if (pin.x <= component.x + 25) { // Angepasst für bessere Abstände
-					labelX = pin.x - 30; // Mehr Abstand
+				if (pin.x <= component.x + 20) { // Left side pin
+					labelX = pin.x - 25;
 					ctx.textAlign = 'right';
-				} else if (pin.x >= component.x + component.width - 25) { // Angepasst für bessere Abstände
-					labelX = pin.x + 30; // Mehr Abstand
+				} else if (pin.x >= component.x + component.width - 20) { // Right side pin
+					labelX = pin.x + 25;
 					ctx.textAlign = 'left';
 				}
 				
@@ -621,78 +487,23 @@
 
 	function drawConnections() {
 		connections.forEach(connection => {
-			// Enhanced connection drawing with bezier curves
 			ctx.strokeStyle = connection.color || '#00d4aa';
-			ctx.lineWidth = 6; // Vergrößert von 4 für bessere Sichtbarkeit
+			ctx.lineWidth = 3;
 			ctx.setLineDash([]);
-			ctx.lineCap = 'round';
-			ctx.lineJoin = 'round';
-			
-			// Add glow effect
-			ctx.shadowColor = connection.color || '#00d4aa';
-			ctx.shadowBlur = 8;
-			ctx.shadowOffsetX = 0;
-			ctx.shadowOffsetY = 0;
-			
-			// Calculate control points for smoother curve
-			const fromX = connection.fromPos.x;
-			const fromY = connection.fromPos.y;
-			const toX = connection.toPos.x;
-			const toY = connection.toPos.y;
-			
-			// Determine if connection is horizontal or vertical
-			const deltaX = Math.abs(toX - fromX);
-			const deltaY = Math.abs(toY - fromY);
 			
 			ctx.beginPath();
-			
-			if (deltaX > deltaY) {
-				// Horizontal connection - curved
-				const midX = fromX + (toX - fromX) * 0.5;
-				const offsetY = Math.min(50, deltaY * 0.3);
-				const cp1X = fromX + deltaX * 0.3;
-				const cp1Y = fromY;
-				const cp2X = toX - deltaX * 0.3;
-				const cp2Y = toY;
-				
-				ctx.moveTo(fromX, fromY);
-				ctx.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, toX, toY);
-			} else {
-				// Vertical connection - curved
-				const midY = fromY + (toY - fromY) * 0.5;
-				const offsetX = Math.min(50, deltaX * 0.3);
-				const cp1X = fromX;
-				const cp1Y = fromY + deltaY * 0.3;
-				const cp2X = toX;
-				const cp2Y = toY - deltaY * 0.3;
-				
-				ctx.moveTo(fromX, fromY);
-				ctx.bezierCurveTo(cp1X, cp1Y, cp2X, cp2Y, toX, toY);
-			}
-			
+			ctx.moveTo(connection.fromPos.x, connection.fromPos.y);
+			ctx.lineTo(connection.toPos.x, connection.toPos.y);
 			ctx.stroke();
 			
-			// Reset shadow
-			ctx.shadowBlur = 0;
-			
-			// Draw enhanced connection endpoints - vergrößert für bessere Sichtbarkeit
+			// Draw connection endpoints
 			ctx.fillStyle = connection.color || '#00d4aa';
-			
-			// From endpoint
 			ctx.beginPath();
-			ctx.arc(connection.fromPos.x, connection.fromPos.y, 8, 0, 2 * Math.PI); // Vergrößert von 6
+			ctx.arc(connection.fromPos.x, connection.fromPos.y, 4, 0, 2 * Math.PI);
 			ctx.fill();
-			ctx.strokeStyle = '#ffffff';
-			ctx.lineWidth = 3; // Vergrößert von 2
-			ctx.stroke();
-			
-			// To endpoint
 			ctx.beginPath();
-			ctx.arc(connection.toPos.x, connection.toPos.y, 8, 0, 2 * Math.PI); // Vergrößert von 6
+			ctx.arc(connection.toPos.x, connection.toPos.y, 4, 0, 2 * Math.PI);
 			ctx.fill();
-			ctx.strokeStyle = '#ffffff';
-			ctx.lineWidth = 3; // Vergrößert von 2
-			ctx.stroke();
 		});
 		
 		// Draw active connection being dragged
@@ -705,20 +516,14 @@
 			gradient.addColorStop(1, highlightedPin ? '#10b981' : '#fbbf24');
 			
 			ctx.strokeStyle = gradient;
-			ctx.lineWidth = highlightedPin ? 8 : 6; // Vergrößert von 5/4 für bessere Sichtbarkeit
-			ctx.setLineDash(highlightedPin ? [12, 3] : [10, 5]); // Vergrößerte Dash-Pattern
-			ctx.lineCap = 'round';
-			
-			// Add pulsing glow effect
-			ctx.shadowColor = '#00d4aa';
-			ctx.shadowBlur = highlightedPin ? 15 : 10; // Verstärkter Glow-Effekt
+			ctx.lineWidth = highlightedPin ? 5 : 4;
+			ctx.setLineDash(highlightedPin ? [10, 2] : [8, 4]);
 			
 			ctx.beginPath();
 			ctx.moveTo(connectionStart.pin.x, connectionStart.pin.y);
 			ctx.lineTo(mousePos.x, mousePos.y);
 			ctx.stroke();
 			ctx.setLineDash([]);
-			ctx.shadowBlur = 0;
 		}
 	}
 
@@ -726,7 +531,7 @@
 		for (const component of placedComponents) {
 			for (const pin of component.pins) {
 				const distance = Math.sqrt((x - pin.x) ** 2 + (y - pin.y) ** 2);
-				if (distance <= 30) { // Vergrößert von 25 für bessere Klickbarkeit mit vergrößerten Pins
+				if (distance <= 20) { // Vergrößert für bessere Klickbarkeit
 					return { component, pin };
 				}
 			}
@@ -752,25 +557,11 @@
 	}
 
 	function createConnection(from: {component: PlacedComponent, pin: Pin}, to: {component: PlacedComponent, pin: Pin}) {
-		// Check if connection already exists
-		const existingConnection = connections.find(conn => 
-			(conn.fromComponent === from.component.id && conn.fromPin === from.pin.name &&
-			 conn.toComponent === to.component.id && conn.toPin === to.pin.name) ||
-			(conn.fromComponent === to.component.id && conn.fromPin === to.pin.name &&
-			 conn.toComponent === from.component.id && conn.toPin === from.pin.name)
-		);
-		
-		if (existingConnection) {
-			console.log('Connection already exists');
-			return;
-		}
-		
 		// Determine wire color based on pin types
 		let color = '#00d4aa'; // Default
 		if (from.pin.type === 'power' || to.pin.type === 'power') color = '#ef4444'; // Red for power
 		if (from.pin.type === 'ground' || to.pin.type === 'ground') color = '#374151'; // Black for ground
 		if (from.pin.type === 'pwm' || to.pin.type === 'pwm') color = '#f59e0b'; // Orange for PWM
-		if (from.pin.type === 'analog' || to.pin.type === 'analog') color = '#10b981'; // Green for analog
 		
 		const connection: Connection = {
 			id: `conn-${Date.now()}`,
@@ -783,53 +574,8 @@
 			color
 		};
 		
-		// Add connection to array and trigger reactivity
-		connections = [...connections, connection];
-		
-		// Track completion for tutorial mode with improved matching
-		if (tutorialComponents) {
-			const connectionKey = `${from.component.componentId}-${from.pin.name}-${to.component.componentId}-${to.pin.name}`;
-			const reverseKey = `${to.component.componentId}-${to.pin.name}-${from.component.componentId}-${from.pin.name}`;
-			
-			// Check if this matches any required connection
-			const matchedRule = ledDimmerConnections.find(rule => 
-				(rule.from.component === from.component.componentId && rule.from.pin === from.pin.name &&
-				 rule.to.component === to.component.componentId && rule.to.pin === to.pin.name) ||
-				(rule.from.component === to.component.componentId && rule.from.pin === to.pin.name &&
-				 rule.to.component === from.component.componentId && rule.to.pin === from.pin.name)
-			);
-			
-			if (matchedRule && !completedConnections.includes(connectionKey) && !completedConnections.includes(reverseKey)) {
-				completedConnections = [...completedConnections, connectionKey]; // Trigger reactivity
-				
-				// Visual feedback for correct connection
-				console.log(`✅ Tutorial connection completed: ${matchedRule.description}`);
-				
-				// Show completion progress
-				const totalConnections = ledDimmerConnections.length;
-				const completed = completedConnections.length;
-				console.log(`Progress: ${completed}/${totalConnections} connections completed`);
-				
-				// Success animation for connection endpoints
-				console.log(`✅ Connection completed: ${matchedRule.description}`);
-				
-				if (completed === totalConnections) {
-					console.log('🎉 All tutorial connections completed!');
-					// Dispatch completion event
-					setTimeout(() => {
-						dispatch('complete');
-					}, 1000);
-				}
-			}
-		}
-		
-		// Force redraw to show the new connection
-		requestAnimationFrame(() => {
-			drawBoard();
-		});
-		
-		console.log(`🔗 Connection created: ${from.component.name}.${from.pin.name} → ${to.component.name}.${to.pin.name} (${color})`);
-		console.log(`📊 Total connections: ${connections.length}`);
+		connections.push(connection);
+		console.log(`Connection created: ${from.component.name}.${from.pin.name} → ${to.component.name}.${to.pin.name}`);
 	}
 
 	// Funktion zum Aktualisieren der Verbindungen wenn eine Komponente bewegt wird
@@ -1032,7 +778,6 @@
 			
 			const targetPin = getPinAt(x, y);
 			
-			// Check if we're dropping on a valid pin
 			if (targetPin && targetPin.component.id !== connectionStart.component.id) {
 				if (tutorialComponents) {
 					// Tutorial mode: validate connection
@@ -1048,23 +793,16 @@
 				}
 			}
 			
-			// Reset connection state completely - no automatic new connection
 			isDraggingConnection = false;
 			connectionStart = null;
 			highlightedPin = null;
-			canvas.style.cursor = 'default'; // Cursor zurück auf default
-		}
-		
-		if (isDragging) {
-			// Update connections for the moved component
-			updateConnectionsForComponent(selectedComponent);
+			canvas.style.cursor = 'default';
+			drawBoard();
+			return;
 		}
 		
 		isDragging = false;
 		canvas.style.cursor = 'default';
-		
-		// Redraw to ensure UI is updated
-		drawBoard();
 	}
 
 	function handleClick(event: MouseEvent) {
@@ -1087,36 +825,6 @@
 			selectedComponent = null;
 			drawBoard();
 		}
-	}
-
-	function handleWheel(event: WheelEvent) {
-		event.preventDefault();
-		
-		const rect = canvas.getBoundingClientRect();
-		const centerX = event.clientX - rect.left;
-		const centerY = event.clientY - rect.top;
-		
-		// Zoom-Richtung bestimmen
-		const zoomFactor = event.deltaY > 0 ? (1 - ZOOM_SENSITIVITY) : (1 + ZOOM_SENSITIVITY);
-		
-		// Neuen Zoom-Level berechnen und begrenzen
-		const newZoomLevel = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoomLevel * zoomFactor));
-		
-		// Zoom um Mausposition zentrieren
-		if (newZoomLevel !== zoomLevel) {
-			const worldPos = screenToWorld(centerX, centerY);
-			zoomLevel = newZoomLevel;
-			const newScreenPos = worldToScreen(worldPos.x, worldPos.y);
-			
-			panX += centerX - newScreenPos.x;
-			panY += centerY - newScreenPos.y;
-			
-			drawBoard();
-		}
-	}
-
-	function handleContextMenu(event: MouseEvent) {
-		event.preventDefault(); // Verhindert das Standard-Kontextmenü
 	}
 
 	function handleKeydown(event: KeyboardEvent) {
@@ -1149,6 +857,36 @@
 			event.preventDefault();
 			fitToView();
 		}
+	}
+
+	function handleWheel(event: WheelEvent) {
+		event.preventDefault();
+		
+		const rect = canvas.getBoundingClientRect();
+		const centerX = event.clientX - rect.left;
+		const centerY = event.clientY - rect.top;
+		
+		// Zoom-Richtung bestimmen
+		const zoomFactor = event.deltaY > 0 ? (1 - ZOOM_SENSITIVITY) : (1 + ZOOM_SENSITIVITY);
+		
+		// Neuen Zoom-Level berechnen und begrenzen
+		const newZoomLevel = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoomLevel * zoomFactor));
+		
+		// Zoom um Mausposition zentrieren
+		if (newZoomLevel !== zoomLevel) {
+			const worldPos = screenToWorld(centerX, centerY);
+			zoomLevel = newZoomLevel;
+			const newScreenPos = worldToScreen(worldPos.x, worldPos.y);
+			
+			panX += centerX - newScreenPos.x;
+			panY += centerY - newScreenPos.y;
+			
+			drawBoard();
+		}
+	}
+
+	function handleContextMenu(event: MouseEvent) {
+		event.preventDefault(); // Verhindert das Standard-Kontextmenü
 	}
 
 	function clearBoard() {
@@ -1188,6 +926,105 @@
 	function exitFullscreen() {
 		dispatch('exit');
 	}
+	
+	// Koordinatentransformation für Zoom und Pan
+	function screenToWorld(screenX: number, screenY: number) {
+		return {
+			x: (screenX - panX) / zoomLevel,
+			y: (screenY - panY) / zoomLevel
+		};
+	}
+
+	function worldToScreen(worldX: number, worldY: number) {
+		return {
+			x: worldX * zoomLevel + panX,
+			y: worldY * zoomLevel + panY
+		};
+	}
+
+	// Zoom-Funktionen
+	function zoomIn(centerX?: number, centerY?: number) {
+		const newZoom = Math.min(zoomLevel + ZOOM_SENSITIVITY, MAX_ZOOM);
+		applyZoom(newZoom, centerX, centerY);
+	}
+
+	function zoomOut(centerX?: number, centerY?: number) {
+		const newZoom = Math.max(zoomLevel - ZOOM_SENSITIVITY, MIN_ZOOM);
+		applyZoom(newZoom, centerX, centerY);
+	}
+
+	function applyZoom(newZoom: number, centerX?: number, centerY?: number) {
+		if (centerX !== undefined && centerY !== undefined) {
+			// Zoom zu einem bestimmten Punkt
+			const worldPos = screenToWorld(centerX, centerY);
+			zoomLevel = newZoom;
+			const newScreenPos = worldToScreen(worldPos.x, worldPos.y);
+			panX += centerX - newScreenPos.x;
+			panY += centerY - newScreenPos.y;
+		} else {
+			// Zoom zum Canvas-Zentrum
+			const centerX = canvas.width / 2;
+			const centerY = canvas.height / 2;
+			const worldPos = screenToWorld(centerX, centerY);
+			zoomLevel = newZoom;
+			const newScreenPos = worldToScreen(worldPos.x, worldPos.y);
+			panX += centerX - newScreenPos.x;
+			panY += centerY - newScreenPos.y;
+		}
+		drawBoard();
+	}
+
+	function resetView() {
+		zoomLevel = 1.0;
+		panX = 0;
+		panY = 0;
+		drawBoard();
+	}
+
+	function fitToView() {
+		if (placedComponents.length === 0) {
+			resetView();
+			return;
+		}
+
+		// Berechne Bounding Box aller Komponenten
+		let minX = placedComponents[0].x;
+		let minY = placedComponents[0].y;
+		let maxX = placedComponents[0].x + placedComponents[0].width;
+		let maxY = placedComponents[0].y + placedComponents[0].height;
+
+		placedComponents.forEach(comp => {
+			minX = Math.min(minX, comp.x);
+			minY = Math.min(minY, comp.y);
+			maxX = Math.max(maxX, comp.x + comp.width);
+			maxY = Math.max(maxY, comp.y + comp.height);
+		});
+
+		// Füge Padding hinzu
+		const padding = 100;
+		minX -= padding;
+		minY -= padding;
+		maxX += padding;
+		maxY += padding;
+
+		// Berechne Zoom Level
+		const contentWidth = maxX - minX;
+		const contentHeight = maxY - minY;
+		const canvasWidth = canvas.width;
+		const canvasHeight = canvas.height;
+
+		const zoomX = canvasWidth / contentWidth;
+		const zoomY = canvasHeight / contentHeight;
+		zoomLevel = Math.min(zoomX, zoomY, MAX_ZOOM);
+
+		// Zentriere den Inhalt
+		const scaledWidth = contentWidth * zoomLevel;
+		const scaledHeight = contentHeight * zoomLevel;
+		panX = (canvasWidth - scaledWidth) / 2 - minX * zoomLevel;
+		panY = (canvasHeight - scaledHeight) / 2 - minY * zoomLevel;
+
+		drawBoard();
+	}
 </script>
 
 <div class="fullscreen-designer">
@@ -1222,7 +1059,6 @@
 					class="component-card"
 					class:selected={selectedComponentId === component.id}
 					on:click={() => addComponentToBoard(component.id)}
-					on:keydown={(e) => e.key === 'Enter' && addComponentToBoard(component.id)}
 					role="button"
 					tabindex="0"
 				>
@@ -1343,35 +1179,16 @@
 					<div class="tutorial-content">
 						<div class="connection-rules">
 							{#each ledDimmerConnections as rule, index}
-								{@const connectionKey1 = `${rule.from.component}-${rule.from.pin}-${rule.to.component}-${rule.to.pin}`}
-								{@const connectionKey2 = `${rule.to.component}-${rule.to.pin}-${rule.from.component}-${rule.from.pin}`}
-								{@const isCompleted = completedConnections.some(key => key === connectionKey1 || key === connectionKey2)}
-								<div class="connection-rule" class:completed={isCompleted}>
+								<div class="connection-rule" class:completed={completedConnections.includes(rule.from.component + rule.from.pin + rule.to.component + rule.to.pin)}>
 									<span class="rule-number">{index + 1}</span>
-									<div>
-										<span class="rule-description">{rule.description}</span>
-										<div class="rule-connection">
-											<span class="from-pin">{rule.from.component}.{rule.from.pin}</span>
-											<span class="arrow">→</span>
-											<span class="to-pin">{rule.to.component}.{rule.to.pin}</span>
-										</div>
-										{#if isCompleted}
-											<span class="completion-mark">✅ Completed</span>
-										{/if}
+									<span class="rule-description">{rule.description}</span>
+									<div class="rule-connection">
+										<span class="from-pin">{rule.from.component}.{rule.from.pin}</span>
+										<span class="arrow">→</span>
+										<span class="to-pin">{rule.to.component}.{rule.to.pin}</span>
 									</div>
 								</div>
 							{/each}
-						</div>
-						<div class="tutorial-progress">
-							<div class="progress-bar">
-								<div 
-									class="progress-fill" 
-									style="width: {(completedConnections.length / ledDimmerConnections.length) * 100}%"
-								></div>
-							</div>
-							<span class="progress-text">
-								{completedConnections.length} / {ledDimmerConnections.length} connections completed
-							</span>
 						</div>
 					</div>
 				</div>
@@ -1652,81 +1469,8 @@
 		display: flex;
 		gap: 0.5rem;
 	}
-	.zoom-controls {
-		margin-top: 1.5rem;
-		padding-top: 1rem;
-		border-top: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.zoom-controls h4 {
-		margin: 0 0 1rem 0;
-		color: #00d4aa;
-		font-size: 0.9rem;
-		font-weight: 600;
-		text-transform: uppercase;
-	}
-	
-	.zoom-buttons {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 0.75rem;
-	}
-	
-	.zoom-btn, .view-btn {
-		flex: 1;
-		background: rgba(30, 41, 59, 0.8);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 6px;
-		color: #e2e8f0;
-		padding: 0.5rem;
-		font-family: inherit;
-		font-size: 0.75rem;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		text-align: center;
-	}
-	
-	.zoom-btn:hover, .view-btn:hover {
-		background: rgba(0, 212, 170, 0.1);
-		border-color: rgba(0, 212, 170, 0.5);
-		transform: translateY(-1px);
-	}
-	
-	.zoom-level {
-		text-align: center;
-		font-size: 0.8rem;
-		color: #94a3b8;
-		margin-bottom: 0.75rem;
-		padding: 0.5rem;
-		background: rgba(0, 0, 0, 0.2);
-		border-radius: 4px;
-		border: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.view-buttons {
-		display: flex;
-		gap: 0.5rem;
-	}
-	
-	.view-btn {
-		flex: 1;
-		background: rgba(30, 41, 59, 0.8);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 6px;
-		color: #e2e8f0;
-		padding: 0.5rem;
-		font-family: inherit;
-		font-size: 0.75rem;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		text-align: center;
-	}
-	
-	.view-btn:hover {
-		background: rgba(0, 212, 170, 0.1);
-		border-color: rgba(0, 212, 170, 0.5);
-	}
-	
+
+	/* Selected Component Info */
 	.selected-component-info {
 		padding: 1.5rem;
 		border-top: 1px solid rgba(0, 212, 170, 0.1);
@@ -1994,43 +1738,6 @@
 		font-weight: bold;
 	}
 	
-	.completion-mark {
-		color: #10b981;
-		font-size: 0.7rem;
-		font-weight: 600;
-		margin-top: 0.25rem;
-		display: block;
-	}
-	
-	.tutorial-progress {
-		margin-top: 1rem;
-		padding-top: 1rem;
-		border-top: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.progress-bar {
-		width: 100%;
-		height: 6px;
-		background: rgba(30, 41, 59, 0.8);
-		border-radius: 3px;
-		overflow: hidden;
-		margin-bottom: 0.5rem;
-	}
-	
-	.progress-fill {
-		height: 100%;
-		background: linear-gradient(90deg, #10b981, #00d4aa);
-		border-radius: 3px;
-		transition: width 0.5s ease;
-	}
-	
-	.progress-text {
-		color: #94a3b8;
-		font-size: 0.75rem;
-		text-align: center;
-		display: block;
-	}
-	
 	.empty-state {
 		position: absolute;
 		top: 50%;
@@ -2075,81 +1782,5 @@
 		font-family: inherit;
 		font-size: 0.8rem;
 		color: #00d4aa;
-	}
-	
-	/* Zoom Controls */
-	.zoom-controls {
-		margin-top: 1.5rem;
-		padding-top: 1rem;
-		border-top: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.zoom-controls h4 {
-		margin: 0 0 1rem 0;
-		color: #00d4aa;
-		font-size: 0.9rem;
-		font-weight: 600;
-		text-transform: uppercase;
-	}
-	
-	.zoom-buttons {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 0.75rem;
-	}
-	
-	.zoom-btn, .view-btn {
-		flex: 1;
-		background: rgba(30, 41, 59, 0.8);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 6px;
-		color: #e2e8f0;
-		padding: 0.5rem;
-		font-family: inherit;
-		font-size: 0.75rem;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		text-align: center;
-	}
-	
-	.zoom-btn:hover, .view-btn:hover {
-		background: rgba(0, 212, 170, 0.1);
-		border-color: rgba(0, 212, 170, 0.5);
-		transform: translateY(-1px);
-	}
-	
-	.zoom-level {
-		text-align: center;
-		font-size: 0.8rem;
-		color: #94a3b8;
-		margin-bottom: 0.75rem;
-		padding: 0.5rem;
-		background: rgba(0, 0, 0, 0.2);
-		border-radius: 4px;
-		border: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.view-buttons {
-		display: flex;
-		gap: 0.5rem;
-	}
-	
-	.view-btn {
-		flex: 1;
-		background: rgba(30, 41, 59, 0.8);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 6px;
-		color: #e2e8f0;
-		padding: 0.5rem;
-		font-family: inherit;
-		font-size: 0.75rem;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		text-align: center;
-	}
-	
-	.view-btn:hover {
-		background: rgba(0, 212, 170, 0.1);
-		border-color: rgba(0, 212, 170, 0.5);
 	}
 </style>

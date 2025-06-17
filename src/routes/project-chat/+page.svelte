@@ -22,7 +22,12 @@
 		nextTutorialStep,
 		previousTutorialStep,
 		finishTutorial,
-		getCompleteTutorialCode
+		getCompleteTutorialCode,
+		jumpToStep,
+		handleProjectButton,
+		handleWorkspaceButton,
+		markCircuitDesignerCompleted,
+		resetConversation
 	} from '$lib/stores/conversations';
 	
 	type Message = {
@@ -34,7 +39,13 @@
 		componentSuggestions?: Array<{name: string, description: string, price?: string}>;
 		componentImages?: string[];
 		showTutorialButton?: boolean;
+		showProjectButtons?: boolean;
+		showWorkspaceButtons?: boolean;
+		showRealTableButton?: boolean; // Neuer Button-Typ nur für "An den Tisch"
 		showNextStepsButtons?: boolean;
+		showCompletionButtons?: boolean; // Neue Button-Typ für "Neues Chat" / "Home"
+		delayedSteps?: Array<{id: string, content: string, delay: number}>;
+		stepId?: string;
 	};
 	
 	// App state
@@ -49,6 +60,9 @@
 	let showExportModal = false;
 	let isStructuredConversation = false;
 	let tutorialComponents: string[] | undefined = undefined;
+	let currentStepId = '';
+	let delayedStepTimeouts: number[] = [];
+	let delayedStepsStarted = false; // Prevent duplicate delayed steps
 	
 	// Subscribe to current project and conversation
 	$: projectName = $currentProject.name;
@@ -57,11 +71,51 @@
 	$: tutorialActive = $isTutorialActive;
 	$: tutorialStepIndex = $currentTutorialStep;
 	
+	let tutorialWasActive = false;
+	let tutorialCompleted = false;
+
+	// Reactive statement um Tutorial Completion zu erkennen
+	$: if (tutorialWasActive && !$isTutorialActive && !tutorialCompleted && currentView === 'chat' && !isStructuredConversation) {
+		tutorialCompleted = true;
+		// Add completion message after a short delay
+		setTimeout(() => {
+			addMessage('ai', `🎉 **Fantastisch! Code Tutorial erfolgreich abgeschlossen!** 
+
+✅ **Der Arduino Code wurde erfolgreich hochgeladen**
+✅ **Die LED sollte nun leuchten und auf das Potentiometer reagieren**
+✅ **Ihr LED-Dimmer Projekt ist vollständig funktionsfähig!**
+
+**Herzlichen Glückwunsch!** Sie haben erfolgreich:
+- Die Hardware korrekt verkabelt
+- Den Arduino Code verstanden und implementiert  
+- Ein voll funktionsfähiges LED-Dimmer System erstellt
+
+**Was möchten Sie als nächstes tun?**`, {
+				showCompletionButtons: true
+			});
+		}, 1000);
+	}
+
+	// Track wenn Tutorial aktiv wird
+	$: if ($isTutorialActive) {
+		tutorialWasActive = true;
+	}
+
+	// Reactive statement für Conversation Updates
+	$: if ($currentConversation && isStructuredConversation) {
+		updateMessagesFromConversation();
+	}
+	
+	// Zusätzliches reactive statement für Step-Änderungen
+	$: if ($conversationStep !== undefined && $currentConversation && isStructuredConversation) {
+		updateMessagesFromConversation();
+	}
+
 	// Navigation functions
 	function switchToView(view: ViewMode) {
 		currentView = view;
 		if (view === 'designer') {
-			tutorialComponents = ['arduino-leonardo', 'breadboard', 'led', 'resistor', 'potentiometer', 'jumper-cable'];
+			tutorialComponents = ['leonardo-keyestudio', 'breadboard', 'leuchtdiode', 'widerstand', 'poti', 'jumpercable'];
 		}
 	}
 	
@@ -70,89 +124,177 @@
 	}
 	
 	function exportCode() {
-		// Export code functionality
 		showExportModal = true;
 	}
-	
-	// ... (Rest of the functions remain the same as in original file)
-	
-	onMount(() => {
-		// Check if there's an initial prompt from the URL
-		const initialPrompt = $page.url.searchParams.get('prompt');
-		if (initialPrompt) {
-			// Check if this is a structured conversation
-			const projectType = detectProjectType(initialPrompt);
-			if (projectType) {
-				isStructuredConversation = true;
-				startConversation(projectType);
-				
-				// Add user message
-				addMessage('user', initialPrompt);
-				
-				// Start the structured conversation flow
-				startStructuredConversationFlow();
-			} else {
-				// Normal conversation
-				addMessage('user', initialPrompt);
-				generateAIResponse(initialPrompt);
-			}
-		} else {
-			// Default welcome message
-			addMessage('ai', "Willkommen bei Circuitspace! Beschreiben Sie Ihr Projekt und ich helfe Ihnen beim Design und der Implementierung.");
-		}
-	});
-	
-	function addMessage(type: 'user' | 'ai' | 'system', content: string, extras?: Partial<Message>, componentImages?: string[]) {
-		const newMessage: Message = {
-			id: messageId++,
-			type,
-			content,
-			timestamp: new Date(),
-			componentImages,
-			...extras
-		};
-		messages = [...messages, newMessage];
+
+	// Neue Funktionen für den Dialog-Flow
+	function updateMessagesFromConversation() {
+		if (!$currentConversation || !isStructuredConversation) return;
 		
-		// Auto-scroll to bottom
-		setTimeout(() => {
-			const chatContainer = document.querySelector('.chat-messages');
-			if (chatContainer) {
-				chatContainer.scrollTop = chatContainer.scrollHeight;
+		// Additional safety check: if tutorial was completed, don't update
+		if (tutorialCompleted) return;
+		
+		console.log('updateMessagesFromConversation called, currentStep:', $currentConversation.currentStep);
+		
+		// Clear delayed timeouts
+		delayedStepTimeouts.forEach(timeout => clearTimeout(timeout));
+		delayedStepTimeouts = [];
+		
+		// Reset delayed steps flag when reloading conversation, BUT only if we're not already in the delayed steps
+		const hasDelayedMessages = messages.some(msg => msg.stepId?.startsWith('delayed-'));
+		if (!hasDelayedMessages) {
+			delayedStepsStarted = false;
+		}
+		
+		// Keep user messages, remove AI messages from structured conversations
+		messages = messages.filter(msg => msg.type === 'user');
+		
+		const conversation = $currentConversation;
+		
+		// Zeige alle Schritte bis zum aktuellen Schritt
+		for (let i = 0; i <= conversation.currentStep; i++) {
+			const step = conversation.steps[i];
+			if (step) {
+				console.log(`Adding step ${i}: ${step.id}`);
+				const message: Message = {
+					id: ++messageId,
+					type: step.type as 'user' | 'ai' | 'system',
+					content: step.content,
+					timestamp: new Date(),
+					componentImages: step.componentImages,
+					showProjectButtons: step.showProjectButtons && !step.isCompleted,
+					showWorkspaceButtons: step.showWorkspaceButtons && !step.isCompleted,
+					showRealTableButton: step.showRealTableButton && !step.isCompleted,
+					showTutorialButton: step.showTutorialButton && !step.isCompleted,
+					stepId: step.id
+				};
+				
+				// Always add the message (we already filtered out AI messages above)
+				messages.push(message);
+				
+				currentStepId = step.id;
+				
+				// Handle delayed steps - aktiviere sie wenn der Schritt gerade erreicht wurde
+				if (step.delayedSteps && step.id === 'real-workspace-steps' && i === conversation.currentStep && !delayedStepsStarted) {
+					console.log('Starting delayed steps for real-workspace-steps');
+					delayedStepsStarted = true; // Mark as started to prevent duplicates
+					step.delayedSteps.forEach((delayedStep, index) => {
+						const timeout = setTimeout(() => {
+							const delayedMessage: Message = {
+								id: ++messageId,
+								type: 'ai',
+								content: delayedStep.content,
+								timestamp: new Date(),
+								stepId: `delayed-${delayedStep.id}`
+							};
+							messages = [...messages, delayedMessage];
+							
+							// Nach dem allerletzten delayed step zeige Tutorial Button
+							if (index === step.delayedSteps!.length - 1) {
+								setTimeout(() => {
+									// Separate Message mit Tutorial Button
+									const tutorialMessage: Message = {
+										id: ++messageId,
+										type: 'ai',
+										content: 'Möchten Sie jetzt mit dem Code Tutorial beginnen?',
+										timestamp: new Date(),
+										showTutorialButton: true,
+										stepId: 'tutorial-prompt'
+									};
+									messages = [...messages, tutorialMessage];
+								}, 2000);
+							}
+						}, delayedStep.delay);
+						delayedStepTimeouts.push(timeout);
+					});
+				}
 			}
+		}
+		
+		// Trigger reactivity
+		messages = [...messages];
+	}
+
+	// Button-Handler
+	function onProjectButton(action: string) {
+		console.log('onProjectButton called with action:', action);
+		if (currentStepId) {
+			markStepCompleted(currentStepId);
+		}
+		handleProjectButton(action);
+		
+		// Force update after a short delay
+		setTimeout(() => {
+			updateMessagesFromConversation();
 		}, 100);
 	}
-	
-	function startStructuredConversationFlow() {
-		if (!$currentConversation) return;
+
+	function onWorkspaceButton(action: string) {
+		console.log('onWorkspaceButton called with action:', action);
+		if (currentStepId) {
+			markStepCompleted(currentStepId);
+		}
 		
-		// Show first step (components) immediately
-		const firstStep = $currentConversation.steps[0];
-		setTimeout(() => {
-			addMessage('ai', firstStep.content, {}, firstStep.componentImages);
+		if (action === 'circuit-designer') {
+			switchToView('designer');
+		} else if (action === 'real-table') {
+			// Für "An den Tisch" springen wir direkt zu real-workspace-steps
+			handleWorkspaceButton(action);
 			
-			// Auto-simulate user response after 3 seconds
+			// Force update after a short delay
 			setTimeout(() => {
-				addMessage('user', 'okay ich habe alle komponenten');
-				
-				// Trigger the next step automatically
-				handleStructuredConversation('okay ich habe alle komponenten');
-			}, 3000);
-		}, 1000);
+				updateMessagesFromConversation();
+			}, 100);
+		} else {
+			handleWorkspaceButton(action);
+			
+			// Force update after a short delay
+			setTimeout(() => {
+				updateMessagesFromConversation();
+			}, 100);
+		}
 	}
-	
-	function startTutorial() {
-		// Start the code tutorial
+
+	function onTutorialButton() {
+		if (currentStepId) {
+			markStepCompleted(currentStepId);
+		}
+		switchToView('code');
 		startCodeTutorial();
-		
-		// Add confirmation message
-		addMessage('ai', '🚀 Perfekt! Das Code Tutorial wurde gestartet. Wechseln Sie zur "Circuit Code" Ansicht für die Schritt-für-Schritt Anleitung.');
-		
-		// Switch to code view
-		setTimeout(() => {
-			switchToView('code');
-		}, 1500);
 	}
-	
+
+	// Completion Button Handler
+	function onCompletionButton(action: string) {
+		if (action === 'new-chat') {
+			// Reset alles und starte neuen Chat
+			tutorialCompleted = false;
+			tutorialWasActive = false;
+			isStructuredConversation = false;
+			delayedStepsStarted = false; // Reset delayed steps flag
+			resetConversation();
+			messages = [];
+			messageId = 0;
+			// Clear any remaining timeouts
+			delayedStepTimeouts.forEach(timeout => clearTimeout(timeout));
+			delayedStepTimeouts = [];
+			addMessage('ai', "Willkommen zurück bei Circuitspace! Beschreiben Sie Ihr nächstes Projekt und ich helfe Ihnen beim Design und der Implementierung.");
+		} else if (action === 'go-home') {
+			// Zurück zur Startseite
+			goBackHome();
+		}
+	}
+
+	// Circuit Designer Handler
+	function onCircuitDesignerComplete() {
+		markCircuitDesignerCompleted();
+		switchToView('chat');
+	}
+
+	function onCircuitDesignerClose() {
+		switchToView('chat');
+	}
+
+	// Tutorial completion function
 	function completeTutorial() {
 		// Get the complete tutorial code
 		const completeCode = getCompleteTutorialCode();
@@ -190,8 +332,127 @@ Wie möchten Sie fortfahren?`, {
 			window.dispatchEvent(event);
 		}, 100);
 	}
+
+	// Upload Code function - direkt completion ohne conversation flow
+	function uploadCodeAndComplete() {
+		console.log('uploadCodeAndComplete called'); // Debug log
+		
+		// Get the current code from editor (or complete tutorial code if in tutorial)
+		const completeCode = tutorialActive ? getCompleteTutorialCode() : $currentProject.code;
+		
+		// Update the project 
+		updateProjectCode(completeCode);
+		updateProjectName('Arduino Leonardo LED Dimmer');
+		
+		// Finish tutorial if active
+		if (tutorialActive) {
+			console.log('Finishing tutorial'); // Debug log
+			finishTutorial();
+		}
+		
+		// Mark tutorial as completed to prevent re-triggering
+		tutorialCompleted = true;
+		
+		// COMPLETE SHUTDOWN OF STRUCTURED CONVERSATION
+		isStructuredConversation = false;
+		delayedStepsStarted = true; // Prevent any future delayed steps
+		
+		// Clear any remaining timeouts
+		delayedStepTimeouts.forEach(timeout => clearTimeout(timeout));
+		delayedStepTimeouts = [];
+		
+		// Reset conversation completely
+		resetConversation();
+		
+		// REMOVE DELAYED MESSAGES AND TUTORIAL-RELATED MESSAGES - keep all other messages
+		messages = messages.filter(msg => 
+			!msg.stepId?.startsWith('delayed-') && 
+			!msg.stepId?.includes('tutorial') &&
+			!(msg.content.includes('Circuit Designer') && msg.content.includes('Realer Tisch')) &&
+			!msg.content.includes('Code Tutorial erfolgreich abgeschlossen') &&
+			!msg.content.includes('Was wurde implementiert') &&
+			!msg.content.includes('Nächste Schritte')
+		);
+		
+		console.log('Switching to chat view'); // Debug log
+		// Switch back to chat
+		currentView = 'chat'; // Direct assignment instead of function call
+		
+		// Add completion message directly without triggering conversation flow
+		setTimeout(() => {
+			console.log('Adding completion message'); // Debug log
+			addMessage('ai', `🎉 **Code erfolgreich hochgeladen!**
+
+✅ **Der Arduino Leonardo LED Dimmer Code wurde auf das Board übertragen**
+✅ **Die LED sollte nun funktionieren und auf das Potentiometer reagieren**
+✅ **Ihr Projekt ist vollständig einsatzbereit!**
+
+**Herzlichen Glückwunsch!** Das Projekt wurde erfolgreich abgeschlossen:
+- ✅ Hardware korrekt verkabelt
+- ✅ Code programmiert und hochgeladen
+- ✅ System getestet und funktionsfähig
+
+**Was möchten Sie als nächstes tun?**`, {
+				showCompletionButtons: true
+			});
+		}, 500);
+	}
+
+	// Existing functions (simplified versions)
+	function addMessage(type: 'user' | 'ai' | 'system', content: string, options?: Partial<Message>) {
+		const message: Message = {
+			id: ++messageId,
+			type,
+			content,
+			timestamp: new Date(),
+			...options
+		};
+		
+		messages = [...messages, message];
+		
+		// Auto-scroll to bottom
+		setTimeout(() => {
+			const chatContainer = document.querySelector('.chat-messages');
+			if (chatContainer) {
+				chatContainer.scrollTop = chatContainer.scrollHeight;
+			}
+		}, 100);
+		
+		return message;
+	}
 	
-	function generateAIResponse(userMessage: string) {
+	onMount(() => {
+		console.log('onMount called');
+		// Check if there's an initial prompt from the URL
+		const initialPrompt = $page.url.searchParams.get('prompt');
+		if (initialPrompt) {
+			console.log('Initial prompt found:', initialPrompt);
+			// Check if this is a structured conversation
+			const projectType = detectProjectType(initialPrompt);
+			if (projectType) {
+				console.log('Project type detected:', projectType);
+				isStructuredConversation = true;
+				startConversation(projectType);
+				
+				// Add user message
+				addMessage('user', initialPrompt);
+				
+				// Force initial conversation update after a short delay
+				setTimeout(() => {
+					console.log('Forcing initial conversation update');
+					updateMessagesFromConversation();
+				}, 100);
+			} else {
+				// Normal conversation
+				addMessage('user', initialPrompt);
+				generateAIResponse(initialPrompt);
+			}
+		} else {
+			// Default welcome message
+			addMessage('ai', "Willkommen bei Circuitspace! Beschreiben Sie Ihr Projekt und ich helfe Ihnen beim Design und der Implementierung.");
+		}
+	});
+		function generateAIResponse(userMessage: string) {
 		const lowercaseMessage = userMessage.toLowerCase();
 		let response = '';
 		let codeGenerated = '';
@@ -255,9 +516,15 @@ void loop() {
 			timestamp: new Date()
 		});
 		
-		// Handle structured conversation
+		// Handle structured conversation vs normal AI response
 		if (isStructuredConversation && conversation) {
-			handleStructuredConversation(message);
+			// In structured conversations, user input is typically not processed
+			// The flow is controlled by buttons and conversation steps
+			isLoading = true;
+			setTimeout(() => {
+				isLoading = false;
+				addMessage('ai', 'In der strukturierten Unterhaltung verwenden Sie bitte die Buttons, um fortzufahren.');
+			}, 1000);
 		} else {
 			// Normal AI response
 			isLoading = true;
@@ -265,45 +532,6 @@ void loop() {
 				isLoading = false;
 				generateAIResponse(message);
 			}, 1000 + Math.random() * 1000);
-		}
-	}
-	
-	function handleStructuredConversation(userMessage: string) {
-		if (!conversation) return;
-		
-		const lowerMessage = userMessage.toLowerCase();
-		
-		// Check if user confirms having components
-		if (lowerMessage.includes('okay ich habe alle komponenten') || 
-			lowerMessage.includes('ok ich habe alle komponenten') ||
-			lowerMessage.includes('ja ich habe alle') ||
-			lowerMessage.includes('habe alle komponenten')) {
-			
-			// Move to code preparation step
-			markStepCompleted('component-analysis');
-			nextConversationStep();
-			
-			// Show code preparation message
-			isLoading = true;
-			setTimeout(() => {
-				isLoading = false;
-				const codeStep = conversation.steps[2]; // code-preparation step
-				addMessage('ai', codeStep.content, { showTutorialButton: true });
-			}, 1000);
-			
-		} else if (lowerMessage.includes('circuit') || lowerMessage.includes('schaltung')) {
-			// User wants to go to circuit designer
-			addMessage('ai', 'Perfekt! Ich wechsle zum Circuit Designer für Sie. Dort können Sie die Schaltung virtuell aufbauen und testen.');
-			setTimeout(() => {
-				switchToView('designer');
-			}, 1000);
-		} else {
-			// Default response for unrecognized input in structured conversation
-			isLoading = true;
-			setTimeout(() => {
-				isLoading = false;
-				generateAIResponse(userMessage);
-			}, 1000);
 		}
 	}
 	
@@ -473,8 +701,38 @@ void loop() {
 								
 								{#if message.showTutorialButton}
 									<div class="tutorial-button-container">
-										<button class="tutorial-start-btn" on:click={startTutorial}>
+										<button class="tutorial-start-btn" on:click={onTutorialButton}>
 											💻 Code Tutorial starten
+										</button>
+									</div>
+								{/if}
+								
+								{#if message.showProjectButtons}
+									<div class="project-buttons-container">
+										<button class="project-btn continue" on:click={() => onProjectButton('continue')}>
+											Weiter
+										</button>
+										<button class="project-btn question" on:click={() => onProjectButton('question')}>
+											Frage
+										</button>
+									</div>
+								{/if}
+								
+								{#if message.showWorkspaceButtons}
+									<div class="workspace-buttons-container">
+										<button class="workspace-btn circuit-designer" on:click={() => onWorkspaceButton('circuit-designer')}>
+											⚡ Circuit Designer
+										</button>
+										<button class="workspace-btn real-table" on:click={() => onWorkspaceButton('real-table')}>
+											🔧 An den Tisch
+										</button>
+									</div>
+								{/if}
+								
+								{#if message.showRealTableButton}
+									<div class="real-table-button-container">
+										<button class="real-table-btn" on:click={() => onWorkspaceButton('real-workspace-after-designer')}>
+											🔧 An den Tisch
 										</button>
 									</div>
 								{/if}
@@ -486,6 +744,17 @@ void loop() {
 										</button>
 										<button class="next-step-btn real-table" on:click={() => addMessage('ai', 'Perfekt! Gehen Sie zu Ihrem realen Arbeitsplatz und bauen Sie die Schaltung physisch auf.')}>
 											🔧 Realer Tisch
+										</button>
+									</div>
+								{/if}
+								
+								{#if message.showCompletionButtons}
+									<div class="completion-buttons-container">
+										<button class="completion-btn new-chat" on:click={() => onCompletionButton('new-chat')}>
+											💬 Neues Chat
+										</button>
+										<button class="completion-btn go-home" on:click={() => onCompletionButton('go-home')}>
+											🏠 Zur Startseite
 										</button>
 									</div>
 								{/if}
@@ -533,7 +802,8 @@ void loop() {
 			<div class="designer-view">
 				<FullscreenCircuitDesigner 
 					{tutorialComponents} 
-					on:exit={() => switchToView('chat')} 
+					on:exit={onCircuitDesignerClose}
+					on:complete={onCircuitDesignerComplete}
 				/>
 			</div>
 		{/if}
@@ -559,9 +829,6 @@ void loop() {
 								Finish Tutorial
 							</button>
 						{/if}
-						<button class="action-btn secondary" on:click={exportCode}>
-							Export Code
-						</button>
 					</div>
 				</header>
 
@@ -619,13 +886,14 @@ void loop() {
 							<CodeEditor 
 								tutorialCode={leonardoCodeTutorial[tutorialStepIndex]?.code} 
 								isInTutorialMode={true}
+								on:uploadComplete={uploadCodeAndComplete}
 							/>
 						</div>
 					</div>
 				{:else}
 					<!-- Normal Code Editor -->
 					<div class="code-editor-container">
-						<CodeEditor />
+						<CodeEditor on:uploadComplete={uploadCodeAndComplete} />
 					</div>
 				{/if}
 			</div>
@@ -1265,6 +1533,107 @@ void loop() {
 		box-shadow: 0 8px 24px rgba(0, 212, 170, 0.4);
 	}
 	
+	/* Project Buttons */
+	.project-buttons-container {
+		margin-top: 1rem;
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+	}
+	
+	.project-btn {
+		padding: 0.875rem 1.5rem;
+		border: 2px solid;
+		border-radius: 10px;
+		cursor: pointer;
+		font-family: 'Space Grotesk', sans-serif;
+		font-weight: 600;
+		font-size: 0.95rem;
+		transition: all 0.3s ease;
+		min-width: 120px;
+	}
+	
+	.project-btn.continue {
+		background: rgba(0, 212, 170, 0.1);
+		border-color: #00d4aa;
+		color: #00d4aa;
+	}
+	
+	.project-btn.question {
+		background: rgba(99, 102, 241, 0.1);
+		border-color: #6366f1;
+		color: #6366f1;
+	}
+	
+	.project-btn:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 6px 20px rgba(0, 212, 170, 0.3);
+	}
+	
+	/* Workspace Buttons */
+	.workspace-buttons-container {
+		margin-top: 1rem;
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+	}
+	
+	.workspace-btn {
+		padding: 1rem 1.5rem;
+		border: 2px solid;
+		border-radius: 12px;
+		cursor: pointer;
+		font-family: 'Space Grotesk', sans-serif;
+		font-weight: 600;
+		font-size: 1rem;
+		transition: all 0.3s ease;
+		min-width: 180px;
+	}
+	
+	.workspace-btn.circuit-designer {
+		background: rgba(0, 212, 170, 0.1);
+		border-color: #00d4aa;
+		color: #00d4aa;
+	}
+	
+	.workspace-btn.real-table {
+		background: rgba(234, 179, 8, 0.1);
+		border-color: #eab308;
+		color: #eab308;
+	}
+	
+	.workspace-btn:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 24px rgba(0, 212, 170, 0.3);
+	}
+	
+	/* Real Table Button (nach Circuit Designer) */
+	.real-table-button-container {
+		margin-top: 1rem;
+		display: flex;
+		justify-content: center;
+	}
+	
+	.real-table-btn {
+		padding: 1rem 2rem;
+		background: rgba(234, 179, 8, 0.1);
+		border: 2px solid #eab308;
+		border-radius: 12px;
+		color: #eab308;
+		cursor: pointer;
+		font-family: 'Space Grotesk', sans-serif;
+		font-weight: 600;
+		font-size: 1rem;
+		transition: all 0.3s ease;
+		min-width: 200px;
+	}
+	
+	.real-table-btn:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 24px rgba(234, 179, 8, 0.3);
+		background: rgba(234, 179, 8, 0.2);
+	}
+	
 	/* Next Steps Buttons */
 	.next-steps-container {
 		margin-top: 1rem;
@@ -1295,6 +1664,43 @@ void loop() {
 		background: rgba(234, 179, 8, 0.1);
 		border-color: #eab308;
 		color: #eab308;
+	}
+	
+	/* Completion Buttons */
+	.completion-buttons-container {
+		margin-top: 1.5rem;
+		display: flex;
+		gap: 1rem;
+		justify-content: center;
+	}
+	
+	.completion-btn {
+		padding: 0.875rem 1.5rem;
+		border: 2px solid;
+		border-radius: 10px;
+		cursor: pointer;
+		font-family: 'Space Grotesk', sans-serif;
+		font-weight: 600;
+		font-size: 0.95rem;
+		transition: all 0.3s ease;
+		min-width: 140px;
+	}
+	
+	.completion-btn.new-chat {
+		background: rgba(0, 212, 170, 0.1);
+		border-color: #00d4aa;
+		color: #00d4aa;
+	}
+	
+	.completion-btn.go-home {
+		background: rgba(100, 116, 139, 0.1);
+		border-color: #64748b;
+		color: #64748b;
+	}
+	
+	.completion-btn:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 6px 20px rgba(0, 212, 170, 0.3);
 	}
 	
 	.next-step-btn:hover {

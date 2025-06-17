@@ -1,5 +1,12 @@
 import { writable } from 'svelte/store';
 
+export interface DelayedStep {
+	id: string;
+	content: string;
+	delay: number; // in milliseconds
+	isCompleted?: boolean;
+}
+
 export interface ConversationStep {
 	id: string;
 	type: 'ai' | 'user' | 'system';
@@ -10,6 +17,10 @@ export interface ConversationStep {
 	userResponse?: string;
 	isCompleted?: boolean;
 	showTutorialButton?: boolean;
+	showWorkspaceButtons?: boolean;
+	showProjectButtons?: boolean;
+	showRealTableButton?: boolean; // Neuer Button-Typ nur für "An den Tisch"
+	delayedSteps?: DelayedStep[];
 }
 
 export interface Conversation {
@@ -34,6 +45,22 @@ export const leonardoLedDimmerConversation: Conversation = {
 	components: ['leonardo-keyestudio', 'breadboard', 'leuchtdiode', 'widerstand', 'poti', 'jumpercable'],
 	steps: [
 		{
+			id: 'project-understanding',
+			type: 'ai',
+			content: `Ich glaube das ich habe jetzt vollständig dein Projekt verstanden. 
+
+Wir bauen einen **LED Dimmer mit Arduino Leonardo**, bei dem:
+- Ein Potentiometer die LED-Helligkeit steuert
+- PWM für stufenlose Helligkeitsregelung verwendet wird
+- Alle Verbindungen über ein Breadboard laufen
+- Ein Schutzwiderstand die LED vor Überstrom schützt
+
+Hast du sonst noch Fragen zum Projekt oder können wir weitermachen?`,
+			nextSteps: ['continue-project', 'ask-question'],
+			showProjectButtons: true,
+			isCompleted: false
+		},
+		{
 			id: 'component-analysis',
 			type: 'ai',
 			content: `Perfekt! Für dieses LED-Dimmer Projekt mit einem Arduino Leonardo benötigen Sie folgende Komponenten:
@@ -48,7 +75,9 @@ export const leonardoLedDimmerConversation: Conversation = {
 🔸 **Jumper Cables** - Verbindungskabel für die Schaltung
 
 **Über das Projekt:**
-Diese Schaltung ermöglicht es Ihnen, die Helligkeit einer LED stufenlos über ein Potentiometer zu regulieren. Der Arduino Leonardo liest den analogen Wert des Potentiometers ein und wandelt ihn in ein PWM-Signal um, das die LED entsprechend dimmt.`,
+Diese Schaltung ermöglicht es Ihnen, die Helligkeit einer LED stufenlos über ein Potentiometer zu regulieren. Der Arduino Leonardo liest den analogen Wert des Potentiometers ein und wandelt ihn in ein PWM-Signal um, das die LED entsprechend dimmt.
+
+**Wo möchten Sie mit dem Aufbau beginnen?**`,
 			componentImages: [
 				'/components/leonardoKeyestudio.png',
 				'/components/jumpercable.png', 
@@ -57,47 +86,106 @@ Diese Schaltung ermöglicht es Ihnen, die Helligkeit einer LED stufenlos über e
 				'/components/poti.png',
 				'/components/breadboard.png'
 			],
-			nextSteps: ['user-confirms-components'],
-			isCompleted: false
-		},
-		{
-			id: 'user-confirms-components',
-			type: 'user',
-			content: 'okay ich habe alle komponenten',
-			userResponse: 'okay ich habe alle komponenten',
-			nextSteps: ['code-preparation'],
-			isCompleted: false
-		},
-		{
-			id: 'code-preparation',
-			type: 'ai',
-			content: `Ausgezeichnet! Alle Komponenten sind verfügbar. Wir können jetzt mit der Schritt-für-Schritt Programmierung beginnen.
-
-**Was wir programmieren werden:**
-1. **Pin-Konfiguration** - Potentiometer und LED Pins definieren
-2. **Setup-Funktion** - Initialisierung der Hardware
-3. **Analoges Einlesen** - Potentiometer-Werte erfassen
-4. **PWM-Steuerung** - LED-Helligkeit per PWM regulieren
-5. **Mapping & Debugging** - Werte umrechnen und überwachen
-
-Sollen wir mit der Code-Implementierung beginnen?`,
-			nextSteps: ['start-coding'],
-			showTutorialButton: true,
-			isCompleted: false
-		},
-		{
-			id: 'start-coding',
-			type: 'ai',
-			content: `Perfekt! Der Code ist fertig und bereit zum Hochladen auf Ihren Arduino Leonardo.
-
-**Nächste Schritte:**
-Jetzt sind wir bereit für die praktische Umsetzung! Möchten Sie:
-
-🔹 **Circuit Designer** - Die Schaltung hier virtuell aufbauen und testen
-🔹 **Realer Tisch** - Direkt zur physischen Umsetzung am Arbeitsplatz wechseln
-
-Wie möchten Sie fortfahren?`,
 			nextSteps: ['circuit-designer', 'real-workspace'],
+			showWorkspaceButtons: true,
+			isCompleted: false
+		},
+		{
+			id: 'circuit-designer-path',
+			type: 'ai',
+			content: `Ausgezeichnet! Sie haben die Schaltung im Circuit Designer erfolgreich aufgebaut! 🎉
+
+Alle Pin-Verbindungen sind korrekt:
+✅ LED mit Schutzwiderstand an Pin 9 (PWM)
+✅ Potentiometer an Pin A0 (Analog Input)
+✅ Korrekte Stromversorgung und Ground-Verbindungen
+
+**Jetzt können Sie zum praktischen Aufbau am Tisch übergehen!**`,
+			nextSteps: ['real-workspace-after-designer'],
+			showRealTableButton: true, // Nur "An den Tisch" Button zeigen
+			isCompleted: false
+		},
+		{
+			id: 'real-workspace-steps',
+			type: 'ai',
+			content: `Perfekt! Lassen Sie uns Schritt für Schritt die Schaltung am Arbeitsplatz aufbauen.
+
+**Bereiten Sie folgende Komponenten vor:**
+- Arduino Leonardo
+- Breadboard
+- LED, Widerstand (220Ω), Potentiometer
+- Jumper Cables
+
+Ich werde Ihnen beim Aufbau helfen und jeden Schritt verfolgen...`,
+			delayedSteps: [
+				{
+					id: 'workspace-prep',
+					content: '🔌 **Schritt 1/7:** Arduino Leonardo mit USB-Kabel an Computer angeschlossen - Erkannt! ✅',
+					delay: 2000
+				},
+				{
+					id: 'breadboard-ready', 
+					content: '🛠️ **Schritt 2/7:** Breadboard auf dem Arbeitsplatz bereitgestellt - Erkannt! ✅',
+					delay: 4000
+				},
+				{
+					id: 'led-placement',
+					content: '💡 **Schritt 3/7:** LED in Breadboard eingesteckt (Anode längeres Bein) - Korrekt platziert! ✅',
+					delay: 6000
+				},
+				{
+					id: 'resistor-connection',
+					content: '⚡ **Schritt 4/7:** 220Ω Widerstand zwischen LED-Kathode und GND-Rail - Verbindung hergestellt! ✅',
+					delay: 8000
+				},
+				{
+					id: 'potentiometer-placement',
+					content: '🎛️ **Schritt 5/7:** Potentiometer in Breadboard eingesteckt - Position bestätigt! ✅',
+					delay: 10000
+				},
+				{
+					id: 'power-connections',
+					content: '🔗 **Schritt 6/7:** Stromversorgung: 5V und GND vom Arduino zum Breadboard - Verbindungen aktiv! ✅',
+					delay: 12000
+				},
+				{
+					id: 'signal-connections',
+					content: '📡 **Schritt 7/7:** Signal-Verbindungen: Pin 9 → LED, Pin A0 → Potentiometer - Alle Pins korrekt! ✅',
+					delay: 14000
+				},
+				{
+					id: 'circuit-complete',
+					content: `🎉 **Hardware-Aufbau komplett!** 
+
+Ich habe erkannt, dass Sie die Schaltung erfolgreich verbunden haben:
+✅ Arduino Leonardo → Breadboard Stromversorgung
+✅ LED + Widerstand → Pin 9 (PWM-Ausgang)  
+✅ Potentiometer → Pin A0 (Analog-Eingang)
+✅ Alle Ground-Verbindungen hergestellt
+
+**Die Hardware ist bereit für die Programmierung!**`,
+					delay: 16000
+				}
+			],
+			nextSteps: ['start-code-tutorial'],
+			showTutorialButton: false, // Wird erst nach den delayed steps angezeigt
+			isCompleted: false
+		},
+		{
+			id: 'start-code-tutorial',
+			type: 'ai',
+			content: `🎉 **Hardware-Aufbau erfolgreich abgeschlossen!**
+
+Ihre LED-Dimmer Schaltung ist jetzt bereit. Alle Komponenten sind korrekt verkabelt:
+- LED + Widerstand an Pin 9 (PWM)
+- Potentiometer an Pin A0 (Analog)
+- Stromversorgung korrekt angeschlossen
+
+**Jetzt fehlt nur noch der Code!** 
+
+Das Arduino benötigt die Software um die Hardware zu steuern. Sind Sie bereit für das interaktive Code-Tutorial?`,
+			nextSteps: ['code-tutorial'],
+			showTutorialButton: true,
 			isCompleted: false
 		}
 	]
@@ -333,13 +421,16 @@ export function startConversation(conversationId: string) {
 }
 
 export function nextConversationStep() {
+	console.log('nextConversationStep called');
 	currentConversation.update(conv => {
 		if (conv && conv.currentStep < conv.steps.length - 1) {
+			console.log(`Moving from step ${conv.currentStep} to ${conv.currentStep + 1}`);
 			return {
 				...conv,
 				currentStep: conv.currentStep + 1
 			};
 		}
+		console.log('Cannot move to next step');
 		return conv;
 	});
 	
@@ -416,4 +507,90 @@ export function getCompleteTutorialCode(): string {
 	// Return the complete code from the last tutorial step
 	const lastStep = leonardoCodeTutorial[leonardoCodeTutorial.length - 1];
 	return lastStep.code;
+}
+
+// Navigation zwischen den verschiedenen Conversation Steps
+export function jumpToStep(stepId: string) {
+	currentConversation.update(conv => {
+		if (conv) {
+			const stepIndex = conv.steps.findIndex(step => step.id === stepId);
+			if (stepIndex !== -1) {
+				return {
+					...conv,
+					currentStep: stepIndex
+				};
+			}
+		}
+		return conv;
+	});
+}
+
+// Button-Handler für Project-Buttons
+export function handleProjectButton(action: string) {
+	console.log('handleProjectButton called with action:', action);
+	switch (action) {
+		case 'continue':
+		case 'continue-project':
+			console.log('Calling nextConversationStep');
+			nextConversationStep();
+			break;
+		case 'question':
+		case 'ask-question':
+			// Hier könnte ein Frage-Dialog implementiert werden
+			console.log('User has a question about the project');
+			break;
+	}
+}
+
+// Button-Handler für Workspace-Buttons  
+export function handleWorkspaceButton(action: string) {
+	console.log('handleWorkspaceButton called with action:', action);
+	switch (action) {
+		case 'circuit-designer':
+			// Wird von der Chat-Komponente direkt behandelt (switchToView)
+			break;
+		case 'real-table':
+		case 'real-workspace':
+			console.log('Jumping to real-workspace-steps');
+			// Springe direkt zum real-workspace-steps Schritt
+			currentConversation.update(conv => {
+				if (conv) {
+					const stepIndex = conv.steps.findIndex(step => step.id === 'real-workspace-steps');
+					if (stepIndex !== -1) {
+						conversationStep.set(stepIndex);
+						return {
+							...conv,
+							currentStep: stepIndex
+						};
+					}
+				}
+				return conv;
+			});
+			break;
+		case 'real-workspace-after-designer':
+			nextConversationStep();
+			break;
+	}
+}
+
+// Store für Circuit Designer Status
+export const circuitDesignerCompleted = writable<boolean>(false);
+
+// Funktion um Circuit Designer Completion zu markieren
+export function markCircuitDesignerCompleted() {
+	circuitDesignerCompleted.set(true);
+	// Springe direkt zum circuit-designer-path Schritt
+	currentConversation.update(conv => {
+		if (conv) {
+			const stepIndex = conv.steps.findIndex(step => step.id === 'circuit-designer-path');
+			if (stepIndex !== -1) {
+				conversationStep.set(stepIndex);
+				return {
+					...conv,
+					currentStep: stepIndex
+				};
+			}
+		}
+		return conv;
+	});
 }

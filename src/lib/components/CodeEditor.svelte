@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, createEventDispatcher } from 'svelte';
 	import Prism from 'prismjs';
 	import 'prismjs/components/prism-c';
 	import 'prismjs/components/prism-cpp';
@@ -9,6 +9,9 @@
 	// Tutorial support
 	export let tutorialCode: string | undefined = undefined;
 	export let isInTutorialMode: boolean = false; // New prop to control when to show empty editor
+	
+	// Event dispatcher for upload completion
+	const dispatch = createEventDispatcher();
 	
 	let codeContent = `// Willkommen bei Circuitspace!
 // Starten Sie ein Tutorial oder erstellen Sie Ihr eigenes Projekt.
@@ -190,6 +193,7 @@ void loop() {
 	}
 	
 	function uploadCode() {
+		console.log('Upload button clicked'); // Debug log
 		isUploading = true;
 		// Simulate upload process with more realistic timing
 		setTimeout(() => {
@@ -201,6 +205,10 @@ void loop() {
 			
 			// Start serial simulation after upload
 			setTimeout(startSerialSimulation, 1000);
+			
+			console.log('Dispatching uploadComplete event'); // Debug log
+			// Dispatch upload completion event to parent component
+			dispatch('uploadComplete');
 		}, 2500);
 	}
 	

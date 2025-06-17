@@ -35,56 +35,56 @@
 			name: 'Arduino Leonardo',
 			image: '/components/leonardoKeyestudio.png',
 			category: 'microcontroller',
-			width: 100,
-			height: 80
+			width: 180,  // Optimiert für PNG-Auflösung
+			height: 120  // Besseres Seitenverhältnis
 		},
 		{
 			id: 'breadboard',
 			name: 'Breadboard',
 			image: '/components/breadboard.png',
 			category: 'prototyping',
-			width: 120,
-			height: 60
+			width: 200,  // Optimiert für PNG-Auflösung
+			height: 130  // Besseres Seitenverhältnis
 		},
 		{
 			id: 'led',
 			name: 'LED',
 			image: '/components/leuchtdiode.png',
 			category: 'output',
-			width: 40,
-			height: 40
+			width: 50,   // Optimiert für PNG-Auflösung
+			height: 80   // Besseres Seitenverhältnis für LED
 		},
 		{
 			id: 'potentiometer',
 			name: 'Potentiometer',
 			image: '/components/poti.png',
 			category: 'input',
-			width: 50,
-			height: 50
+			width: 80,   // Quadratischer für Potentiometer
+			height: 80   // Besseres Seitenverhältnis
 		},
 		{
 			id: 'pushbutton',
 			name: 'Push Button',
 			image: '/components/pushbutton.png',
 			category: 'input',
-			width: 40,
-			height: 40
+			width: 60,   // Optimiert für PNG-Auflösung
+			height: 60   // Besseres Seitenverhältnis
 		},
 		{
 			id: 'resistor',
 			name: 'Resistor',
 			image: '/components/widerstand.png',
 			category: 'passive',
-			width: 60,
-			height: 20
+			width: 100,  // Optimiert für PNG-Auflösung
+			height: 35   // Besseres Seitenverhältnis für Resistor
 		},
 		{
 			id: 'jumper-cable',
 			name: 'Jumper Cable',
 			image: '/components/jumpercable.png',
 			category: 'connection',
-			width: 80,
-			height: 10
+			width: 120,  // Optimiert für Kabel
+			height: 20   // Besseres Seitenverhältnis für Kabel
 		}
 	];
 	
@@ -95,6 +95,103 @@
 	let componentImages: Map<string, HTMLImageElement> = new Map();
 	let gridSize = 20;
 	let snapToGrid = true;
+	
+	// Zoom and Pan State
+	let zoomLevel = 1.0;
+	let panX = 0;
+	let panY = 0;
+	let isPanning = false;
+	let panStartPos = { x: 0, y: 0 };
+	let lastPanPos = { x: 0, y: 0 };
+	
+	// Zoom Limits
+	const MIN_ZOOM = 0.1;
+	const MAX_ZOOM = 5.0;
+	const ZOOM_SENSITIVITY = 0.1;
+	
+	// Coordinate transformation functions
+	function screenToWorld(screenX: number, screenY: number) {
+		return {
+			x: (screenX - panX) / zoomLevel,
+			y: (screenY - panY) / zoomLevel
+		};
+	}
+	
+	function worldToScreen(worldX: number, worldY: number) {
+		return {
+			x: worldX * zoomLevel + panX,
+			y: worldY * zoomLevel + panY
+		};
+	}
+	
+	// Zoom control functions
+	function zoomIn() {
+		applyZoom(zoomLevel * (1 + ZOOM_SENSITIVITY), canvas.width / 2, canvas.height / 2);
+	}
+	
+	function zoomOut() {
+		applyZoom(zoomLevel * (1 - ZOOM_SENSITIVITY), canvas.width / 2, canvas.height / 2);
+	}
+	
+	function applyZoom(newZoomLevel: number, centerX: number, centerY: number) {
+		const clampedZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoomLevel));
+		if (clampedZoom !== zoomLevel) {
+			const worldPos = screenToWorld(centerX, centerY);
+			zoomLevel = clampedZoom;
+			const newScreenPos = worldToScreen(worldPos.x, worldPos.y);
+			
+			panX += centerX - newScreenPos.x;
+			panY += centerY - newScreenPos.y;
+			
+			drawBoard();
+		}
+	}
+	
+	function resetView() {
+		zoomLevel = 1.0;
+		panX = 0;
+		panY = 0;
+		drawBoard();
+	}
+	
+	function fitToView() {
+		if (placedComponents.length === 0) {
+			resetView();
+			return;
+		}
+		
+		// Calculate bounding box of all components
+		let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+		
+		placedComponents.forEach(comp => {
+			minX = Math.min(minX, comp.x);
+			minY = Math.min(minY, comp.y);
+			maxX = Math.max(maxX, comp.x + comp.width);
+			maxY = Math.max(maxY, comp.y + comp.height);
+		});
+		
+		// Add some padding
+		const padding = 50;
+		minX -= padding;
+		minY -= padding;
+		maxX += padding;
+		maxY += padding;
+		
+		// Calculate zoom level to fit content
+		const contentWidth = maxX - minX;
+		const contentHeight = maxY - minY;
+		const scaleX = canvas.width / contentWidth;
+		const scaleY = canvas.height / contentHeight;
+		
+		zoomLevel = Math.min(scaleX, scaleY, MAX_ZOOM);
+		zoomLevel = Math.max(zoomLevel, MIN_ZOOM);
+		
+		// Center the content
+		panX = (canvas.width - contentWidth * zoomLevel) / 2 - minX * zoomLevel;
+		panY = (canvas.height - contentHeight * zoomLevel) / 2 - minY * zoomLevel;
+		
+		drawBoard();
+	}
 	
 	// Snap position to grid
 	function snapToGridPosition(x: number, y: number) {
@@ -108,25 +205,30 @@
 	onMount(() => {
 		if (canvas) {
 			ctx = canvas.getContext('2d')!;
-			canvas.width = canvas.offsetWidth;
-			canvas.height = canvas.offsetHeight;
+			
+			// Initial canvas setup
+			resizeCanvas();
 			
 			// Load component images
 			loadComponentImages();
+			
+			// Initialize view - center the board
+			resetView();
 			
 			// Add event listeners
 			canvas.addEventListener('mousedown', handleMouseDown);
 			canvas.addEventListener('mousemove', handleMouseMove);
 			canvas.addEventListener('mouseup', handleMouseUp);
 			canvas.addEventListener('click', handleClick);
+			canvas.addEventListener('wheel', handleWheel, { passive: false });
+			canvas.addEventListener('contextmenu', handleContextMenu);
 			
 			// Keyboard event listeners
 			window.addEventListener('keydown', handleKeydown);
 			
 			// Handle window resize
 			const handleResize = () => {
-				canvas.width = canvas.offsetWidth;
-				canvas.height = canvas.offsetHeight;
+				resizeCanvas();
 				drawBoard();
 			};
 			window.addEventListener('resize', handleResize);
@@ -137,12 +239,38 @@
 					canvas.removeEventListener('mousemove', handleMouseMove);
 					canvas.removeEventListener('mouseup', handleMouseUp);
 					canvas.removeEventListener('click', handleClick);
+					canvas.removeEventListener('wheel', handleWheel);
+					canvas.removeEventListener('contextmenu', handleContextMenu);
 				}
 				window.removeEventListener('keydown', handleKeydown);
 				window.removeEventListener('resize', handleResize);
 			};
 		}
 	});
+
+	function resizeCanvas() {
+		const wrapper = canvas.parentElement; // canvas-wrapper
+		if (wrapper) {
+			const rect = wrapper.getBoundingClientRect();
+			const dpr = window.devicePixelRatio || 1;
+			
+			// Berücksichtige Wrapper-Padding und -Margin
+			const availableWidth = rect.width - 20; // 20px für Padding/Margin
+			const availableHeight = rect.height - 20;
+			
+			// Canvas-Größe für High-DPI Displays optimieren
+			canvas.width = availableWidth * dpr;
+			canvas.height = availableHeight * dpr;
+			
+			canvas.style.width = availableWidth + 'px';
+			canvas.style.height = availableHeight + 'px';
+			
+			ctx.scale(dpr, dpr);
+			
+			// Optimale Rendering-Einstellungen für scharfe Bilder
+			ctx.imageSmoothingEnabled = false;
+		}
+	}
 	
 	function loadComponentImages() {
 		availableComponents.forEach(component => {
@@ -194,16 +322,21 @@
 		const componentTemplate = availableComponents.find(c => c.id === componentId);
 		if (!componentTemplate) return;
 		
-		// Calculate center position with some randomization
-		const centerX = canvas.width / 2 - componentTemplate.width / 2;
-		const centerY = canvas.height / 2 - componentTemplate.height / 2;
-		const randomOffsetX = (Math.random() - 0.5) * 100;
-		const randomOffsetY = (Math.random() - 0.5) * 100;
+	// Calculate top-left position in current viewport (world coordinates)
+	const topLeftScreenX = 50; // 50px from left edge
+	const topLeftScreenY = 50; // 50px from top edge
+	const worldTopLeft = screenToWorld(topLeftScreenX, topLeftScreenY);
+	
+	// Place component in top-left area with some randomization
+	const baseX = worldTopLeft.x;
+	const baseY = worldTopLeft.y;
+	const randomOffsetX = Math.random() * 150; // 0-150px random offset
+	const randomOffsetY = Math.random() * 150; // 0-150px random offset
 		
-		const position = snapToGridPosition(
-			centerX + randomOffsetX,
-			centerY + randomOffsetY
-		);
+	const position = snapToGridPosition(
+		baseX + randomOffsetX,
+		baseY + randomOffsetY
+	);
 		
 		const newComponent: PlacedComponent = {
 			id: `${componentId}-${Date.now()}`,
@@ -233,6 +366,11 @@
 		// Clear canvas
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
 		
+		// Save context and apply transformation
+		ctx.save();
+		ctx.translate(panX, panY);
+		ctx.scale(zoomLevel, zoomLevel);
+		
 		// Draw grid
 		drawGrid();
 		
@@ -243,48 +381,68 @@
 		
 		// Draw connections
 		drawConnections();
+		
+		// Restore context
+		ctx.restore();
 	}
 	
 	function drawGrid() {
 		ctx.strokeStyle = 'rgba(148, 163, 184, 0.08)';
-		ctx.lineWidth = 1;
+		ctx.lineWidth = 1 / zoomLevel; // Anpassung für Zoom
 		
 		const gridSize = 20;
 		
+		// Calculate visible area in world coordinates
+		const worldTopLeft = screenToWorld(0, 0);
+		const worldBottomRight = screenToWorld(canvas.width, canvas.height);
+		
+		// Calculate grid range with some padding
+		const startX = Math.floor(worldTopLeft.x / gridSize) * gridSize;
+		const endX = Math.ceil(worldBottomRight.x / gridSize) * gridSize;
+		const startY = Math.floor(worldTopLeft.y / gridSize) * gridSize;
+		const endY = Math.ceil(worldBottomRight.y / gridSize) * gridSize;
+		
 		// Major grid lines every 100px
 		ctx.strokeStyle = 'rgba(148, 163, 184, 0.15)';
-		for (let x = 0; x < canvas.width; x += gridSize * 5) {
+		for (let x = startX; x <= endX; x += gridSize * 5) {
 			ctx.beginPath();
-			ctx.moveTo(x, 0);
-			ctx.lineTo(x, canvas.height);
+			ctx.moveTo(x, startY);
+			ctx.lineTo(x, endY);
 			ctx.stroke();
 		}
 		
-		for (let y = 0; y < canvas.height; y += gridSize * 5) {
+		for (let y = startY; y <= endY; y += gridSize * 5) {
 			ctx.beginPath();
-			ctx.moveTo(0, y);
-			ctx.lineTo(canvas.width, y);
+			ctx.moveTo(startX, y);
+			ctx.lineTo(endX, y);
 			ctx.stroke();
 		}
 		
 		// Minor grid lines
-		ctx.strokeStyle = 'rgba(148, 163, 184, 0.05)';
-		for (let x = 0; x < canvas.width; x += gridSize) {
+		ctx.strokeStyle = 'rgba(148, 163, 184, 0.08)';
+		for (let x = startX; x <= endX; x += gridSize) {
 			ctx.beginPath();
-			ctx.moveTo(x, 0);
-			ctx.lineTo(x, canvas.height);
+			ctx.moveTo(x, startY);
+			ctx.lineTo(x, endY);
 			ctx.stroke();
 		}
 		
-		for (let y = 0; y < canvas.height; y += gridSize) {
+		for (let y = startY; y <= endY; y += gridSize) {
 			ctx.beginPath();
-			ctx.moveTo(0, y);
-			ctx.lineTo(canvas.width, y);
+			ctx.moveTo(startX, y);
+			ctx.lineTo(endX, y);
 			ctx.stroke();
 		}
 	}
 	
 	function drawComponent(component: PlacedComponent) {
+		// Add margin around component for better visual separation
+		const componentMargin = 12;
+		const displayX = component.x + componentMargin;
+		const displayY = component.y + componentMargin;
+		const displayWidth = component.width - (componentMargin * 2);
+		const displayHeight = component.height - (componentMargin * 2);
+		
 		// Draw component shadow
 		ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
 		ctx.shadowBlur = 8;
@@ -293,7 +451,7 @@
 		
 		// Draw component background
 		ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-		ctx.fillRect(component.x - 2, component.y - 2, component.width + 4, component.height + 4);
+		ctx.fillRect(displayX, displayY, displayWidth, displayHeight);
 		
 		// Reset shadow
 		ctx.shadowColor = 'transparent';
@@ -301,7 +459,7 @@
 		ctx.shadowOffsetX = 0;
 		ctx.shadowOffsetY = 0;
 		
-		// Draw component border with selection highlight
+		// Draw component border with selection highlight (full size including margin)
 		if (selectedComponent?.id === component.id) {
 			ctx.strokeStyle = '#00d4aa';
 			ctx.lineWidth = 3;
@@ -317,73 +475,113 @@
 		// Draw component image if loaded
 		const img = componentImages.get(component.componentId);
 		if (img) {
-			ctx.drawImage(img, component.x, component.y, component.width, component.height);
+			ctx.save();
+			
+			// Enable high-quality image rendering for maximum sharpness
+			ctx.imageSmoothingEnabled = false; // Pixel-perfect rendering
+			ctx.imageSmoothingQuality = 'high';
+			
+			// Calculate aspect ratio preserving dimensions with margin
+			const imgAspectRatio = img.naturalWidth / img.naturalHeight;
+			const componentAspectRatio = displayWidth / displayHeight;
+			
+			let drawWidth = displayWidth;
+			let drawHeight = displayHeight;
+			let offsetX = 0;
+			let offsetY = 0;
+			
+			// Preserve aspect ratio by fitting image within component bounds
+			if (imgAspectRatio > componentAspectRatio) {
+				// Image is wider, fit to width
+				drawHeight = displayWidth / imgAspectRatio;
+				offsetY = (displayHeight - drawHeight) / 2;
+			} else {
+				// Image is taller, fit to height  
+				drawWidth = displayHeight * imgAspectRatio;
+				offsetX = (displayWidth - drawWidth) / 2;
+			}
+			
+			// Draw the image with pixel-perfect positioning for maximum sharpness
+			const pixelPerfectX = Math.round(displayX + offsetX);
+			const pixelPerfectY = Math.round(displayY + offsetY);
+			const pixelPerfectWidth = Math.round(drawWidth);
+			const pixelPerfectHeight = Math.round(drawHeight);
+			
+			ctx.drawImage(
+				img, 
+				pixelPerfectX, 
+				pixelPerfectY, 
+				pixelPerfectWidth, 
+				pixelPerfectHeight
+			);
+			
+			ctx.restore();
 		} else {
-			// Fallback rectangle with pattern
-			const gradient = ctx.createLinearGradient(component.x, component.y, component.x + component.width, component.y + component.height);
+			// Fallback rectangle with pattern and margin
+			const gradient = ctx.createLinearGradient(displayX, displayY, displayX + displayWidth, displayY + displayHeight);
 			gradient.addColorStop(0, 'rgba(0, 212, 170, 0.2)');
 			gradient.addColorStop(1, 'rgba(0, 212, 170, 0.1)');
 			ctx.fillStyle = gradient;
-			ctx.fillRect(component.x, component.y, component.width, component.height);
+			ctx.fillRect(displayX, displayY, displayWidth, displayHeight);
 		}
 		
 		// Draw component label with background
-		const labelY = component.y + component.height + 25;
+		const labelY = component.y + component.height + 30; // Mehr Abstand
 		const labelText = component.name;
-		ctx.font = '11px IBM Plex Mono';
+		ctx.font = '12px IBM Plex Mono'; // Vergrößert
 		ctx.textAlign = 'center';
 		const textWidth = ctx.measureText(labelText).width;
 		
 		// Label background
 		ctx.fillStyle = 'rgba(15, 23, 42, 0.8)';
-		ctx.fillRect(component.x + component.width/2 - textWidth/2 - 4, labelY - 14, textWidth + 8, 16);
+		ctx.fillRect(component.x + component.width/2 - textWidth/2 - 6, labelY - 16, textWidth + 12, 20);
 		
 		// Label text
 		ctx.fillStyle = '#e2e8f0';
 		ctx.fillText(labelText, component.x + component.width/2, labelY);
 		
-		// Draw pins with enhanced visibility
+		// Draw pins with enhanced visibility and spacing
 		component.pins.forEach((pin, index) => {
-			// Pin background circle
+			// Enhanced pin background circle
 			ctx.fillStyle = '#1e293b';
 			ctx.beginPath();
-			ctx.arc(pin.x, pin.y, 6, 0, 2 * Math.PI);
+			ctx.arc(pin.x, pin.y, 8, 0, 2 * Math.PI); // Vergrößert
 			ctx.fill();
 			
 			// Pin circle
 			ctx.fillStyle = selectedComponent?.id === component.id ? '#00d4aa' : '#64748b';
 			ctx.beginPath();
-			ctx.arc(pin.x, pin.y, 4, 0, 2 * Math.PI);
+			ctx.arc(pin.x, pin.y, 6, 0, 2 * Math.PI); // Vergrößert
 			ctx.fill();
 			
 			// Pin border
 			ctx.strokeStyle = '#ffffff';
-			ctx.lineWidth = 1;
+			ctx.lineWidth = 2; // Vergrößert
 			ctx.stroke();
 			
-			// Pin label with better positioning
+			// Pin label with better positioning and enhanced spacing
 			ctx.fillStyle = '#ffffff';
-			ctx.font = '9px IBM Plex Mono';
+			ctx.font = '10px IBM Plex Mono'; // Vergrößert
 			ctx.textAlign = 'center';
 			
 			// Position label based on pin location relative to component
 			let labelX = pin.x;
-			let labelY = pin.y - 10;
+			let labelY = pin.y - 12; // Mehr Abstand
 			
-			// Adjust label position for better readability
-			if (pin.x <= component.x + 10) { // Left side pin
-				labelX = pin.x - 15;
+			// Adjust label position for better readability with enhanced spacing
+			if (pin.x <= component.x + 15) { // Left side pin
+				labelX = pin.x - 20; // Mehr Abstand
 				ctx.textAlign = 'right';
-			} else if (pin.x >= component.x + component.width - 10) { // Right side pin
-				labelX = pin.x + 15;
+			} else if (pin.x >= component.x + component.width - 15) { // Right side pin
+				labelX = pin.x + 20; // Mehr Abstand
 				ctx.textAlign = 'left';
 			}
 			
-			// Label background
+			// Enhanced label background
 			const labelWidth = ctx.measureText(pin.name).width;
-			const bgX = labelX - (ctx.textAlign === 'center' ? labelWidth/2 : ctx.textAlign === 'right' ? labelWidth : 0) - 2;
-			ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-			ctx.fillRect(bgX, labelY - 10, labelWidth + 4, 12);
+			const bgX = labelX - (ctx.textAlign === 'center' ? labelWidth/2 : ctx.textAlign === 'right' ? labelWidth : 0) - 3;
+			ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+			ctx.fillRect(bgX, labelY - 12, labelWidth + 6, 16);
 			
 			// Label text
 			ctx.fillStyle = '#00d4aa';
@@ -404,8 +602,26 @@
 	
 	function handleMouseDown(event: MouseEvent) {
 		const rect = canvas.getBoundingClientRect();
-		const x = event.clientX - rect.left;
-		const y = event.clientY - rect.top;
+		const screenX = event.clientX - rect.left;
+		const screenY = event.clientY - rect.top;
+		
+		// Mittlere Maustaste oder Rechtsklick für Panning
+		if (event.button === 1 || event.button === 2) {
+			isPanning = true;
+			panStartPos = { x: screenX, y: screenY };
+			lastPanPos = { x: panX, y: panY };
+			canvas.style.cursor = 'grab';
+			event.preventDefault();
+			return;
+		}
+		
+		// Nur Linksklick für normale Interaktionen
+		if (event.button !== 0) return;
+		
+		// Transformiere Screen-Koordinaten zu Welt-Koordinaten
+		const worldPos = screenToWorld(screenX, screenY);
+		const x = worldPos.x;
+		const y = worldPos.y;
 		
 		selectedComponent = getComponentAt(x, y);
 		if (selectedComponent) {
@@ -419,8 +635,24 @@
 	
 	function handleMouseMove(event: MouseEvent) {
 		const rect = canvas.getBoundingClientRect();
-		const x = event.clientX - rect.left;
-		const y = event.clientY - rect.top;
+		const screenX = event.clientX - rect.left;
+		const screenY = event.clientY - rect.top;
+		
+		// Handle panning
+		if (isPanning) {
+			const deltaX = screenX - panStartPos.x;
+			const deltaY = screenY - panStartPos.y;
+			panX = lastPanPos.x + deltaX;
+			panY = lastPanPos.y + deltaY;
+			canvas.style.cursor = 'grabbing';
+			drawBoard();
+			return;
+		}
+		
+		// Transformiere Screen-Koordinaten zu Welt-Koordinaten
+		const worldPos = screenToWorld(screenX, screenY);
+		const x = worldPos.x;
+		const y = worldPos.y;
 		
 		if (isDragging && selectedComponent) {
 			const newX = x - dragOffset.x;
@@ -430,10 +662,6 @@
 			const snappedPosition = snapToGridPosition(newX, newY);
 			selectedComponent.x = snappedPosition.x;
 			selectedComponent.y = snappedPosition.y;
-			
-			// Keep component within canvas bounds
-			selectedComponent.x = Math.max(10, Math.min(canvas.width - selectedComponent.width - 10, selectedComponent.x));
-			selectedComponent.y = Math.max(10, Math.min(canvas.height - selectedComponent.height - 50, selectedComponent.y));
 			
 			// Update pin positions
 			selectedComponent.pins = generatePins(selectedComponent);
@@ -447,6 +675,13 @@
 	}
 	
 	function handleMouseUp() {
+		// Panning beenden
+		if (isPanning) {
+			isPanning = false;
+			canvas.style.cursor = 'default';
+			return;
+		}
+		
 		if (isDragging && selectedComponent) {
 			// Final snap to grid when dropping
 			const snappedPosition = snapToGridPosition(selectedComponent.x, selectedComponent.y);
@@ -464,8 +699,13 @@
 		if (isDragging) return;
 		
 		const rect = canvas.getBoundingClientRect();
-		const x = event.clientX - rect.left;
-		const y = event.clientY - rect.top;
+		const screenX = event.clientX - rect.left;
+		const screenY = event.clientY - rect.top;
+		
+		// Transformiere Screen-Koordinaten zu Welt-Koordinaten
+		const worldPos = screenToWorld(screenX, screenY);
+		const x = worldPos.x;
+		const y = worldPos.y;
 		
 		const clickedComponent = getComponentAt(x, y);
 		if (clickedComponent) {
@@ -476,6 +716,36 @@
 			selectedComponent = null;
 			drawBoard();
 		}
+	}
+	
+	function handleWheel(event: WheelEvent) {
+		event.preventDefault();
+		
+		const rect = canvas.getBoundingClientRect();
+		const centerX = event.clientX - rect.left;
+		const centerY = event.clientY - rect.top;
+		
+		// Zoom-Richtung bestimmen
+		const zoomFactor = event.deltaY > 0 ? (1 - ZOOM_SENSITIVITY) : (1 + ZOOM_SENSITIVITY);
+		
+		// Neuen Zoom-Level berechnen und begrenzen
+		const newZoomLevel = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoomLevel * zoomFactor));
+		
+		// Zoom um Mausposition zentrieren
+		if (newZoomLevel !== zoomLevel) {
+			const worldPos = screenToWorld(centerX, centerY);
+			zoomLevel = newZoomLevel;
+			const newScreenPos = worldToScreen(worldPos.x, worldPos.y);
+			
+			panX += centerX - newScreenPos.x;
+			panY += centerY - newScreenPos.y;
+			
+			drawBoard();
+		}
+	}
+
+	function handleContextMenu(event: MouseEvent) {
+		event.preventDefault(); // Verhindert das Standard-Kontextmenü
 	}
 	
 	function toggleComponentPanel() {
@@ -523,6 +793,22 @@
 			selectedComponent = null;
 			showComponentPanel = false;
 			drawBoard();
+		} else if (event.key === '+' || event.key === '=') {
+			// Zoom in with keyboard
+			event.preventDefault();
+			zoomIn();
+		} else if (event.key === '-' || event.key === '_') {
+			// Zoom out with keyboard
+			event.preventDefault();
+			zoomOut();
+		} else if (event.key === '0') {
+			// Reset view with keyboard
+			event.preventDefault();
+			resetView();
+		} else if (event.key === 'f' || event.key === 'F') {
+			// Fit to view with keyboard
+			event.preventDefault();
+			fitToView();
 		} else if (event.ctrlKey || event.metaKey) {
 			if (event.key === 's') {
 				event.preventDefault();
@@ -558,6 +844,32 @@
 				<span class="shortcut">Ctrl+S</span>
 			</button>
 		</div>
+		
+		<!-- Zoom Controls -->
+		<div class="zoom-controls">
+			<button class="zoom-btn" on:click={zoomOut} title="Zoom Out (-)">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+					<path d="M19 13H5v-2h14v2z" fill="currentColor"/>
+				</svg>
+			</button>
+			<span class="zoom-level">{Math.round(zoomLevel * 100)}%</span>
+			<button class="zoom-btn" on:click={zoomIn} title="Zoom In (+)">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+					<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+				</svg>
+			</button>
+			<button class="zoom-btn" on:click={resetView} title="Reset View (0)">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+					<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" fill="currentColor"/>
+					<path d="M12 6v6l4 2" stroke="currentColor" stroke-width="2" fill="none"/>
+				</svg>
+			</button>
+			<button class="zoom-btn" on:click={fitToView} title="Fit to View (F)">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+					<path d="M15 3l2.3 2.3-2.89 2.87 1.42 1.42L18.7 6.7 21 9V3h-6zM3 9l2.3-2.3 2.87 2.89 1.42-1.42L6.7 5.3 9 3H3v6zm6 12l-2.3-2.3 2.89-2.87-1.42-1.42L5.3 17.3 3 15v6h6zm12-6l-2.3 2.3-2.87-2.89-1.42 1.42 2.89 2.87L15 21h6v-6z" fill="currentColor"/>
+				</svg>
+			</button>
+		</div>
 	</header>
 	
 	<!-- Component Selection Panel -->
@@ -582,7 +894,9 @@
 	{/if}
 	
 	<div class="diagram-canvas-container">
-		<canvas bind:this={canvas} class="diagram-canvas"></canvas>
+		<div class="canvas-wrapper">
+			<canvas bind:this={canvas} class="diagram-canvas"></canvas>
+		</div>
 		
 		<!-- Canvas Overlay Info -->
 		{#if placedComponents.length === 0}
@@ -598,6 +912,21 @@
 					</div>
 					<div class="shortcut-item">
 						<kbd>Esc</kbd> Deselect
+					</div>
+					<div class="shortcut-item">
+						<kbd>Mouse Wheel</kbd> Zoom in/out
+					</div>
+					<div class="shortcut-item">
+						<kbd>Middle/Right Click + Drag</kbd> Pan view
+					</div>
+					<div class="shortcut-item">
+						<kbd>+/-</kbd> Zoom in/out
+					</div>
+					<div class="shortcut-item">
+						<kbd>0</kbd> Reset view
+					</div>
+					<div class="shortcut-item">
+						<kbd>F</kbd> Fit all components
 					</div>
 				</div>
 			</div>
@@ -641,7 +970,7 @@
 	</div>
 	
 	<div class="diagram-info">
-		<p>Drag components to move • Click "Add Component" to place new parts • Components show pins for connections</p>
+		<p>Drag components to move • Use mouse wheel to zoom • Middle/right-click + drag to pan • Components show pins for connections</p>
 	</div>
 </div>
 
@@ -722,6 +1051,48 @@
 		background: rgba(0, 212, 170, 0.2);
 		border-color: #00d4aa;
 		transform: translateY(-2px);
+	}
+	
+	/* Zoom Controls */
+	.zoom-controls {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem;
+		background: rgba(15, 23, 42, 0.8);
+		border: 1px solid rgba(0, 212, 170, 0.2);
+		border-radius: 8px;
+		backdrop-filter: blur(8px);
+	}
+	
+	.zoom-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		background: rgba(0, 212, 170, 0.1);
+		border: 1px solid rgba(0, 212, 170, 0.3);
+		border-radius: 6px;
+		color: #e2e8f0;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+	
+	.zoom-btn:hover {
+		background: rgba(0, 212, 170, 0.2);
+		border-color: #00d4aa;
+		color: #00d4aa;
+		transform: translateY(-1px);
+	}
+	
+	.zoom-level {
+		min-width: 50px;
+		text-align: center;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.8rem;
+		color: #00d4aa;
+		font-weight: 500;
 	}
 	
 	/* Component Panel Styles */
@@ -979,12 +1350,54 @@
 		flex: 1;
 		position: relative;
 		overflow: hidden;
+		display: flex;
+		flex-direction: column;
+		min-height: 0; /* Wichtig für Flexbox-Sizing */
+	}
+	
+	/* Responsiver Canvas Wrapper */
+	.canvas-wrapper {
+		flex: 1;
+		position: relative;
+		width: 100%;
+		height: 100%;
+		min-height: 300px;
+		max-height: calc(100vh - 250px); /* Verhindert Overflow */
+		overflow: hidden;
+		border-radius: 8px;
+		margin: 1rem;
+		box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+		background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+	}
+	
+	/* Responsive Anpassungen für kleinere Bildschirme */
+	@media (max-width: 1200px) {
+		.canvas-wrapper {
+			margin: 0.75rem;
+			max-height: calc(100vh - 200px);
+		}
+	}
+	
+	@media (max-width: 768px) {
+		.canvas-wrapper {
+			margin: 0.5rem;
+			max-height: calc(100vh - 180px);
+			min-height: 250px;
+		}
+	}
+	
+	@media (max-height: 600px) {
+		.canvas-wrapper {
+			max-height: calc(100vh - 150px);
+			min-height: 200px;
+		}
 	}
 	
 	.diagram-canvas {
 		width: 100%;
 		height: 100%;
-		background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+		display: block;
+		background: transparent;
 		cursor: default;
 	}
 	
