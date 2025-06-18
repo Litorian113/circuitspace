@@ -2,16 +2,37 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	
-	let showConnectionModal = true;
+	let showOnboarding = true;
+	let onboardingStep = 1;
+	let showConnectionModal = false;
 	let autoConnect = false;
 	let projectInput = '';
 	let isTransitioning = false;
 	
+	// Onboarding data
+	let nickname = '';
+	let experienceLevel = '';
+	let activities = [];
+	let hasBuiltOwnCircuit = '';
+	let circuitDescription = '';
+	let solderingConfidence = 0;
+	let tools = [];
+	let programmingLevel = '';
+	let componentRecognition = [];
+	let goals = '';
+	
 	onMount(() => {
-		// Check if user has previously set auto-connect
-		const savedAutoConnect = localStorage.getItem('circuitspace-autoconnect');
-		if (savedAutoConnect === 'true') {
-			showConnectionModal = false;
+		// Check if user has completed onboarding
+		const onboardingCompleted = localStorage.getItem('circuitspace-onboarding-completed');
+		if (onboardingCompleted === 'true') {
+			showOnboarding = false;
+			// Check if user has previously set auto-connect
+			const savedAutoConnect = localStorage.getItem('circuitspace-autoconnect');
+			if (savedAutoConnect === 'true') {
+				showConnectionModal = false;
+			} else {
+				showConnectionModal = true;
+			}
 		}
 	});
 	
@@ -19,6 +40,51 @@
 		showConnectionModal = false;
 		if (autoConnect) {
 			localStorage.setItem('circuitspace-autoconnect', 'true');
+		}
+	}
+	
+	// Onboarding functions
+	function nextOnboardingStep() {
+		if (onboardingStep < 8) {
+			onboardingStep++;
+		} else {
+			completeOnboarding();
+		}
+	}
+	
+	function prevOnboardingStep() {
+		if (onboardingStep > 1) {
+			onboardingStep--;
+		}
+	}
+	
+	function completeOnboarding() {
+		localStorage.setItem('circuitspace-onboarding-completed', 'true');
+		showOnboarding = false;
+		showConnectionModal = true;
+	}
+	
+	function handleActivityToggle(activity) {
+		if (activities.includes(activity)) {
+			activities = activities.filter(a => a !== activity);
+		} else {
+			activities = [...activities, activity];
+		}
+	}
+	
+	function handleToolToggle(tool) {
+		if (tools.includes(tool)) {
+			tools = tools.filter(t => t !== tool);
+		} else {
+			tools = [...tools, tool];
+		}
+	}
+	
+	function handleComponentToggle(component) {
+		if (componentRecognition.includes(component)) {
+			componentRecognition = componentRecognition.filter(c => c !== component);
+		} else {
+			componentRecognition = [...componentRecognition, component];
 		}
 	}
 	
@@ -48,6 +114,266 @@
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
 	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 </svelte:head>
+
+<!-- Onboarding Modal -->
+{#if showOnboarding}
+	<div class="onboarding-overlay">
+		<div class="onboarding-modal">
+			<div class="onboarding-progress">
+				<div class="progress-bar">
+					<div class="progress-fill" style="width: {(onboardingStep / 8) * 100}%"></div>
+				</div>
+				<span class="progress-text">Schritt {onboardingStep} von 8</span>
+			</div>
+			
+			{#if onboardingStep === 1}
+				<div class="onboarding-step">
+					<h2>🎉 Willkommen bei Circuitspace!</h2>
+					<p>Wie sollen wir dich ansprechen?</p>
+					<input 
+						type="text" 
+						bind:value={nickname} 
+						placeholder="Dein Nickname..." 
+						class="onboarding-input"
+					>
+					<p class="step-description">Dies hilft uns, deine Antworten zu personalisieren.</p>
+				</div>
+			{:else if onboardingStep === 2}
+				<div class="onboarding-step">
+					<h2>Deine Elektronik-Erfahrung</h2>
+					<p>Wie würdest du deine Elektronik-Erfahrung momentan einschätzen?</p>
+					<div class="option-group">
+						<label class="option-radio">
+							<input type="radio" bind:group={experienceLevel} value="none">
+							<span class="radio-custom"></span>
+							A) Keine Erfahrung
+						</label>
+						<label class="option-radio">
+							<input type="radio" bind:group={experienceLevel} value="basic">
+							<span class="radio-custom"></span>
+							B) Grundkenntnisse
+						</label>
+						<label class="option-radio">
+							<input type="radio" bind:group={experienceLevel} value="advanced">
+							<span class="radio-custom"></span>
+							C) Fortgeschritten
+						</label>
+						<label class="option-radio">
+							<input type="radio" bind:group={experienceLevel} value="expert">
+							<span class="radio-custom"></span>
+							D) Profi
+						</label>
+					</div>
+				</div>
+			{:else if onboardingStep === 3}
+				<div class="onboarding-step">
+					<h2>Praktische Erfahrungen</h2>
+					<p>Welche dieser Tätigkeiten hast du bereits selbstständig gemacht?</p>
+					<div class="option-group">
+						<label class="option-checkbox">
+							<input type="checkbox" on:change={() => handleActivityToggle('led-breadboard')}>
+							<span class="checkbox-custom"></span>
+							LED mit Widerstand auf Breadboard stecken
+						</label>
+						<label class="option-checkbox">
+							<input type="checkbox" on:change={() => handleActivityToggle('microcontroller-flash')}>
+							<span class="checkbox-custom"></span>
+							Mikrocontroller flashen (z. B. Arduino-Sketch)
+						</label>
+						<label class="option-checkbox">
+							<input type="checkbox" on:change={() => handleActivityToggle('sensor-motor')}>
+							<span class="checkbox-custom"></span>
+							Sensor / Motor ansteuern
+						</label>
+						<label class="option-checkbox">
+							<input type="checkbox" on:change={() => handleActivityToggle('pcb-design')}>
+							<span class="checkbox-custom"></span>
+							Platinenlayout entworfen (EAGLE/KiCad)
+						</label>
+						<label class="option-checkbox">
+							<input type="checkbox" on:change={() => handleActivityToggle('smd-soldering')}>
+							<span class="checkbox-custom"></span>
+							SMD-Bauteile per Lötkolben/Heißluft löten
+						</label>
+					</div>
+				</div>
+			{:else if onboardingStep === 4}
+				<div class="onboarding-step">
+					<h2>Eigene Schaltungen</h2>
+					<p>Hast du schon einmal eine Schaltung nach eigenem Schaltplan aufgebaut?</p>
+					<div class="option-group">
+						<label class="option-radio">
+							<input type="radio" bind:group={hasBuiltOwnCircuit} value="yes">
+							<span class="radio-custom"></span>
+							Ja
+						</label>
+						<label class="option-radio">
+							<input type="radio" bind:group={hasBuiltOwnCircuit} value="no">
+							<span class="radio-custom"></span>
+							Nein
+						</label>
+					</div>
+					{#if hasBuiltOwnCircuit === 'yes'}
+						<div class="follow-up">
+							<p>Beschreibe kurz dein Projekt:</p>
+							<textarea 
+								bind:value={circuitDescription} 
+								placeholder="z.B. LED-Matrix mit Arduino, Temperatursensor mit Display..."
+								class="onboarding-textarea"
+								rows="3"
+							></textarea>
+						</div>
+					{/if}
+				</div>
+			{:else if onboardingStep === 5}
+				<div class="onboarding-step">
+					<h2>Löt-Erfahrung</h2>
+					<p>Wie sicher fühlst du dich beim Löten?</p>
+					<div class="slider-container">
+						<input 
+							type="range" 
+							min="0" 
+							max="5" 
+							bind:value={solderingConfidence}
+							class="onboarding-slider"
+						>
+						<div class="slider-labels">
+							<span>0 - Nie gelötet</span>
+							<span>5 - Saubere SMD-Rework</span>
+						</div>
+						<div class="slider-value">
+							Aktuell: {solderingConfidence}/5
+						</div>
+					</div>
+				</div>
+			{:else if onboardingStep === 6}
+				<div class="onboarding-step">
+					<h2>Mess- und Werkzeuge</h2>
+					<p>Welche Mess- und Werkzeuge nutzt du routinemäßig?</p>
+					<div class="option-group">
+						<label class="option-checkbox">
+							<input type="checkbox" on:change={() => handleToolToggle('multimeter')}>
+							<span class="checkbox-custom"></span>
+							Multimeter
+						</label>
+						<label class="option-checkbox">
+							<input type="checkbox" on:change={() => handleToolToggle('power-supply')}>
+							<span class="checkbox-custom"></span>
+							Labornetzteil
+						</label>
+						<label class="option-checkbox">
+							<input type="checkbox" on:change={() => handleToolToggle('oscilloscope')}>
+							<span class="checkbox-custom"></span>
+							Oszilloskop
+						</label>
+						<label class="option-checkbox">
+							<input type="checkbox" on:change={() => handleToolToggle('logic-analyzer')}>
+							<span class="checkbox-custom"></span>
+							Logic Analyzer
+						</label>
+						<label class="option-checkbox">
+							<input type="checkbox" on:change={() => handleToolToggle('none')}>
+							<span class="checkbox-custom"></span>
+							Keine davon
+						</label>
+					</div>
+				</div>
+			{:else if onboardingStep === 7}
+				<div class="onboarding-step">
+					<h2>Programmierkenntnisse</h2>
+					<p>Wie stehst du zu Programmierung für Mikrocontroller?</p>
+					<div class="option-group">
+						<label class="option-radio">
+							<input type="radio" bind:group={programmingLevel} value="none">
+							<span class="radio-custom"></span>
+							A) Keine Kenntnisse
+						</label>
+						<label class="option-radio">
+							<input type="radio" bind:group={programmingLevel} value="copy-paste">
+							<span class="radio-custom"></span>
+							B) Copy-&-Paste klappt
+						</label>
+						<label class="option-radio">
+							<input type="radio" bind:group={programmingLevel} value="understand">
+							<span class="radio-custom"></span>
+							C) Ich verstehe C/C++-Sketches
+						</label>
+						<label class="option-radio">
+							<input type="radio" bind:group={programmingLevel} value="expert">
+							<span class="radio-custom"></span>
+							D) Schreibe eigene Libraries
+						</label>
+					</div>
+					
+					<div style="margin-top: 2rem;">
+						<p>Welche Bauteil-Kategorien erkennst du auf Anhieb?</p>
+						<div class="option-group">
+							<label class="option-checkbox">
+								<input type="checkbox" on:change={() => handleComponentToggle('resistors')}>
+								<span class="checkbox-custom"></span>
+								Widerstände
+							</label>
+							<label class="option-checkbox">
+								<input type="checkbox" on:change={() => handleComponentToggle('capacitors')}>
+								<span class="checkbox-custom"></span>
+								Kondensatoren
+							</label>
+							<label class="option-checkbox">
+								<input type="checkbox" on:change={() => handleComponentToggle('diodes')}>
+								<span class="checkbox-custom"></span>
+								Dioden/LED
+							</label>
+							<label class="option-checkbox">
+								<input type="checkbox" on:change={() => handleComponentToggle('transistors')}>
+								<span class="checkbox-custom"></span>
+								Transistoren
+							</label>
+							<label class="option-checkbox">
+								<input type="checkbox" on:change={() => handleComponentToggle('ics')}>
+								<span class="checkbox-custom"></span>
+								IC-Gehäuse (SOIC/TQFP)
+							</label>
+						</div>
+					</div>
+				</div>
+			{:else if onboardingStep === 8}
+				<div class="onboarding-step">
+					<h2>Deine Ziele</h2>
+					<p>Was möchtest du mit Circuitspace erreichen?</p>
+					<textarea 
+						bind:value={goals} 
+						placeholder="z.B. Roboter bauen, Grundlagen lernen, IoT-Projekte entwickeln, Sensoren verstehen..."
+						class="onboarding-textarea"
+						rows="4"
+					></textarea>
+					<p class="step-description">Dies hilft uns, dir passende Lernpfade und Projekte vorzuschlagen.</p>
+				</div>
+			{/if}
+			
+			<div class="onboarding-actions">
+				{#if onboardingStep > 1}
+					<button class="btn-outline" on:click={prevOnboardingStep}>
+						← Zurück
+					</button>
+				{/if}
+				
+				<button 
+					class="btn-primary" 
+					on:click={nextOnboardingStep}
+					disabled={onboardingStep === 1 && !nickname.trim()}
+				>
+					{onboardingStep === 8 ? 'Los geht\'s!' : 'Weiter →'}
+				</button>
+			</div>
+			
+			<div class="onboarding-skip">
+				<button class="skip-button" on:click={completeOnboarding}>
+					Überspringen
+				</button>
+			</div>
+		</div>
+	</div>
+{/if}
 
 <!-- Connection Modal -->
 {#if showConnectionModal}
@@ -182,6 +508,277 @@
 		overflow-x: hidden;
 		overflow-y: auto;
 		min-height: 100vh;
+	}
+	
+	/* Onboarding Styles */
+	.onboarding-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100vw;
+		height: 100vh;
+		background: linear-gradient(135deg, #0a0f1a 0%, #1e293b 50%, #0f172a 100%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 2000;
+		overflow-y: auto;
+		padding: 2rem;
+		box-sizing: border-box;
+	}
+	
+	.onboarding-modal {
+		background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+		backdrop-filter: blur(20px);
+		border: 1px solid rgba(0, 212, 170, 0.3);
+		border-radius: 20px;
+		padding: 3rem;
+		max-width: 600px;
+		width: 100%;
+		max-height: 90vh;
+		overflow-y: auto;
+		box-shadow: 0 25px 50px rgba(0, 212, 170, 0.1);
+		position: relative;
+	}
+	
+	.onboarding-progress {
+		margin-bottom: 2.5rem;
+		text-align: center;
+	}
+	
+	.progress-bar {
+		width: 100%;
+		height: 4px;
+		background: rgba(0, 212, 170, 0.2);
+		border-radius: 2px;
+		overflow: hidden;
+		margin-bottom: 0.5rem;
+	}
+	
+	.progress-fill {
+		height: 100%;
+		background: linear-gradient(90deg, #00d4aa, #0ea5e9);
+		border-radius: 2px;
+		transition: width 0.3s ease;
+	}
+	
+	.progress-text {
+		font-size: 0.9rem;
+		color: rgba(226, 232, 240, 0.8);
+		font-family: 'Space Grotesk', sans-serif;
+	}
+	
+	.onboarding-step h2 {
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 1.75rem;
+		font-weight: 600;
+		margin: 0 0 1rem 0;
+		color: #00d4aa;
+		text-align: center;
+	}
+	
+	.onboarding-step p {
+		font-size: 1.1rem;
+		line-height: 1.6;
+		margin-bottom: 2rem;
+		text-align: center;
+		color: #e2e8f0;
+	}
+	
+	.step-description {
+		font-size: 0.9rem !important;
+		color: rgba(226, 232, 240, 0.7) !important;
+		margin-top: 1rem !important;
+		margin-bottom: 0 !important;
+	}
+	
+	.onboarding-input, .onboarding-textarea {
+		width: 100%;
+		background: rgba(15, 23, 42, 0.6);
+		border: 1px solid rgba(0, 212, 170, 0.3);
+		border-radius: 8px;
+		padding: 1rem;
+		color: #e2e8f0;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 1rem;
+		transition: all 0.2s ease;
+		box-sizing: border-box;
+	}
+	
+	.onboarding-input:focus, .onboarding-textarea:focus {
+		outline: none;
+		border-color: #00d4aa;
+		box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.1);
+	}
+	
+	.onboarding-textarea {
+		resize: vertical;
+		min-height: 80px;
+	}
+	
+	.option-group {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+	
+	.option-radio, .option-checkbox {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		cursor: pointer;
+		padding: 1rem;
+		background: rgba(15, 23, 42, 0.3);
+		border: 1px solid rgba(0, 212, 170, 0.2);
+		border-radius: 8px;
+		transition: all 0.2s ease;
+		user-select: none;
+	}
+	
+	.option-radio:hover, .option-checkbox:hover {
+		background: rgba(15, 23, 42, 0.5);
+		border-color: rgba(0, 212, 170, 0.4);
+	}
+	
+	.option-radio input, .option-checkbox input {
+		display: none;
+	}
+	
+	.radio-custom, .checkbox-custom {
+		width: 20px;
+		height: 20px;
+		border: 2px solid #00d4aa;
+		position: relative;
+		transition: all 0.2s ease;
+		flex-shrink: 0;
+	}
+	
+	.radio-custom {
+		border-radius: 50%;
+	}
+	
+	.checkbox-custom {
+		border-radius: 4px;
+	}
+	
+	.option-radio input:checked + .radio-custom::after {
+		content: '';
+		position: absolute;
+		width: 8px;
+		height: 8px;
+		background: #00d4aa;
+		border-radius: 50%;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+	
+	.option-checkbox input:checked + .checkbox-custom {
+		background: #00d4aa;
+	}
+	
+	.option-checkbox input:checked + .checkbox-custom::after {
+		content: '✓';
+		position: absolute;
+		color: #0a0f1a;
+		font-size: 14px;
+		font-weight: bold;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+	}
+	
+	.slider-container {
+		text-align: center;
+	}
+	
+	.onboarding-slider {
+		width: 100%;
+		height: 6px;
+		background: rgba(0, 212, 170, 0.2);
+		border-radius: 3px;
+		outline: none;
+		margin: 1rem 0;
+		-webkit-appearance: none;
+	}
+	
+	.onboarding-slider::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		width: 24px;
+		height: 24px;
+		background: #00d4aa;
+		border-radius: 50%;
+		cursor: pointer;
+		box-shadow: 0 0 8px rgba(0, 212, 170, 0.5);
+	}
+	
+	.onboarding-slider::-moz-range-thumb {
+		width: 24px;
+		height: 24px;
+		background: #00d4aa;
+		border-radius: 50%;
+		cursor: pointer;
+		border: none;
+		box-shadow: 0 0 8px rgba(0, 212, 170, 0.5);
+	}
+	
+	.slider-labels {
+		display: flex;
+		justify-content: space-between;
+		font-size: 0.8rem;
+		color: rgba(226, 232, 240, 0.7);
+		margin-bottom: 0.5rem;
+	}
+	
+	.slider-value {
+		font-size: 1.1rem;
+		color: #00d4aa;
+		font-weight: 600;
+		font-family: 'Space Grotesk', sans-serif;
+	}
+	
+	.follow-up {
+		margin-top: 2rem;
+		padding-top: 2rem;
+		border-top: 1px solid rgba(0, 212, 170, 0.2);
+	}
+	
+	.follow-up p {
+		font-size: 1rem;
+		margin-bottom: 1rem;
+		text-align: left;
+	}
+	
+	.onboarding-actions {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: 3rem;
+		gap: 1rem;
+	}
+	
+	.onboarding-actions .btn-primary:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	
+	.onboarding-skip {
+		text-align: center;
+		margin-top: 1.5rem;
+	}
+	
+	.skip-button {
+		background: none;
+		border: none;
+		color: rgba(226, 232, 240, 0.6);
+		font-size: 0.9rem;
+		cursor: pointer;
+		text-decoration: underline;
+		transition: color 0.2s ease;
+	}
+	
+	.skip-button:hover {
+		color: rgba(226, 232, 240, 0.8);
 	}
 	
 	/* Modal Styles */
@@ -714,6 +1311,35 @@
 	
 	/* Responsive Design */
 	@media (max-width: 768px) {
+		.onboarding-modal {
+			padding: 2rem 1.5rem;
+			margin: 1rem;
+			max-height: 95vh;
+		}
+		
+		.onboarding-step h2 {
+			font-size: 1.5rem;
+		}
+		
+		.onboarding-step p {
+			font-size: 1rem;
+		}
+		
+		.option-radio, .option-checkbox {
+			padding: 0.75rem;
+			font-size: 0.9rem;
+		}
+		
+		.onboarding-actions {
+			flex-direction: column-reverse;
+			gap: 0.75rem;
+		}
+		
+		.onboarding-actions .btn-primary,
+		.onboarding-actions .btn-outline {
+			width: 100%;
+		}
+		
 		.content-grid {
 			grid-template-columns: 1fr;
 			grid-template-rows: auto auto auto;
@@ -739,6 +1365,18 @@
 	}
 	
 	@media (max-width: 480px) {
+		.onboarding-overlay {
+			padding: 1rem;
+		}
+		
+		.onboarding-modal {
+			padding: 1.5rem 1rem;
+		}
+		
+		.onboarding-step h2 {
+			font-size: 1.25rem;
+		}
+		
 		.main-container {
 			padding: 1rem 0.5rem;
 		}
