@@ -57,119 +57,115 @@
 
 <!-- Main Content with Sidebar Offset -->
 <main class="main-container">
-	<div class="header-section">
-		<h1 class="main-title">Welcome to Circuitspace</h1>
-		<p class="subtitle">Build, Learn, and Create Electronic Circuits</p>
-	</div>
+	<!-- Hero Section -->
+	<section class="hero-section">
+		<div class="container">
+			<div class="hero-content">
+				<h1 class="hero-title">Build Physical Prototypes with AI and AR Assistance</h1>
+				<p class="hero-subtitle">For students, makers, and tinkerers. Get guidance, build smarter, and level up with every circuit.</p>
+				
+				<div class="project-start">
+					<h2 class="project-start-title">Start Your Project</h2>
+					<div class="chat-input-container">
+						<div class="chat-input-wrapper">
+							<textarea 
+								bind:value={projectInput}
+								placeholder="Tell me about your idea..."
+								class="chat-input"
+								rows="1"
+							></textarea>
+							<div class="chat-input-actions">
+								<div class="left-actions">
+									<button class="search-button" title="Search">
+										<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+											<circle cx="11" cy="11" r="8"></circle>
+											<path d="m21 21-4.35-4.35"></path>
+										</svg>
+									</button>
+								</div>
+								<div class="right-actions">
+									<button class="attachment-button" title="Attach file">
+										<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+											<path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.64 16.2a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+										</svg>
+									</button>
+									<button class="mic-button" title="Voice input">
+										<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+											<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+											<path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+											<line x1="12" y1="19" x2="12" y2="23"></line>
+											<line x1="8" y1="23" x2="16" y2="23"></line>
+										</svg>
+									</button>
+									<button 
+										class="send-button" 
+										class:transitioning={isTransitioning}
+										on:click={handleProjectSubmit}
+										disabled={!projectInput.trim() || isTransitioning}
+										title="Send"
+									>
+										{#if isTransitioning}
+											<span class="button-spinner"></span>
+										{:else}
+											<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+												<line x1="22" y1="2" x2="11" y2="13"></line>
+												<polygon points="22,2 15,22 11,13 2,9 22,2"></polygon>
+											</svg>
+										{/if}
+									</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
 	
-	<div class="content-grid">
-		<!-- Quick Start Card -->
-		<div class="card quick-start-card">
-			<h2>🚀 Quick Start</h2>
-			<div class="input-section">
-				<textarea 
-					bind:value={projectInput}
-					placeholder="Describe your circuit project idea..."
-					class="project-input"
-					rows="4"
-				></textarea>
-				<button 
-					class="btn-primary" 
-					class:transitioning={isTransitioning}
-					on:click={handleProjectSubmit}
-					disabled={!projectInput.trim() || isTransitioning}
-				>
-					{#if isTransitioning}
-						<span class="button-spinner"></span>
-						Launching...
-					{:else}
-						Start Planning
-					{/if}
-				</button>
+	<!-- How It Works Section -->
+	<section class="how-it-works-section">
+		<div class="container">
+			<div class="how-it-works-content">
+				<h2 class="section-title">How It Works</h2>
+				<div class="how-it-works-grid">
+				<div class="work-card">
+					<div class="work-card-image">🤖</div>
+					<h3 class="work-card-title">AI-Powered Planning</h3>
+					<p class="work-card-text">Describe your project idea and get intelligent component suggestions, wiring diagrams, and step-by-step guidance.</p>
+				</div>
+				<div class="work-card">
+					<div class="work-card-image">🔧</div>
+					<h3 class="work-card-title">Component Library</h3>
+					<p class="work-card-text">Access our comprehensive database of electronic components with detailed specifications and usage examples.</p>
+				</div>
+				<div class="work-card">
+					<div class="work-card-image">⚡</div>
+					<h3 class="work-card-title">Circuit Designer</h3>
+					<p class="work-card-text">Build and test your circuits virtually with our interactive designer before creating physical prototypes.</p>
+				</div>
+				<div class="work-card">
+					<div class="work-card-image">�</div>
+					<h3 class="work-card-title">AR Assistance</h3>
+					<p class="work-card-text">Use augmented reality to overlay instructions and component information directly onto your physical workspace.</p>
+				</div>
 			</div>
 		</div>
-		
-		<!-- Components Card -->
-		<div class="card">
-			<h2>🔧 Components</h2>
-			<p>Explore our comprehensive component library and learn about electronic components, their functions, and how to use them in your projects.</p>
-			<button class="btn-outline" on:click={goToComponents}>
-				Explore Components
-			</button>
-		</div>
-		
-		<!-- Circuit Designer Card -->
-		<div class="card">
-			<h2>⚡ Circuit Designer</h2>
-			<p>Test the new Pin-Out system with the LED Dimmer project. See how components connect with Arduino Leonardo.</p>
-			<div class="demo-buttons">
-				<button class="btn-outline" on:click={() => goto('/demo-connections')}>
-					📋 View Pin-Out Demo
-				</button>
-				<button class="btn-outline" on:click={() => goto('/test-circuit')}>
-					🛠️ Test Circuit Designer
-				</button>
-			</div>
-		</div>
-		
-		<!-- Templates Card -->
-		<div class="card">
-			<h2>📋 Project Templates</h2>
-			<p>Browse our collection of ready-to-build project templates. From beginner LED controllers to advanced IoT systems.</p>
-			<button class="btn-outline" on:click={goToTemplates}>
-				Browse Templates
-			</button>
-		</div>
-		
-		<!-- Features Grid -->
-		<div class="features-grid">
-			<div class="feature-card">
-				<div class="feature-icon">🤖</div>
-				<h3>AI-Powered</h3>
-				<p>Get intelligent suggestions and help from our AI assistant</p>
-			</div>
-			<div class="feature-card">
-				<div class="feature-icon">🎯</div>
-				<h3>Interactive</h3>
-				<p>Build and test circuits in real-time with visual feedback</p>
-			</div>
-			<div class="feature-card">
-				<div class="feature-icon">📚</div>
-				<h3>Educational</h3>
-				<p>Learn electronics with step-by-step tutorials and guides</p>
-			</div>
-		</div>
-	</div>
+	</section>
 </main>
 
 <style>
 	:global(body) {
 		margin: 0;
 		padding: 0;
-		font-family: 'IBM Plex Mono', monospace;
-		background: linear-gradient(135deg, #000428 0%, #004e92 25%, #009ffd 50%, #00d2ff 75%, #ffffff 100%);
-		background-size: 300% 300%;
-		animation: gradientShift 15s ease infinite;
+		font-family: 'Inter', sans-serif;
+		background: #191919;
 		color: rgba(255, 255, 255, 0.9);
 		overflow-x: hidden;
-		overflow-y: auto;
 		min-height: 100vh;
-		position: relative;
 	}
 	
 	:global(body::before) {
-		content: '';
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background: 
-			radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-			radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-			radial-gradient(circle at 40% 40%, rgba(120, 219, 226, 0.3) 0%, transparent 50%);
-		pointer-events: none;
-		z-index: -1;
+		display: none;
 	}
 	
 	/* Page Transition Styles */
@@ -269,299 +265,253 @@
 	.main-container {
 		margin-left: 280px;
 		min-height: 100vh;
-		padding: 4rem 3rem;
 		position: relative;
 		z-index: 1;
 	}
 	
-	.header-section {
-		text-align: center;
-		margin-bottom: 4rem;
+	.container {
+		max-width: 1200px;
+		margin: 0 auto;
+		padding: 0 3rem;
+	}
+	
+	/* Hero Section */
+	.hero-section {
+		min-height: 75vh;
+		display: flex;
+		align-items: center;
+		padding: 2rem 0;
 		position: relative;
 	}
 	
-	.main-title {
-		font-family: 'Space Grotesk', sans-serif;
-		font-size: clamp(2.5rem, 5vw, 4rem);
-		font-weight: 700;
-		margin: 0 0 1rem 0;
-		background: linear-gradient(135deg, rgba(120, 119, 198, 1) 0%, rgba(255, 119, 198, 1) 50%, rgba(120, 219, 226, 1) 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-		text-shadow: 0 0 40px rgba(120, 119, 198, 0.4);
-		filter: drop-shadow(0 4px 8px rgba(120, 119, 198, 0.2));
-	}
-	
-	.subtitle {
-		font-family: 'Space Grotesk', sans-serif;
-		font-size: 1.25rem;
-		font-weight: 400;
-		color: rgba(255, 255, 255, 0.8);
-		margin: 0;
-	}
-	
-	.content-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-		gap: 2rem;
-		max-width: 1400px;
-		margin: 0 auto;
-	}
-	
-	.quick-start-card {
-		grid-column: 1 / -1;
-		max-width: 600px;
-		margin: 0 auto;
-	}
-	
-	.card {
-		background: rgba(255, 255, 255, 0.06);
-		backdrop-filter: blur(60px) saturate(200%);
-		-webkit-backdrop-filter: blur(60px) saturate(200%);
-		border: 1px solid rgba(255, 255, 255, 0.15);
-		border-radius: 20px;
-		padding: 2rem;
-		transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-		box-shadow: 
-			0 16px 32px rgba(31, 38, 135, 0.2),
-			inset 0 1px 0 rgba(255, 255, 255, 0.2),
-			inset 0 -1px 0 rgba(255, 255, 255, 0.05);
-		position: relative;
-		overflow: hidden;
-	}
-	
-	.card::before {
+	.hero-section::before {
 		content: '';
 		position: absolute;
 		top: 0;
 		left: 0;
 		right: 0;
-		height: 1px;
-		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-		opacity: 0;
-		transition: opacity 0.3s ease;
+		bottom: 0;
+		background-image: linear-gradient(rgba(37, 37, 37, 0.6) 1px, transparent 1px);
+		background-size: 100% 75px;
+		background-repeat: repeat-y;
+		pointer-events: none;
+		z-index: 0;
 	}
 	
-	.card:hover {
-		border-color: rgba(255, 255, 255, 0.25);
-		background: rgba(255, 255, 255, 0.08);
-		box-shadow: 
-			0 24px 48px rgba(31, 38, 135, 0.3),
-			inset 0 1px 0 rgba(255, 255, 255, 0.3),
-			inset 0 -1px 0 rgba(255, 255, 255, 0.1),
-			0 0 80px rgba(120, 119, 198, 0.1);
-		transform: translateY(-8px) scale(1.02);
+	.hero-content {
+		width: 100%;
+		position: relative;
+		z-index: 1;
+		text-align: center;
 	}
 	
-	.card:hover::before {
-		opacity: 1;
+	.hero-title {
+		font-family: 'Inter', sans-serif;
+		font-size: clamp(2.5rem, 5vw, 3.5rem);
+		font-weight: 700;
+		line-height: 1.1;
+		margin: 0 auto 1.5rem auto;
+		color: #FFFFFF;
+		max-width: 800px;
+		text-align: center;
 	}
 	
-	.card h2 {
-		font-family: 'Space Grotesk', sans-serif;
+	.hero-subtitle {
+		font-family: 'Inter', sans-serif;
+		font-size: 1.25rem;
+		font-weight: 400;
+		color: rgba(255, 255, 255, 0.7);
+		margin: 0 auto 3rem auto;
+		max-width: 600px;
+		line-height: 1.6;
+		text-align: center;
+	}
+	
+	.project-start {
+		max-width: 800px;
+		margin: 0 auto;
+		text-align: left;
+	}
+	
+	.project-start-title {
+		font-family: 'Inter', sans-serif;
 		font-size: 1.5rem;
 		font-weight: 600;
-		margin: 0 0 1.5rem 0;
-		background: linear-gradient(135deg, rgba(120, 119, 198, 1), rgba(255, 119, 198, 1));
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
+		color: #FFFFFF;
+		margin: 0 0 1rem 0;
 	}
 	
-	.card p {
-		line-height: 1.6;
-		margin-bottom: 2rem;
-		color: rgba(255, 255, 255, 0.8);
+	.chat-input-container {
+		position: relative;
 	}
 	
-	.input-section {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-	
-	.project-input {
-		background: rgba(255, 255, 255, 0.04);
-		backdrop-filter: blur(30px);
-		-webkit-backdrop-filter: blur(30px);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		border-radius: 12px;
-		padding: 1rem;
-		color: rgba(255, 255, 255, 0.9);
-		font-family: 'IBM Plex Mono', monospace;
-		font-size: 0.9rem;
-		resize: vertical;
-		min-height: 100px;
-		transition: all 0.3s ease;
-		box-shadow: 
-			inset 0 1px 0 rgba(255, 255, 255, 0.05),
-			0 4px 20px rgba(0, 0, 0, 0.05);
-	}
-	
-	.project-input:focus {
-		outline: none;
-		border-color: rgba(120, 119, 198, 0.5);
-		background: rgba(255, 255, 255, 0.06);
-		box-shadow: 
-			inset 0 1px 0 rgba(255, 255, 255, 0.1),
-			0 0 0 3px rgba(120, 119, 198, 0.1),
-			0 8px 32px rgba(120, 119, 198, 0.1);
-	}
-	
-	.project-input::placeholder {
-		color: rgba(255, 255, 255, 0.4);
-	}
-	
-	.demo-buttons {
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-	
-	.features-grid {
-		grid-column: 1 / -1;
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: 1.5rem;
-		margin-top: 2rem;
-	}
-	
-	.feature-card {
-		background: rgba(255, 255, 255, 0.04);
-		backdrop-filter: blur(30px);
+	.chat-input-wrapper {
+		background: rgba(255, 255, 255, 0.05);
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 16px;
-		padding: 1.5rem;
-		text-align: center;
+		padding: 1rem;
+		position: relative;
+		backdrop-filter: blur(20px);
 		transition: all 0.3s ease;
 	}
 	
-	.feature-card:hover {
-		background: rgba(255, 255, 255, 0.06);
+	.chat-input-wrapper:focus-within {
 		border-color: rgba(255, 255, 255, 0.2);
-		transform: translateY(-4px);
+		background: rgba(255, 255, 255, 0.08);
 	}
 	
-	.feature-icon {
-		font-size: 2.5rem;
+	.chat-input {
+		width: 100%;
+		background: transparent;
+		border: none;
+		outline: none;
+		color: #FFFFFF;
+		font-family: 'Inter', sans-serif;
+		font-size: 1rem;
+		resize: none;
 		margin-bottom: 1rem;
-	}
-	
-	.feature-card h3 {
-		font-family: 'Space Grotesk', sans-serif;
-		font-size: 1.2rem;
-		font-weight: 600;
-		margin: 0 0 0.5rem 0;
-		color: rgba(255, 255, 255, 0.9);
-	}
-	
-	.feature-card p {
-		font-size: 0.9rem;
-		color: rgba(255, 255, 255, 0.7);
-		margin: 0;
+		min-height: 2.5rem;
+		max-height: 200px;
 		line-height: 1.5;
 	}
 	
-	/* Buttons */
-	.btn-primary, .btn-outline {
-		font-family: 'Space Grotesk', sans-serif;
-		font-weight: 500;
-		padding: 0.75rem 1.5rem;
-		border-radius: 12px;
+	.chat-input::placeholder {
+		color: rgba(255, 255, 255, 0.4);
+	}
+	
+	.chat-input-actions {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+	
+	.left-actions, .right-actions {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+	}
+	
+	.search-button, .attachment-button, .mic-button {
+		width: 40px;
+		height: 40px;
 		border: none;
+		background: transparent;
+		color: #CABDF5;
+		border-radius: 8px;
 		cursor: pointer;
-		transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-		font-size: 1rem;
-		position: relative;
-		overflow: hidden;
-		backdrop-filter: blur(20px);
-		-webkit-backdrop-filter: blur(20px);
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 	
-	.btn-primary {
-		background: linear-gradient(135deg, rgba(120, 119, 198, 0.8) 0%, rgba(255, 119, 198, 0.8) 100%);
-		color: rgba(255, 255, 255, 0.95);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		box-shadow: 
-			0 8px 32px rgba(120, 119, 198, 0.3),
-			inset 0 1px 0 rgba(255, 255, 255, 0.2);
-		width: 100%;
+	.search-button:hover, .attachment-button:hover, .mic-button:hover {
+		background: rgba(202, 189, 245, 0.1);
+		color: #FFFFFF;
 	}
 	
-	.btn-primary::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: -100%;
-		width: 100%;
-		height: 100%;
-		background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-		transition: left 0.5s ease;
+	.send-button {
+		width: 40px;
+		height: 40px;
+		border: none;
+		background: #EDF760;
+		color: #000000;
+		border-radius: 50%;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 	
-	.btn-primary:hover:not(:disabled) {
-		transform: translateY(-3px) scale(1.02);
-		box-shadow: 
-			0 12px 40px rgba(120, 119, 198, 0.4),
-			inset 0 1px 0 rgba(255, 255, 255, 0.3);
-		background: linear-gradient(135deg, rgba(120, 119, 198, 0.9) 0%, rgba(255, 119, 198, 0.9) 100%);
+	.send-button:hover:not(:disabled) {
+		background: #F0FA70;
+		transform: scale(1.05);
 	}
 	
-	.btn-primary:hover::before {
-		left: 100%;
-	}
-	
-	.btn-primary:disabled {
+	.send-button:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
 	}
 	
-	.btn-primary.transitioning {
-		background: rgba(120, 119, 198, 0.1);
-		border-color: rgba(120, 119, 198, 0.6);
-		transform: scale(0.98);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 0.5rem;
+	.send-button.transitioning {
+		background: rgba(237, 247, 96, 0.7);
 	}
 	
+	/* How It Works Section */
+	.how-it-works-section {
+		padding: 3rem 0 6rem 0;
+		background: rgba(255, 255, 255, 0.02);
+		margin-top: -5vh;
+	}
+	
+	.section-title {
+		font-family: 'Inter', sans-serif;
+		font-size: 1.5rem;
+		font-weight: 600;
+		color: #FFFFFF;
+		text-align: left;
+		margin: 0 0 3rem 0;
+	}
+	
+	.how-it-works-content {
+		max-width: 800px;
+		margin: 0 auto;
+	}
+	
+	.how-it-works-grid {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 2rem;
+	}
+	
+	.work-card {
+		background: rgba(255, 255, 255, 0.03);
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		border-radius: 16px;
+		padding: 2rem;
+		text-align: center;
+		transition: all 0.3s ease;
+	}
+	
+	.work-card:hover {
+		background: rgba(255, 255, 255, 0.05);
+		border-color: rgba(255, 255, 255, 0.15);
+		transform: translateY(-4px);
+	}
+	
+	.work-card-image {
+		font-size: 3rem;
+		margin-bottom: 1.5rem;
+	}
+	
+	.work-card-title {
+		font-family: 'Inter', sans-serif;
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: #FFFFFF;
+		margin: 0 0 1rem 0;
+	}
+	
+	.work-card-text {
+		font-family: 'Inter', sans-serif;
+		font-size: 1rem;
+		color: rgba(255, 255, 255, 0.7);
+		line-height: 1.6;
+		margin: 0;
+	}
+	
+	/* Buttons */
 	.button-spinner {
 		width: 16px;
 		height: 16px;
-		border: 2px solid rgba(120, 119, 198, 0.3);
-		border-top: 2px solid rgba(120, 119, 198, 1);
+		border: 2px solid rgba(0, 0, 0, 0.3);
+		border-top: 2px solid #000000;
 		border-radius: 50%;
 		animation: spin 1s linear infinite;
 	}
 	
-	.btn-outline {
-		background: rgba(255, 255, 255, 0.02);
-		color: rgba(120, 119, 198, 1);
-		border: 1px solid rgba(120, 119, 198, 0.4);
-		box-shadow: 
-			inset 0 1px 0 rgba(255, 255, 255, 0.05),
-			0 4px 20px rgba(0, 0, 0, 0.05);
-		width: 100%;
-	}
-	
-	.btn-outline:hover {
-		background: rgba(120, 119, 198, 0.08);
-		border-color: rgba(120, 119, 198, 0.6);
-		transform: translateY(-2px);
-		box-shadow: 
-			inset 0 1px 0 rgba(255, 255, 255, 0.1),
-			0 8px 32px rgba(120, 119, 198, 0.2);
-	}
-	
 	/* Animations */
-	@keyframes gradientShift {
-		0% { background-position: 0% 50%; }
-		50% { background-position: 100% 50%; }
-		100% { background-position: 0% 50%; }
-	}
-	
 	@keyframes fadeInOverlay {
 		from {
 			opacity: 0;
@@ -620,47 +570,80 @@
 	@media (max-width: 1024px) {
 		.main-container {
 			margin-left: 0;
-			padding: 2rem 1.5rem;
 		}
 		
-		.content-grid {
-			grid-template-columns: 1fr;
+		.container {
+			padding: 0 2rem;
 		}
 		
-		.features-grid {
+		.how-it-works-grid {
 			grid-template-columns: 1fr;
+			gap: 1.5rem;
 		}
 	}
 	
 	@media (max-width: 768px) {
-		.main-container {
-			padding: 1.5rem 1rem;
+		.container {
+			padding: 0 1.5rem;
 		}
 		
-		.header-section {
-			margin-bottom: 2rem;
+		.hero-section {
+			min-height: 80vh;
+			padding: 1rem 0;
 		}
 		
-		.card {
+		.hero-title {
+			font-size: clamp(2rem, 8vw, 3rem);
+		}
+		
+		.hero-subtitle {
+			font-size: 1.1rem;
+			margin-bottom: 3rem;
+		}
+		
+		.how-it-works-section {
+			padding: 4rem 0;
+		}
+		
+		.section-title {
+			font-size: 1.25rem;
+			margin-bottom: 3rem;
+		}
+		
+		.work-card {
 			padding: 1.5rem;
-		}
-		
-		.demo-buttons {
-			gap: 0.75rem;
 		}
 	}
 	
 	@media (max-width: 480px) {
-		.main-container {
-			padding: 1rem 0.5rem;
+		.container {
+			padding: 0 1rem;
 		}
 		
-		.card {
-			padding: 1rem;
+		.hero-title {
+			font-size: clamp(1.8rem, 10vw, 2.5rem);
 		}
 		
-		.content-grid {
-			gap: 1.5rem;
+		.hero-subtitle {
+			font-size: 1rem;
+			margin-bottom: 2rem;
+		}
+		
+		.chat-input-wrapper {
+			padding: 0.75rem;
+		}
+		
+		.section-title {
+			font-size: 2rem;
+		}
+		
+		.work-card {
+			padding: 1.25rem;
+		}
+		
+		.work-card-image {
+			font-size: 2.5rem;
+			margin-bottom: 1rem;
 		}
 	}
 </style>
