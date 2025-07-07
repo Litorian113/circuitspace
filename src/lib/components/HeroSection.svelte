@@ -9,6 +9,18 @@
 <!-- Hero Section -->
 <section class="hero-section">
 	<div class="container">
+		<!-- Login Section -->
+		<div class="login-section">
+			<button class="login-button" aria-label="Login">
+				Login
+			</button>
+			<button class="dropdown-button" aria-label="More options">
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<polyline points="6,9 12,15 18,9"></polyline>
+				</svg>
+			</button>
+		</div>
+		
 		<div class="hero-content">
 			<h1 class="hero-title">Build Physical Prototypes with AI and AR Assistance</h1>
 			<p class="hero-subtitle">For students, makers, and tinkerers. Get guidance, build smarter, and level up with every circuit.</p>
@@ -100,6 +112,52 @@
 		background-repeat: repeat-y;
 		pointer-events: none;
 		z-index: 0;
+	}
+	
+	/* Login Section */
+	.login-section {
+		position: absolute;
+		top: 2rem;
+		right: 2rem;
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+		z-index: 2;
+	}
+	
+	.login-button {
+		background: #EDF760;
+		color: #000000;
+		border: none;
+		border-radius: 8px;
+		padding: 0.75rem 2rem;
+		font-family: 'Inter', sans-serif;
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+	
+	.login-button:hover {
+		background: #F0FA70;
+		transform: translateY(-1px);
+	}
+	
+	.dropdown-button {
+		background: transparent;
+		color: #FFFFFF;
+		border: none;
+		padding: 0.75rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	
+	.dropdown-button:hover {
+		color: rgba(255, 255, 255, 0.7);
+		transform: translateY(-1px);
 	}
 	
 	.hero-content {
@@ -274,6 +332,20 @@
 			padding: 1rem 0;
 		}
 		
+		.login-section {
+			top: 1rem;
+			right: 1.5rem;
+		}
+		
+		.login-button {
+			padding: 0.625rem 1.25rem;
+			font-size: 0.8rem;
+		}
+		
+		.dropdown-button {
+			padding: 0.625rem;
+		}
+		
 		.hero-title {
 			font-size: clamp(2rem, 8vw, 3rem);
 		}
@@ -287,6 +359,20 @@
 	@media (max-width: 480px) {
 		.container {
 			padding: 0 1rem;
+		}
+		
+		.login-section {
+			top: 1rem;
+			right: 1rem;
+		}
+		
+		.login-button {
+			padding: 0.5rem 1rem;
+			font-size: 0.75rem;
+		}
+		
+		.dropdown-button {
+			padding: 0.5rem;
 		}
 		
 		.hero-title {
