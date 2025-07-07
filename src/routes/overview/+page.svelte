@@ -210,9 +210,65 @@
 	<!-- Header -->
 	<header class="components-header">
 		<div class="header-left">
-			<h1>Explore Components</h1>
-			<p class="page-description">Learn about electronic components and gain experience points through interactive quizzes!</p>
+			<h1>Component Library</h1>
 		</div>
+	</header>
+
+	<!-- Filters -->
+	<div class="filters-section">
+		<div class="filter-row">
+			<!-- Search Box with Icon -->
+			<div class="search-box">
+				<input 
+					type="text" 
+					placeholder="Search..." 
+					bind:value={searchTerm}
+				/>
+				<div class="search-divider"></div>
+				<div class="search-icon">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<circle cx="11" cy="11" r="8"/>
+						<path d="21 21l-4.35-4.35"/>
+					</svg>
+				</div>
+			</div>
+			
+			<!-- Filter Controls -->
+			<div class="filter-controls">
+				<div class="filter-group">
+					<select id="category-select" bind:value={selectedCategory}>
+						<option value="all">All Categories</option>
+						{#each categories as category}
+							<option value={category}>{category}</option>
+						{/each}
+					</select>
+				</div>
+				
+				<div class="filter-group">
+					<select id="difficulty-select" bind:value={selectedDifficulty}>
+						<option value="all">Difficulty</option>
+						{#each difficulties as difficulty}
+							<option value={difficulty}>
+								{difficulty === 'beginner' ? 'Beginner' : 
+								 difficulty === 'intermediate' ? 'Intermediate' : 'Advanced'}
+							</option>
+						{/each}
+					</select>
+				</div>
+				
+				<div class="filter-group">
+					<select id="sort-select" bind:value={sortBy}>
+						<option value="name">Name</option>
+						<option value="difficulty">Difficulty</option>
+						<option value="progress">Progress</option>
+					</select>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Stats Section -->
+	<div class="stats-section">
 		<div class="header-stats">
 			<div class="stat-card">
 				<span class="stat-number">{allComponents.length}</span>
@@ -225,53 +281,6 @@
 			<div class="stat-card">
 				<span class="stat-number">{allComponents.filter(c => getProgressPercentage(c.id) === 100).length}</span>
 				<span class="stat-label">Completed</span>
-			</div>
-		</div>
-	</header>
-
-	<!-- Filters -->
-	<div class="filters-section">
-		<div class="search-group">
-			<div class="search-box">
-				<input 
-					type="text" 
-					placeholder="Search components..." 
-					bind:value={searchTerm}
-				/>
-			</div>
-		</div>
-		
-		<div class="filter-controls">
-			<div class="filter-group">
-				<label for="category-select">Category:</label>
-				<select id="category-select" bind:value={selectedCategory}>
-					<option value="all">All Categories</option>
-					{#each categories as category}
-						<option value={category}>{category}</option>
-					{/each}
-				</select>
-			</div>
-			
-			<div class="filter-group">
-				<label for="difficulty-select">Difficulty:</label>
-				<select id="difficulty-select" bind:value={selectedDifficulty}>
-					<option value="all">All</option>
-					{#each difficulties as difficulty}
-						<option value={difficulty}>
-							{difficulty === 'beginner' ? 'Beginner' : 
-							 difficulty === 'intermediate' ? 'Intermediate' : 'Advanced'}
-						</option>
-					{/each}
-				</select>
-			</div>
-			
-			<div class="filter-group">
-				<label for="sort-select">Sort by:</label>
-				<select id="sort-select" bind:value={sortBy}>
-					<option value="name">Name</option>
-					<option value="difficulty">Difficulty</option>
-					<option value="progress">Progress</option>
-				</select>
 			</div>
 		</div>
 	</div>
@@ -396,9 +405,6 @@
 	.components-header {
 		padding: 2rem 3rem;
 		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
 		background: rgba(25, 25, 25, 0.5);
 		backdrop-filter: blur(8px);
 	}
@@ -416,9 +422,16 @@
 		margin: 0;
 	}
 
+	/* Stats Section */
+	.stats-section {
+		padding: 2rem 3rem;
+		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
+	}
+
 	.header-stats {
 		display: flex;
 		gap: 1.5rem;
+		justify-content: center;
 	}
 
 	.stat-card {
@@ -426,8 +439,8 @@
 		flex-direction: column;
 		align-items: center;
 		padding: 1rem 1.5rem;
-		background: rgba(0, 212, 170, 0.1);
-		border: 1px solid rgba(0, 212, 170, 0.3);
+		background: rgba(202, 189, 245, 0.1);
+		border: 1px solid rgba(202, 189, 245, 0.3);
 		border-radius: 12px;
 		backdrop-filter: blur(8px);
 	}
@@ -435,7 +448,7 @@
 	.stat-number {
 		font-size: 1.75rem;
 		font-weight: 700;
-		color: #00d4aa;
+		color: #CABDF5;
 		font-family: 'IBM Plex Mono', monospace;
 	}
 
@@ -450,31 +463,63 @@
 		padding: 2rem 3rem;
 	}
 
-	.search-group {
-		margin-bottom: 1.5rem;
+	.filter-row {
+		display: flex;
+		align-items: center;
+		gap: 2rem;
 	}
 
-	.search-box input {
-		width: 100%;
+	.search-box {
+		position: relative;
+		flex: 1;
 		max-width: 500px;
-		padding: 1rem 1.5rem;
-		border: 2px solid rgba(0, 212, 170, 0.3);
+		display: flex;
+		align-items: center;
+		background: #1F1F1F;
+		border: none;
 		border-radius: 12px;
-		font-size: 1rem;
-		background: rgba(25, 25, 25, 0.8);
-		color: #e2e8f0;
-		font-family: 'Space Grotesk', sans-serif;
 		transition: all 0.3s ease;
 	}
 
-	.search-box input:focus {
+	.search-box:focus-within {
+		box-shadow: 0 0 0 2px rgba(202, 189, 245, 0.3);
+	}
+
+	.search-box input {
+		flex: 1;
+		padding: 1rem 1.5rem;
+		border: none;
+		background: transparent;
+		font-size: 1rem;
+		color: #e2e8f0;
+		font-family: 'Space Grotesk', sans-serif;
 		outline: none;
-		border-color: #00d4aa;
-		box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.2);
 	}
 
 	.search-box input::placeholder {
 		color: rgba(226, 232, 240, 0.5);
+	}
+
+	.search-divider {
+		width: 1px;
+		height: 24px;
+		background: rgba(226, 232, 240, 0.2);
+		margin: 0 0.75rem;
+	}
+
+	.search-icon {
+		padding: 0 1rem;
+		color: rgba(226, 232, 240, 0.5);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 50px;
+	}
+
+	.search-icon svg {
+		width: 18px;
+		height: 18px;
+		flex-shrink: 0;
 	}
 
 	.filter-controls {
@@ -485,30 +530,27 @@
 
 	.filter-group {
 		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.filter-group label {
-		font-weight: 500;
-		color: rgba(226, 232, 240, 0.8);
-		font-size: 0.875rem;
+		align-items: center;
 	}
 
 	.filter-group select {
-		padding: 0.75rem 1rem;
-		border: 2px solid rgba(0, 212, 170, 0.3);
-		border-radius: 8px;
-		background: rgba(25, 25, 25, 0.8);
+		padding: 0.5rem 2rem 0.5rem 0.75rem;
+		border: none;
+		background: transparent;
 		color: #e2e8f0;
 		font-family: 'Space Grotesk', sans-serif;
+		font-size: 0.875rem;
 		cursor: pointer;
-		transition: border-color 0.3s ease;
+		outline: none;
+		appearance: none;
+		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+		background-position: right 0.5rem center;
+		background-repeat: no-repeat;
+		background-size: 1.5em 1.5em;
 	}
 
-	.filter-group select:focus {
-		outline: none;
-		border-color: #00d4aa;
+	.filter-group select:hover {
+		color: #00d4aa;
 	}
 
 	/* Components Grid */
@@ -554,7 +596,7 @@
 	.progress-icon {
 		width: 20px;
 		height: 20px;
-		filter: invert(1);
+		filter: brightness(0) invert(1);
 	}
 
 	.level-text {
@@ -1029,15 +1071,18 @@
 
 	/* Responsive Design */
 	@media (max-width: 1200px) {
-		.components-header {
+		.filter-row {
 			flex-direction: column;
-			align-items: flex-start;
+			align-items: stretch;
 			gap: 1.5rem;
 		}
-		
-		.header-stats {
-			align-self: stretch;
-			justify-content: space-around;
+
+		.search-box {
+			max-width: none;
+		}
+
+		.filter-controls {
+			justify-content: center;
 		}
 	}
 
@@ -1054,6 +1099,15 @@
 			font-size: 1.5rem;
 		}
 		
+		.stats-section {
+			padding: 1.5rem;
+		}
+		
+		.header-stats {
+			flex-direction: column;
+			gap: 1rem;
+		}
+		
 		.filters-section {
 			padding: 1.5rem;
 		}
@@ -1061,6 +1115,11 @@
 		.filter-controls {
 			flex-direction: column;
 			gap: 1rem;
+			align-items: stretch;
+		}
+
+		.filter-group {
+			justify-content: space-between;
 		}
 		
 		.components-grid {
