@@ -3,7 +3,6 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import Sidebar from '$lib/components/Sidebar.svelte';
-	import PromptInput from '$lib/components/PromptInput.svelte';
 	import CodeEditor from '$lib/components/CodeEditor.svelte';
 	import ExportModal from '$lib/components/ExportModal.svelte';
 	import CircuitDiagram from '$lib/components/CircuitDiagram.svelte';
@@ -552,7 +551,7 @@ void loop() {
 <svelte:head>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
-	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 </svelte:head>
 
 <div class="app-container">
@@ -571,12 +570,6 @@ void loop() {
 						<p>AI-powered circuit design assistant</p>
 					</div>
 					<div class="header-actions">
-						<button class="action-btn" on:click={() => switchToView('designer')}>
-							⚡ Circuit Designer
-						</button>
-						<button class="action-btn" on:click={() => switchToView('code')}>
-							💻 Circuit Code
-						</button>
 						<button class="action-btn secondary" on:click={exportChat}>
 							Export Chat
 						</button>
@@ -588,15 +581,6 @@ void loop() {
 					<div class="chat-container">
 						{#each messages as message (message.id)}
 							<div class="message {message.type}">
-								<div class="message-avatar">
-									{#if message.type === 'user'}
-										<div class="user-avatar">👤</div>
-									{:else if message.type === 'ai'}
-										<div class="ai-avatar">🤖</div>
-									{:else}
-										<div class="system-avatar">⚡</div>
-									{/if}
-								</div>
 								<div class="message-content">
 								<div class="message-text">
 									{@html message.content.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>')}
@@ -713,9 +697,6 @@ void loop() {
 					
 					{#if isLoading}
 						<div class="message ai">
-							<div class="message-avatar">
-								<div class="ai-avatar">🤖</div>
-							</div>
 							<div class="message-content">
 								<div class="typing-indicator">
 									<span></span>
@@ -731,12 +712,64 @@ void loop() {
 				<!-- Input Area -->
 				<div class="chat-input">
 					<div class="chat-container">
-						<PromptInput 
-							bind:value={currentInput}
-							onSend={handleSendMessage}
-							disabled={isLoading || (isStructuredConversation && tutorialActive)}
-							placeholder={isStructuredConversation ? "Strukturierte Konversation läuft..." : "Describe your circuit requirements, ask questions, or request component suggestions..."}
-						/>
+						<div class="modern-input-container">
+							<div class="modern-input-wrapper">
+								<textarea 
+									bind:value={currentInput}
+									on:keydown={(e) => {
+										if (e.key === 'Enter' && !e.shiftKey) {
+											e.preventDefault();
+											handleSendMessage(currentInput);
+										}
+									}}
+									placeholder={isStructuredConversation ? "Strukturierte Konversation läuft..." : "Describe your circuit requirements, ask questions, or request component suggestions..."}
+									class="modern-chat-input"
+									rows="1"
+									disabled={isLoading || (isStructuredConversation && tutorialActive)}
+								></textarea>
+								<div class="modern-input-actions">
+									<div class="left-actions">
+										<button class="modern-search-button" title="Search" aria-label="Search">
+											<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+												<circle cx="11" cy="11" r="8"></circle>
+												<path d="m21 21-4.35-4.35"></path>
+											</svg>
+										</button>
+									</div>
+									<div class="right-actions">
+										<button class="modern-attachment-button" title="Attach file" aria-label="Attach file">
+											<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+												<path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66L9.64 16.2a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+											</svg>
+										</button>
+										<button class="modern-mic-button" title="Voice input" aria-label="Voice input">
+											<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+												<path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+												<path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+												<line x1="12" y1="19" x2="12" y2="23"></line>
+												<line x1="8" y1="23" x2="16" y2="23"></line>
+											</svg>
+										</button>
+										<button 
+											class="modern-send-button" 
+											class:loading={isLoading}
+											on:click={() => handleSendMessage(currentInput)}
+											disabled={!currentInput.trim() || isLoading || (isStructuredConversation && tutorialActive)}
+											title="Send"
+										>
+											{#if isLoading}
+												<span class="modern-button-spinner"></span>
+											{:else}
+												<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+													<line x1="22" y1="2" x2="11" y2="13"></line>
+													<polygon points="22,2 15,22 11,13 2,9 22,2"></polygon>
+												</svg>
+											{/if}
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -765,9 +798,6 @@ void loop() {
 					<div class="header-actions">
 						<button class="action-btn" on:click={() => switchToView('chat')}>
 							💬 Back to Chat
-						</button>
-						<button class="action-btn" on:click={() => switchToView('designer')}>
-							⚡ Circuit Designer
 						</button>
 						{#if tutorialActive}
 							<button class="action-btn tutorial" on:click={completeTutorial}>
@@ -853,10 +883,15 @@ void loop() {
 	:global(body) {
 		margin: 0;
 		padding: 0;
-		font-family: 'IBM Plex Mono', monospace;
-		background: #0a0f1a;
-		color: #e2e8f0;
+		font-family: 'Inter', sans-serif;
+		background: #191919;
+		color: rgba(255, 255, 255, 0.9);
 		overflow: hidden;
+		min-height: 100vh;
+	}
+	
+	:global(body::before) {
+		display: none;
 	}
 	
 	.app-container {
@@ -871,80 +906,126 @@ void loop() {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
-		background: #0a0f1a;
+		background: #191919;
 		min-height: 0;
 		overflow: hidden;
+	}
+	
+	.main-content::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 280px;
+		right: 0;
+		bottom: 0;
+		background-image: 
+			linear-gradient(90deg, rgba(37, 37, 37, 1) 1px, transparent 1px);
+		background-size: 10% 100%;
+		background-repeat: repeat-x;
+		pointer-events: none;
+		z-index: -1;
 	}
 	
 	/* View Headers */
 	.view-header {
 		padding: 1.5rem 2rem;
-		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
-		background: rgba(15, 23, 42, 0.5);
-		backdrop-filter: blur(8px);
+		justify-content: center;
+		background: #191919;
 		flex-shrink: 0;
+		position: relative;
+		overflow: hidden;
+	}
+	
+	.view-header::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-image: 
+			linear-gradient(90deg, rgba(37, 37, 37, 0.3) 1px, transparent 1px);
+		background-size: 8% 100%;
+		background-repeat: repeat-x;
+		pointer-events: none;
+		z-index: 0;
+	}
+	
+	.view-header > * {
+		position: relative;
+		z-index: 1;
+	}
+	
+	.header-left {
+		max-width: 800px;
+		margin: 0 auto;
+		flex: 1;
+	}
+	
+	.header-actions {
+		position: absolute;
+		right: 2rem;
+		top: 50%;
+		transform: translateY(-50%);
+		display: flex;
+		gap: 1rem;
 	}
 	
 	.view-header h1 {
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-size: 1.75rem;
 		font-weight: 600;
 		margin: 0;
-		color: #00d4aa;
+		color: #FFFFFF;
 	}
 	
 	.view-header p {
 		font-size: 0.9rem;
 		margin: 0.25rem 0 0 0;
-		color: #94a3b8;
-	}
-	
-	.header-actions {
-		display: flex;
-		gap: 1rem;
+		color: rgba(255, 255, 255, 0.7);
 	}
 	
 	.action-btn {
 		padding: 0.5rem 1rem;
-		background: rgba(0, 212, 170, 0.1);
-		border: 1px solid rgba(0, 212, 170, 0.3);
+		background: rgba(255, 255, 255, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.3);
 		border-radius: 6px;
-		color: #00d4aa;
+		color: #FFFFFF;
 		cursor: pointer;
-		font-family: 'IBM Plex Mono', monospace;
+		font-family: 'Inter', sans-serif;
 		font-size: 0.9rem;
 		transition: all 0.2s ease;
 	}
 	
 	.action-btn:hover {
-		background: rgba(0, 212, 170, 0.2);
-		border-color: #00d4aa;
+		background: rgba(255, 255, 255, 0.2);
+		border-color: rgba(255, 255, 255, 0.5);
 	}
 	
 	.action-btn.secondary {
-		background: rgba(30, 41, 59, 0.5);
-		border-color: rgba(100, 116, 139, 0.3);
-		color: #94a3b8;
+		background: rgba(37, 37, 37, 0.5);
+		border-color: rgba(255, 255, 255, 0.2);
+		color: rgba(255, 255, 255, 0.7);
 	}
 	
 	.action-btn.secondary:hover {
-		background: rgba(30, 41, 59, 0.8);
-		border-color: rgba(100, 116, 139, 0.5);
-		color: #e2e8f0;
+		background: rgba(37, 37, 37, 0.8);
+		border-color: rgba(255, 255, 255, 0.3);
+		color: #FFFFFF;
 	}
 	
 	.action-btn.tutorial {
-		background: linear-gradient(135deg, #00d4aa 0%, #0ea5e9 100%);
-		color: #0a0f1a;
+		background: linear-gradient(135deg, rgba(120, 119, 198, 1), rgba(255, 119, 198, 1));
+		color: #FFFFFF;
 		border-color: transparent;
 	}
 	
 	.action-btn.tutorial:hover {
 		transform: translateY(-1px);
-		box-shadow: 0 4px 12px rgba(0, 212, 170, 0.3);
+		box-shadow: 0 4px 12px rgba(120, 119, 198, 0.3);
 	}
 	
 	/* Chat View */
@@ -953,6 +1034,24 @@ void loop() {
 		display: flex;
 		flex-direction: column;
 		min-height: 0;
+		position: relative;
+		background: #191919;
+	}
+	
+	.chat-view::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-image: 
+			linear-gradient(90deg, rgba(37, 37, 37, 0.3) 1px, transparent 1px),
+			linear-gradient(rgba(37, 37, 37, 0.25) 1px, transparent 1px);
+		background-size: 8% 100%, 100% 10%;
+		background-repeat: repeat-x, repeat-y;
+		pointer-events: none;
+		z-index: 0;
 	}
 	
 	.chat-messages {
@@ -963,84 +1062,32 @@ void loop() {
 		flex-direction: column;
 		gap: 1.5rem;
 		max-width: 100%;
+		position: relative;
+		z-index: 1;
 		/* margin: 0 auto; */
 	}
 	
 	.chat-container {
-		max-width: 900px;
+		max-width: 800px;
 		margin: 0 auto;
 		width: 100%;
 		padding: 0 1rem;
+		position: relative;
+		z-index: 1;
 	}
 	
 	.message {
 		display: flex;
-		gap: 1rem;
 		width: 100%;
-		max-width: 700px;
+		margin-bottom: 1.5rem;
 	}
 	
 	.message.user {
 		justify-content: flex-end;
-		margin-left: auto;
-		margin-right: 0;
-		max-width: 600px;
-		align-self: flex-end;
 	}
 	
-	.message.user .message-content {
-		order: 1;
-	}
-	
-	.message.user .message-avatar {
-		order: 2;
-	}
-	
-	.message.ai {
+	.message.ai, .message.system {
 		justify-content: flex-start;
-		margin-left: 0;
-		margin-right: auto;
-		max-width: 650px;
-		align-self: flex-start;
-	}
-	
-	.message.system {
-		justify-content: flex-start;
-		margin-left: 0;
-		margin-right: auto;
-		max-width: 700px;
-		align-self: flex-start;
-	}
-	
-	.message-avatar {
-		flex-shrink: 0;
-	}
-	
-	.user-avatar, .ai-avatar, .system-avatar {
-		width: 40px;
-		height: 40px;
-		border-radius: 50%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-weight: 600;
-		font-size: 1.2rem;
-	}
-	
-	.user-avatar {
-		background: linear-gradient(135deg, #0ea5e9 0%, #00d4aa 100%);
-		color: #0a0f1a;
-	}
-	
-	.ai-avatar {
-		background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-		border: 2px solid #00d4aa;
-		color: #00d4aa;
-	}
-	
-	.system-avatar {
-		background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
-		color: #f8fafc;
 	}
 	
 	.message-content {
@@ -1049,62 +1096,188 @@ void loop() {
 		margin-bottom: 16px;
 	}
 	
+	.message.user .message-content {
+		max-width: 70%;
+	}
+	
+	.message.ai .message-content,
+	.message.system .message-content {
+		max-width: 100%;
+	}
+	
 	.message-text {
-		background: rgba(30, 41, 59, 0.6);
 		padding: 1rem 1.25rem;
 		border-radius: 16px;
 		line-height: 1.6;
-		border: 1px solid rgba(0, 212, 170, 0.1);
+		color: rgba(255, 255, 255, 0.9);
 	}
 	
 	.message.user .message-text {
-		background: rgba(0, 212, 170, 0.1);
-		border-color: rgba(0, 212, 170, 0.3);
+		background: rgba(120, 119, 198, 0.2);
+		border: 1px solid rgba(120, 119, 198, 0.3);
+		backdrop-filter: blur(40px) saturate(180%);
+		-webkit-backdrop-filter: blur(40px) saturate(180%);
 	}
 	
+	.message.ai .message-text,
 	.message.system .message-text {
-		background: rgba(124, 58, 237, 0.1);
-		border-color: rgba(124, 58, 237, 0.3);
-	}
-	
-	.chat-input {
-		flex-shrink: 0;
-		padding: 1rem 2rem 2rem 2rem;
-		background: rgba(15, 23, 42, 0.5);
-		border-top: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.chat-input :global(.chat-container) {
-		max-width: 900px;
-		margin: 0 auto;
+		background: transparent;
+		border: none;
 		padding: 0;
 	}
 	
-	.chat-input :global(.prompt-input) {
-		width: 100%;
-		max-width: none;
+	/* Chat Input */
+	.chat-input {
+		flex-shrink: 0;
+		padding: 1rem 2rem 2rem 2rem;
+		background: #191919;
+		backdrop-filter: blur(40px) saturate(180%);
+		-webkit-backdrop-filter: blur(40px) saturate(180%);
+		border-top: 1px solid rgba(255, 255, 255, 0.1);
 	}
 	
-	.chat-input :global(.prompt-input) {
+	/* Modern Input Design */
+	.modern-input-container {
+		position: relative;
+		max-width: 800px;
+		margin: 0 auto;
+	}
+	
+	.modern-input-wrapper {
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 16px;
+		padding: 1rem;
+		position: relative;
+		backdrop-filter: blur(20px);
+		transition: all 0.3s ease;
+	}
+	
+	.modern-input-wrapper:focus-within {
+		border-color: rgba(255, 255, 255, 0.2);
+		background: rgba(255, 255, 255, 0.08);
+	}
+	
+	.modern-chat-input {
 		width: 100%;
-		max-width: none;
+		background: transparent;
+		border: none;
+		outline: none;
+		color: #FFFFFF;
+		font-family: 'Inter', sans-serif;
+		font-size: 1rem;
+		resize: none;
+		margin-bottom: 1rem;
+		min-height: 2.5rem;
+		max-height: 200px;
+		line-height: 1.5;
+	}
+	
+	.modern-chat-input::placeholder {
+		color: rgba(255, 255, 255, 0.4);
+	}
+	
+	.modern-chat-input:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
+	}
+	
+	.modern-input-actions {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+	
+	.left-actions, .right-actions {
+		display: flex;
+		gap: 0.5rem;
+		align-items: center;
+	}
+	
+	.modern-search-button, .modern-attachment-button, .modern-mic-button {
+		width: 40px;
+		height: 40px;
+		border: none;
+		background: transparent;
+		color: #CABDF5;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	
+	.modern-search-button:hover, .modern-attachment-button:hover, .modern-mic-button:hover {
+		background: rgba(202, 189, 245, 0.1);
+		color: #FFFFFF;
+	}
+	
+	.modern-send-button {
+		width: 40px;
+		height: 40px;
+		border: none;
+		background: #EDF760;
+		color: #000000;
+		border-radius: 50%;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	
+	.modern-send-button:hover:not(:disabled) {
+		background: #F0FA70;
+		transform: scale(1.05);
+	}
+	
+	.modern-send-button:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	
+	.modern-send-button.loading {
+		background: rgba(237, 247, 96, 0.7);
+	}
+	
+	.modern-button-spinner {
+		width: 16px;
+		height: 16px;
+		border: 2px solid rgba(0, 0, 0, 0.3);
+		border-top: 2px solid #000000;
+		border-radius: 50%;
+		animation: modernSpin 1s linear infinite;
+	}
+	
+	@keyframes modernSpin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	}
+	
+	.chat-input :global(.chat-container) {
+		max-width: 800px;
+		margin: 0 auto;
+		padding: 0;
 	}
 	
 	/* Component Suggestions */
 	.component-suggestions {
 		margin-top: 1rem;
 		padding: 1rem;
-		background: rgba(15, 23, 42, 0.8);
+		background: rgba(0, 0, 0, 0.4);
+		backdrop-filter: blur(40px) saturate(180%);
+		-webkit-backdrop-filter: blur(40px) saturate(180%);
 		border-radius: 12px;
-		border: 1px solid rgba(0, 212, 170, 0.2);
+		border: 1px solid rgba(255, 255, 255, 0.1);
 	}
 	
 	.component-suggestions h4 {
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-size: 1rem;
 		font-weight: 600;
 		margin: 0 0 1rem 0;
-		color: #00d4aa;
+		color: rgba(120, 119, 198, 1);
 	}
 	
 	.component-grid {
@@ -1114,8 +1287,8 @@ void loop() {
 	}
 	
 	.component-card {
-		background: rgba(30, 41, 59, 0.8);
-		border: 1px solid rgba(0, 212, 170, 0.2);
+		background: rgba(37, 37, 37, 0.8);
+		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 8px;
 		padding: 1rem;
 		transition: all 0.3s ease;
@@ -1123,43 +1296,45 @@ void loop() {
 	}
 	
 	.component-card:hover {
-		border-color: #00d4aa;
+		border-color: rgba(120, 119, 198, 0.5);
 		transform: translateY(-2px);
-		box-shadow: 0 4px 16px rgba(0, 212, 170, 0.2);
+		box-shadow: 0 4px 16px rgba(120, 119, 198, 0.2);
 	}
 	
 	.component-card h5 {
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-size: 0.95rem;
 		font-weight: 600;
 		margin: 0 0 0.5rem 0;
-		color: #e2e8f0;
+		color: #FFFFFF;
 	}
 	
 	.component-card p {
 		font-size: 0.85rem;
 		margin: 0 0 0.75rem 0;
-		opacity: 0.8;
+		color: rgba(255, 255, 255, 0.7);
 		line-height: 1.4;
 	}
 	
 	.component-card .price {
 		display: inline-block;
-		background: rgba(0, 212, 170, 0.2);
-		color: #00d4aa;
+		background: rgba(120, 119, 198, 0.2);
+		color: rgba(120, 119, 198, 1);
 		padding: 0.25rem 0.5rem;
 		border-radius: 4px;
 		font-size: 0.8rem;
 		font-weight: 600;
-		font-family: 'IBM Plex Mono', monospace;
+		font-family: 'Inter', sans-serif;
 	}
 	
 	/* Code Block */
 	.code-block {
 		margin-top: 1rem;
-		background: rgba(15, 23, 42, 0.9);
+		background: rgba(0, 0, 0, 0.4);
+		backdrop-filter: blur(40px) saturate(180%);
+		-webkit-backdrop-filter: blur(40px) saturate(180%);
 		border-radius: 12px;
-		border: 1px solid rgba(0, 212, 170, 0.2);
+		border: 1px solid rgba(255, 255, 255, 0.1);
 		overflow: hidden;
 	}
 	
@@ -1168,25 +1343,25 @@ void loop() {
 		align-items: center;
 		justify-content: space-between;
 		padding: 0.75rem 1rem;
-		background: rgba(0, 212, 170, 0.1);
-		border-bottom: 1px solid rgba(0, 212, 170, 0.2);
+		background: rgba(120, 119, 198, 0.1);
+		border-bottom: 1px solid rgba(120, 119, 198, 0.2);
 	}
 	
 	.code-header span {
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-weight: 600;
-		color: #00d4aa;
+		color: rgba(120, 119, 198, 1);
 		font-size: 0.9rem;
 	}
 	
 	.copy-code-btn {
 		padding: 0.5rem 1rem;
-		background: linear-gradient(135deg, #00d4aa 0%, #0ea5e9 100%);
+		background: linear-gradient(135deg, rgba(120, 119, 198, 1), rgba(255, 119, 198, 1));
 		border: none;
 		border-radius: 6px;
-		color: #0a0f1a;
+		color: #FFFFFF;
 		cursor: pointer;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-weight: 600;
 		font-size: 0.85rem;
 		transition: all 0.3s ease;
@@ -1194,13 +1369,13 @@ void loop() {
 	
 	.copy-code-btn:hover {
 		transform: translateY(-1px);
-		box-shadow: 0 4px 12px rgba(0, 212, 170, 0.3);
+		box-shadow: 0 4px 12px rgba(120, 119, 198, 0.3);
 	}
 	
 	.code-block pre {
 		margin: 0;
 		padding: 1rem;
-		background: rgba(0, 0, 0, 0.3);
+		background: rgba(0, 0, 0, 0.6);
 		overflow-x: auto;
 	}
 	
@@ -1208,22 +1383,26 @@ void loop() {
 		font-family: 'IBM Plex Mono', monospace;
 		font-size: 0.85rem;
 		line-height: 1.5;
-		color: #e2e8f0;
+		color: rgba(255, 255, 255, 0.9);
 	}
 	
 	.message-timestamp {
 		font-size: 0.75rem;
 		opacity: 0.5;
 		margin-top: 0.5rem;
-		padding: 0 1.25rem;
+		text-align: right;
+	}
+	
+	.message.ai .message-timestamp,
+	.message.system .message-timestamp {
+		text-align: left;
 	}
 	
 	/* Typing Indicator */
 	.typing-indicator {
-		background: rgba(30, 41, 59, 0.6);
-		padding: 1rem 1.25rem;
+		background: transparent;
+		padding: 1rem 0;
 		border-radius: 16px;
-		border: 1px solid rgba(0, 212, 170, 0.1);
 		display: flex;
 		gap: 4px;
 		align-items: center;
@@ -1232,7 +1411,7 @@ void loop() {
 	.typing-indicator span {
 		width: 8px;
 		height: 8px;
-		background: #00d4aa;
+		background: rgba(120, 119, 198, 1);
 		border-radius: 50%;
 		animation: typing 1.4s infinite ease-in-out;
 	}
@@ -1249,17 +1428,19 @@ void loop() {
 	.component-images {
 		margin-top: 1rem;
 		padding: 1rem;
-		background: rgba(15, 23, 42, 0.8);
+		background: rgba(0, 0, 0, 0.4);
+		backdrop-filter: blur(40px) saturate(180%);
+		-webkit-backdrop-filter: blur(40px) saturate(180%);
 		border-radius: 12px;
-		border: 1px solid rgba(0, 212, 170, 0.2);
+		border: 1px solid rgba(255, 255, 255, 0.1);
 	}
 	
 	.component-images h4 {
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-size: 1rem;
 		font-weight: 600;
 		margin: 0 0 1rem 0;
-		color: #00d4aa;
+		color: rgba(120, 119, 198, 1);
 	}
 	
 	.images-grid {
@@ -1270,8 +1451,8 @@ void loop() {
 	}
 	
 	.component-image {
-		background: rgba(30, 41, 59, 0.8);
-		border: 1px solid rgba(0, 212, 170, 0.2);
+		background: rgba(37, 37, 37, 0.8);
+		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 8px;
 		padding: 0.5rem;
 		transition: all 0.3s ease;
@@ -1284,9 +1465,9 @@ void loop() {
 	}
 	
 	.component-image:hover {
-		border-color: #00d4aa;
+		border-color: rgba(120, 119, 198, 0.5);
 		transform: translateY(-2px);
-		box-shadow: 0 4px 16px rgba(0, 212, 170, 0.2);
+		box-shadow: 0 4px 16px rgba(120, 119, 198, 0.2);
 	}
 	
 	.component-image img {
@@ -1306,21 +1487,21 @@ void loop() {
 	
 	.tutorial-start-btn {
 		padding: 1rem 2rem;
-		background: linear-gradient(135deg, #00d4aa 0%, #0ea5e9 100%);
+		background: linear-gradient(135deg, rgba(120, 119, 198, 1), rgba(255, 119, 198, 1));
 		border: none;
 		border-radius: 12px;
-		color: #0a0f1a;
+		color: #FFFFFF;
 		cursor: pointer;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-weight: 600;
 		font-size: 1.1rem;
 		transition: all 0.3s ease;
-		box-shadow: 0 4px 16px rgba(0, 212, 170, 0.3);
+		box-shadow: 0 4px 16px rgba(120, 119, 198, 0.3);
 	}
 	
 	.tutorial-start-btn:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 8px 24px rgba(0, 212, 170, 0.4);
+		box-shadow: 0 8px 24px rgba(120, 119, 198, 0.4);
 	}
 	
 	/* Project Buttons */
@@ -1336,7 +1517,7 @@ void loop() {
 		border: 2px solid;
 		border-radius: 10px;
 		cursor: pointer;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-weight: 600;
 		font-size: 0.95rem;
 		transition: all 0.3s ease;
@@ -1344,20 +1525,31 @@ void loop() {
 	}
 	
 	.project-btn.continue {
-		background: rgba(0, 212, 170, 0.1);
-		border-color: #00d4aa;
-		color: #00d4aa;
+		background: rgba(237, 247, 96, 0.1);
+		border-color: rgba(237, 247, 96, 0.5);
+		color: #EDF760;
 	}
 	
 	.project-btn.question {
-		background: rgba(99, 102, 241, 0.1);
-		border-color: #6366f1;
-		color: #6366f1;
+		background: rgba(202, 189, 245, 0.1);
+		border-color: rgba(202, 189, 245, 0.5);
+		color: #CABDF5;
 	}
 	
 	.project-btn:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 6px 20px rgba(0, 212, 170, 0.3);
+	}
+	
+	.project-btn.continue:hover {
+		background: #EDF760;
+		border-color: #EDF760;
+		color: #191919;
+	}
+	
+	.project-btn.question:hover {
+		background: #CABDF5;
+		border-color: #CABDF5;
+		color: #191919;
 	}
 	
 	/* Workspace Buttons */
@@ -1373,7 +1565,7 @@ void loop() {
 		border: 2px solid;
 		border-radius: 12px;
 		cursor: pointer;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-weight: 600;
 		font-size: 1rem;
 		transition: all 0.3s ease;
@@ -1381,20 +1573,20 @@ void loop() {
 	}
 	
 	.workspace-btn.circuit-designer {
-		background: rgba(0, 212, 170, 0.1);
-		border-color: #00d4aa;
-		color: #00d4aa;
+		background: rgba(120, 119, 198, 0.1);
+		border-color: rgba(120, 119, 198, 0.5);
+		color: rgba(120, 119, 198, 1);
 	}
 	
 	.workspace-btn.real-table {
-		background: rgba(234, 179, 8, 0.1);
-		border-color: #eab308;
-		color: #eab308;
+		background: rgba(255, 119, 198, 0.1);
+		border-color: rgba(255, 119, 198, 0.5);
+		color: rgba(255, 119, 198, 1);
 	}
 	
 	.workspace-btn:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 8px 24px rgba(0, 212, 170, 0.3);
+		box-shadow: 0 8px 24px rgba(120, 119, 198, 0.3);
 	}
 	
 	/* Real Table Button (nach Circuit Designer) */
@@ -1406,12 +1598,12 @@ void loop() {
 	
 	.real-table-btn {
 		padding: 1rem 2rem;
-		background: rgba(234, 179, 8, 0.1);
-		border: 2px solid #eab308;
+		background: rgba(255, 119, 198, 0.1);
+		border: 2px solid rgba(255, 119, 198, 0.5);
 		border-radius: 12px;
-		color: #eab308;
+		color: rgba(255, 119, 198, 1);
 		cursor: pointer;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-weight: 600;
 		font-size: 1rem;
 		transition: all 0.3s ease;
@@ -1420,8 +1612,8 @@ void loop() {
 	
 	.real-table-btn:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 8px 24px rgba(234, 179, 8, 0.3);
-		background: rgba(234, 179, 8, 0.2);
+		box-shadow: 0 8px 24px rgba(255, 119, 198, 0.3);
+		background: rgba(255, 119, 198, 0.2);
 	}
 	
 	/* Next Steps Buttons */
@@ -1437,7 +1629,7 @@ void loop() {
 		border: 2px solid;
 		border-radius: 12px;
 		cursor: pointer;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-weight: 600;
 		font-size: 1rem;
 		transition: all 0.3s ease;
@@ -1445,15 +1637,20 @@ void loop() {
 	}
 	
 	.next-step-btn.circuit {
-		background: rgba(0, 212, 170, 0.1);
-		border-color: #00d4aa;
-		color: #00d4aa;
+		background: rgba(120, 119, 198, 0.1);
+		border-color: rgba(120, 119, 198, 0.5);
+		color: rgba(120, 119, 198, 1);
 	}
 	
 	.next-step-btn.real-table {
-		background: rgba(234, 179, 8, 0.1);
-		border-color: #eab308;
-		color: #eab308;
+		background: rgba(255, 119, 198, 0.1);
+		border-color: rgba(255, 119, 198, 0.5);
+		color: rgba(255, 119, 198, 1);
+	}
+	
+	.next-step-btn:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 24px rgba(120, 119, 198, 0.3);
 	}
 	
 	/* Completion Buttons */
@@ -1469,7 +1666,7 @@ void loop() {
 		border: 2px solid;
 		border-radius: 10px;
 		cursor: pointer;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-weight: 600;
 		font-size: 0.95rem;
 		transition: all 0.3s ease;
@@ -1477,20 +1674,20 @@ void loop() {
 	}
 	
 	.completion-btn.new-chat {
-		background: rgba(0, 212, 170, 0.1);
-		border-color: #00d4aa;
-		color: #00d4aa;
+		background: rgba(120, 119, 198, 0.1);
+		border-color: rgba(120, 119, 198, 0.5);
+		color: rgba(120, 119, 198, 1);
 	}
 	
 	.completion-btn.go-home {
-		background: rgba(100, 116, 139, 0.1);
-		border-color: #64748b;
-		color: #64748b;
+		background: rgba(255, 255, 255, 0.1);
+		border-color: rgba(255, 255, 255, 0.3);
+		color: rgba(255, 255, 255, 0.7);
 	}
 	
 	.completion-btn:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 6px 20px rgba(0, 212, 170, 0.3);
+		box-shadow: 0 6px 20px rgba(120, 119, 198, 0.3);
 	}
 	
 	.next-step-btn:hover {
@@ -1526,40 +1723,42 @@ void loop() {
 	
 	.tutorial-sidebar {
 		width: 320px;
-		background: rgba(15, 23, 42, 0.8);
-		border-right: 1px solid rgba(0, 212, 170, 0.2);
+		background: rgba(0, 0, 0, 0.4);
+		backdrop-filter: blur(40px) saturate(180%);
+		-webkit-backdrop-filter: blur(40px) saturate(180%);
+		border-right: 1px solid rgba(255, 255, 255, 0.1);
 		display: flex;
 		flex-direction: column;
 	}
 	
 	.tutorial-header {
 		padding: 1.5rem;
-		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 	}
 	
 	.tutorial-header h3 {
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-size: 1.25rem;
 		font-weight: 600;
 		margin: 0 0 0.5rem 0;
-		color: #00d4aa;
+		color: rgba(120, 119, 198, 1);
 	}
 	
 	.tutorial-description {
 		margin: 0 0 1rem 0;
-		color: #94a3b8;
+		color: rgba(255, 255, 255, 0.7);
 		font-size: 0.875rem;
 	}
 	
 	.tutorial-progress {
 		display: inline-block;
-		background: rgba(0, 212, 170, 0.2);
-		color: #00d4aa;
+		background: rgba(120, 119, 198, 0.2);
+		color: rgba(120, 119, 198, 1);
 		padding: 0.5rem 1rem;
 		border-radius: 20px;
 		font-size: 0.85rem;
 		font-weight: 600;
-		font-family: 'IBM Plex Mono', monospace;
+		font-family: 'Inter', sans-serif;
 	}
 	
 	.tutorial-content {
@@ -1575,26 +1774,26 @@ void loop() {
 	}
 	
 	.tutorial-step h4 {
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-size: 1.1rem;
 		font-weight: 600;
 		margin: 0 0 0.5rem 0;
-		color: #e2e8f0;
+		color: #FFFFFF;
 	}
 	
 	.step-description {
 		margin: 0 0 1rem 0;
-		color: #94a3b8;
+		color: rgba(255, 255, 255, 0.7);
 		font-size: 0.9rem;
 	}
 	
 	.step-explanation {
-		background: rgba(30, 41, 59, 0.6);
+		background: rgba(37, 37, 37, 0.6);
 		padding: 1rem;
 		border-radius: 8px;
-		border: 1px solid rgba(0, 212, 170, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.1);
 		line-height: 1.6;
-		color: #e2e8f0;
+		color: rgba(255, 255, 255, 0.9);
 		font-size: 0.9rem;
 	}
 	
@@ -1607,34 +1806,34 @@ void loop() {
 	
 	.nav-btn {
 		padding: 0.75rem 1.5rem;
-		border: 1px solid rgba(0, 212, 170, 0.3);
+		border: 1px solid rgba(255, 255, 255, 0.3);
 		border-radius: 8px;
 		cursor: pointer;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-weight: 600;
 		font-size: 0.9rem;
 		transition: all 0.2s ease;
 	}
 	
 	.nav-btn.prev {
-		background: rgba(30, 41, 59, 0.8);
-		color: #94a3b8;
+		background: rgba(37, 37, 37, 0.8);
+		color: rgba(255, 255, 255, 0.7);
 	}
 	
 	.nav-btn.next {
-		background: rgba(0, 212, 170, 0.1);
-		color: #00d4aa;
+		background: rgba(120, 119, 198, 0.1);
+		color: rgba(120, 119, 198, 1);
 	}
 	
 	.nav-btn.finish {
-		background: linear-gradient(135deg, #00d4aa 0%, #0ea5e9 100%);
-		color: #0a0f1a;
+		background: linear-gradient(135deg, rgba(120, 119, 198, 1), rgba(255, 119, 198, 1));
+		color: #FFFFFF;
 		border-color: transparent;
 	}
 	
 	.nav-btn:hover:not(:disabled) {
 		transform: translateY(-1px);
-		box-shadow: 0 4px 12px rgba(0, 212, 170, 0.2);
+		box-shadow: 0 4px 12px rgba(120, 119, 198, 0.2);
 	}
 	
 	.nav-btn:disabled {
@@ -1681,6 +1880,10 @@ void loop() {
 			padding: 1rem 1.5rem 2rem 1.5rem;
 		}
 		
+		.modern-input-wrapper {
+			padding: 0.75rem;
+		}
+		
 		.message.user {
 			max-width: 500px;
 		}
@@ -1712,16 +1915,20 @@ void loop() {
 			padding: 1rem;
 		}
 		
+		.modern-input-wrapper {
+			padding: 0.75rem;
+		}
+		
 		.message.user {
+			margin-right: 5%;
+		}
+		
+		.message.ai, .message.system {
+			margin-left: 0;
+		}
+		
+		.message.user .message-content {
 			max-width: 85%;
-		}
-		
-		.message.ai {
-			max-width: 90%;
-		}
-		
-		.message.system {
-			max-width: 95%;
 		}
 		
 		.view-header {
@@ -1751,6 +1958,10 @@ void loop() {
 		}
 		
 		.chat-input {
+			padding: 0.75rem;
+		}
+		
+		.modern-input-wrapper {
 			padding: 0.75rem;
 		}
 		
