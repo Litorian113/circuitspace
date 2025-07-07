@@ -399,12 +399,14 @@
 
 	/* Main Content */
 	.main-content {
-		margin-left: var(--sidebar-width);
+		margin-left: calc(var(--sidebar-width) + 4rem);
+		margin-right: 6rem;
 		display: flex;
 		flex-direction: column;
 		overflow-y: auto;
 		background: #191919;
 		transition: margin-left 0.3s ease;
+		width: calc(100vw - var(--sidebar-width) - 10rem);
 	}
 
 	.components-header {
@@ -1093,7 +1095,9 @@
 
 	@media (max-width: 768px) {
 		.main-content {
-			margin-left: 0;
+			margin-left: 1.5rem;
+			margin-right: 1.5rem;
+			width: calc(100vw - 3rem);
 		}
 		
 		.components-header {

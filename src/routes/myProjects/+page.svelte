@@ -260,9 +260,10 @@
 		background: #191919;
 		color: #e2e8f0;
 		font-family: 'Inter', sans-serif;
-		margin-left: var(--sidebar-width, 280px);
+		margin-left: calc(var(--sidebar-width, 280px) + 4rem);
+		margin-right: 6rem;
 		transition: margin-left 0.3s ease;
-		width: calc(100vw - var(--sidebar-width, 280px));
+		width: calc(100vw - var(--sidebar-width, 280px) - 10rem);
 		position: relative;
 	}
 	
@@ -641,8 +642,9 @@
 	/* Responsive Design */
 	@media (max-width: 768px) {
 		.projects-page {
-			margin-left: 0;
-			width: 100vw;
+			margin-left: 2rem;
+			margin-right: 2rem;
+			width: calc(100vw - 4rem);
 		}
 		
 		.page-header {
