@@ -145,27 +145,21 @@
 		{#each filteredProjects as project (project.id)}
 			<div class="project-card">
 				<div class="card-header">
-					<div class="header-top">
-						<h3>{project.name}</h3>
-						<div class="badges">
-							<div class="state-badge" style="background-color: {getStateColor(project.state)}">
-								{getStateText(project.state)}
-							</div>
-							<div class="difficulty-badge" style="background-color: {getCategoryColor(project.category)}">
-								{project.category}
-							</div>
+					<div class="badges-row">
+						<div class="state-badge" style="background-color: {getStateColor(project.state)}">
+							{getStateText(project.state)}
+						</div>
+						<div class="difficulty-badge" style="background-color: {getCategoryColor(project.category)}">
+							{project.category}
 						</div>
 					</div>
+					<h3>{project.name}</h3>
 				</div>
 				
 				<div class="card-content">
 					<p class="description">{project.description}</p>
 					
 					<div class="project-meta">
-						<div class="meta-row">
-							<span class="meta-label">Schwierigkeit:</span>
-							<span class="difficulty-stars">{getDifficultyStars(project.difficulty)}</span>
-						</div>
 						<div class="meta-row">
 							<span class="meta-label">Dauer:</span>
 							<span>{project.estimatedTime}</span>
@@ -174,16 +168,19 @@
 							<span class="meta-label">Komponenten:</span>
 							<span>{project.componentsCount} Teile</span>
 						</div>
-						<div class="meta-row">
-							<span class="meta-label">Erstellt:</span>
-							<span>{project.createdAt.toLocaleDateString('de-DE')}</span>
-						</div>
-						<div class="meta-row">
-							<span class="meta-label">Zuletzt bearbeitet:</span>
-							<span>{project.updatedAt.toLocaleDateString('de-DE')}</span>
-						</div>
 					</div>
 					
+					<!-- Project Image -->
+					{#if project.imageUrl}
+						<div class="project-image">
+							<img src={project.imageUrl} alt={project.name} />
+						</div>
+					{/if}
+					<div class="tags">
+						{#each project.tags.slice(0, 4) as tag}
+							<span class="tag">#{tag}</span>
+						{/each}
+					</div>
 					<div class="learning-objectives">
 						<h4>Lernziele:</h4>
 						<ul>
@@ -196,11 +193,6 @@
 						</ul>
 					</div>
 					
-					<div class="tags">
-						{#each project.tags.slice(0, 4) as tag}
-							<span class="tag">#{tag}</span>
-						{/each}
-					</div>
 				</div>
 				
 				<div class="card-actions">
@@ -412,33 +404,25 @@
 	
 	.card-header {
 		display: flex;
-		justify-content: space-between;
-		align-items: center;
+		flex-direction: column;
+		gap: 1.5rem;
 	}
 	
-	.header-top {
+	.badges-row {
 		display: flex;
 		justify-content: space-between;
-		align-items: flex-start;
-		gap: 1rem;
+		align-items: center;
 		width: 100%;
 	}
 	
 	.card-header h3 {
 		margin: 0;
 		font-family: 'Inter', sans-serif;
-		font-size: 1.25rem;
+		font-size: 1.5rem;
 		font-weight: 700;
 		color: #f1f5f9;
 		line-height: 1.2;
-		flex: 1;
-	}
-	
-	.badges {
-		display: flex;
-		gap: 0.5rem;
-		flex-direction: column;
-		align-items: flex-end;
+		width: 100%;
 	}
 	
 	.state-badge,
@@ -507,15 +491,37 @@
 	.meta-row {
 		display: flex;
 		justify-content: space-between;
-		margin-bottom: 0.5rem;
+		margin-bottom: 0.2rem;
 	}
 	
 	.meta-label {
 		color: #64748b;
 	}
 	
+	.meta-row span:not(.meta-label) {
+		color: #94a3b8;
+	}
+	
 	.difficulty-stars {
 		color: #fbbf24;
+	}
+	
+	.project-image {
+		background: rgba(25, 25, 25, 0.6);
+		border-radius: 12px;
+		padding: 1.5rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 120px;
+		margin-bottom: 1rem;
+	}
+	
+	.project-image img {
+		max-width: 100%;
+		max-height: 150px;
+		object-fit: contain;
+		border-radius: 8px;
 	}
 	
 	.learning-objectives {
