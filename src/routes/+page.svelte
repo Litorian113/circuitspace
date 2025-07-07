@@ -20,7 +20,7 @@
 	}
 	
 	function goToComponents() {
-		goto('/components/overview');
+		goto('/overview');
 	}
 	
 	function goToTemplates() {

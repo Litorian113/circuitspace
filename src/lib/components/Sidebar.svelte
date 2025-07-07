@@ -166,8 +166,8 @@
 			<li class="nav-item">
 				<button 
 					class="nav-link" 
-					class:active={isActiveRoute('/components')}
-					on:click={() => navigateTo('/components')}
+					class:active={isActiveRoute('/overview')}
+					on:click={() => navigateTo('/overview')}
 				>
 					Components
 				</button>

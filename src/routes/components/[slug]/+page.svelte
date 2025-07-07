@@ -2,6 +2,7 @@
 	import type { PageData } from './$types';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
+	import Sidebar from '$lib/components/Sidebar.svelte';
 	import { 
 		getComponentById,
 		getComponentProgress, 
@@ -50,12 +51,8 @@
 		quizQuestions = getQuizQuestions(component.id);
 	}
 
-	function goHome() {
-		goto('/');
-	}
-
 	function goBack() {
-		goto('/components/overview');
+		goto('/overview');
 	}
 
 	function startQuiz() {
@@ -146,18 +143,6 @@
 		const currentLevelExp = component.experience % 100;
 		return (currentLevelExp / 100) * 100;
 	}
-
-	function goToProjects() {
-		goto('/project-chat');
-	}
-
-	function goToTemplates() {
-		goto('/templates');
-	}
-
-	function goToComponents() {
-		goto('/components/overview');
-	}
 </script>
 
 <svelte:head>
@@ -170,54 +155,14 @@
 
 <div class="app-container">
 	<!-- Sidebar -->
-	<aside class="sidebar">
-		<div class="sidebar-header">
-			<button class="home-link" on:click={goHome}>
-				<h2>Circuitspace</h2>
-			</button>
-			<div class="level-indicator">
-				<span class="level-badge">Level {userLevel}</span>
-			</div>
-		</div>
-		
-		<nav class="sidebar-nav">
-			<button class="nav-item" on:click={goHome}>
-				🏠 Home
-			</button>
-			<button class="nav-item" on:click={goToProjects}>
-				⚡ IDE / Projects
-			</button>
-			<button class="nav-item active" on:click={goToComponents}>
-				📚 Components
-			</button>
-			<button class="nav-item" on:click={goToTemplates}>
-				🛠️ Templates
-			</button>
-		</nav>
-		
-		<div class="sidebar-footer">
-			<div class="user-progress">
-				<h4>Your Progress</h4>
-				<div class="xp-info">
-					<span class="xp-amount">{totalXP} XP</span>
-				</div>
-				<div class="achievement-preview">
-					<div class="achievement-icon">🏆</div>
-					<div class="achievement-text">
-						<span class="achievement-title">Component Explorer</span>
-						<span class="achievement-desc">Keep learning!</span>
-					</div>
-				</div>
-			</div>
-		</div>
-	</aside>
+	<Sidebar />
 
 	<!-- Main Content -->
 	<main class="main-content">
 		{#if component}
 		<!-- Back Button -->
 		<div class="back-button-container">
-			<button class="back-button" on:click={goToComponents}>
+			<button class="back-button" on:click={goBack}>
 				← Back to Overview
 			</button>
 		</div>
@@ -403,171 +348,23 @@
 	/* Main Content */
 	.main-content {
 		flex: 1;
-		margin-left: 320px;
 		overflow-y: auto;
 		height: 100vh;
 		background: #0f1115;
-	}
-
-	/* Sidebar Styles */
-	.sidebar {
-		width: 320px;
-		background: linear-gradient(145deg, #1a1b23 0%, #14161b 100%);
-		border-right: 1px solid #2a2d3a;
-		display: flex;
-		flex-direction: column;
-		position: fixed;
-		height: 100vh;
-		overflow-y: auto;
-	}
-
-	.sidebar-header {
-		padding: 2rem 1.5rem 1rem;
-		border-bottom: 1px solid #2a2d3a;
-		display: flex;
-		flex-direction: column;
-		gap: 1rem;
-	}
-
-	.home-link {
-		background: none;
-		border: none;
-		cursor: pointer;
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 0;
-	}
-
-	.home-link h2 {
-		margin: 0;
-		font-size: 1.75rem;
-		font-weight: 700;
-		background: linear-gradient(135deg, #00d4aa 0%, #06b6d4 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-		letter-spacing: -0.025em;
-	}
-
-	.level-indicator {
-		display: flex;
-		justify-content: center;
-	}
-
-	.level-badge {
-		background: linear-gradient(135deg, #00d4aa 0%, #06b6d4 100%);
-		color: white;
-		padding: 0.5rem 1rem;
-		border-radius: 12px;
-		font-size: 0.875rem;
-		font-weight: 600;
-		letter-spacing: 0.025em;
-	}
-
-	/* Sidebar Navigation */
-	.sidebar-nav {
-		padding: 1.5rem 1rem;
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-		flex: 1;
-	}
-
-	.nav-item {
-		background: none;
-		border: none;
-		color: #94a3b8;
-		padding: 1rem 1.25rem;
-		border-radius: 12px;
-		font-size: 1rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		text-align: left;
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		font-family: 'Space Grotesk', sans-serif;
-	}
-
-	.nav-item:hover {
-		background: rgba(0, 212, 170, 0.1);
-		color: #00d4aa;
-		transform: translateX(4px);
-	}
-
-	.nav-item.active {
-		background: linear-gradient(135deg, rgba(0, 212, 170, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%);
-		color: #00d4aa;
-		border: 1px solid rgba(0, 212, 170, 0.3);
-	}
-
-	/* Sidebar Footer */
-	.sidebar-footer {
-		padding: 1.5rem;
-		border-top: 1px solid #2a2d3a;
-		background: rgba(0, 0, 0, 0.2);
-	}
-
-	.user-progress h4 {
-		margin: 0 0 1rem 0;
-		font-size: 1rem;
-		font-weight: 600;
-		color: #e2e8f0;
-	}
-
-	.xp-info {
-		margin-bottom: 1rem;
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-	}
-
-	.xp-amount {
-		font-size: 1.25rem;
-		font-weight: 700;
-		color: #00d4aa;
-	}
-
-	.achievement-preview {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 0.75rem;
-		background: rgba(0, 212, 170, 0.1);
-		border-radius: 8px;
-		border: 1px solid rgba(0, 212, 170, 0.2);
-	}
-
-	.achievement-icon {
-		font-size: 1.5rem;
-	}
-
-	.achievement-text {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-	}
-
-	.achievement-title {
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: #e2e8f0;
-	}
-
-	.achievement-desc {
-		font-size: 0.75rem;
-		color: #94a3b8;
+		padding: 2rem;
+		min-height: 100vh;
+		transition: margin-left 0.3s ease;
 	}
 
 	/* Main Content */
 	.main-content {
 		flex: 1;
-		margin-left: 320px;
-		padding: 2rem;
+		overflow-y: auto;
+		height: 100vh;
 		background: #0f1115;
+		padding: 2rem;
 		min-height: 100vh;
+		transition: margin-left 0.3s ease;
 	}
 
 	.back-button-container {
@@ -991,27 +788,8 @@
 	}
 
 	/* Mobile Responsiveness */
-	@media (max-width: 1024px) {
-		.sidebar {
-			width: 280px;
-		}
-
-		.main-content {
-			margin-left: 280px;
-		}
-	}
-
 	@media (max-width: 768px) {
-		.sidebar {
-			position: fixed;
-			left: -100%;
-			transition: left 0.3s ease;
-			z-index: 50;
-			width: 280px;
-		}
-
 		.main-content {
-			margin-left: 0;
 			padding: 1rem;
 		}
 

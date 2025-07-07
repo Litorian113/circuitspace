@@ -1,9 +1,15 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 	
 	function goHome() {
 		goto('/');
 	}
+	
+	// Automatically redirect to overview page
+	onMount(() => {
+		goto('/overview');
+	});
 </script>
 
 <svelte:head>
