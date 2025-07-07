@@ -231,14 +231,15 @@
 	}
 	
 	.modal-content {
-		background: #1a1a1a;
+		background: #191919;
 		border-radius: 16px;
 		width: 90%;
 		max-width: 500px;
 		max-height: 80vh;
 		overflow: hidden;
-		border: 1px solid #333;
-		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+		font-family: 'Inter', sans-serif;
 	}
 	
 	.modal-header {
@@ -246,14 +247,16 @@
 		justify-content: space-between;
 		align-items: center;
 		padding: 20px 24px;
-		border-bottom: 1px solid #333;
-		background: #2a2a2a;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		background: #191919;
 	}
 	
 	.modal-header h2 {
 		margin: 0;
 		font-size: 1.25rem;
 		color: #ffffff;
+		font-family: 'Inter', sans-serif;
+		font-weight: 600;
 	}
 	
 	.close-btn {
@@ -273,7 +276,7 @@
 	}
 	
 	.close-btn:hover {
-		background: #444;
+		background: rgba(255, 255, 255, 0.1);
 		color: #ffffff;
 	}
 	
@@ -295,6 +298,7 @@
 		font-size: 1rem;
 		color: #ffffff;
 		font-weight: 600;
+		font-family: 'Inter', sans-serif;
 	}
 	
 	.radio-option,
@@ -391,35 +395,44 @@
 		justify-content: flex-end;
 		gap: 12px;
 		padding: 20px 24px;
-		border-top: 1px solid #333;
-		background: #2a2a2a;
+		border-top: 1px solid rgba(255, 255, 255, 0.1);
+		background: #191919;
 	}
 	
 	.btn-secondary,
 	.btn-primary {
-		padding: 10px 20px;
+		padding: 12px 24px;
 		border-radius: 8px;
 		font-weight: 600;
 		cursor: pointer;
-		transition: all 0.2s ease;
-		border: none;
+		transition: all 0.3s ease;
+		border: 2px solid;
+		font-family: 'Inter', sans-serif;
+		font-size: 0.95rem;
 	}
 	
 	.btn-secondary {
-		background: #444;
+		background: rgba(255, 255, 255, 0.1);
+		border-color: rgba(255, 255, 255, 0.3);
 		color: #ffffff;
 	}
 	
 	.btn-secondary:hover {
-		background: #555;
+		background: rgba(255, 255, 255, 0.2);
+		border-color: rgba(255, 255, 255, 0.5);
+		transform: translateY(-1px);
 	}
 	
 	.btn-primary {
-		background: #00d4aa;
-		color: #000000;
+		background: rgba(237, 247, 96, 0.1);
+		border-color: rgba(237, 247, 96, 0.5);
+		color: #EDF760;
 	}
 	
 	.btn-primary:hover {
-		background: #00b8d4;
+		background: #EDF760;
+		border-color: #EDF760;
+		color: #191919;
+		transform: translateY(-1px);
 	}
 </style>

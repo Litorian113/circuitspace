@@ -127,6 +127,26 @@
 		showExportModal = true;
 	}
 
+	// Helper function to extract component name from image path
+	function getComponentNameFromPath(imagePath: string): string {
+		const fileName = imagePath.split('/').pop()?.replace('.png', '') || '';
+		
+		// Map specific filenames to readable names
+		const nameMap: Record<string, string> = {
+			'leonardoKeyestudio': 'Arduino Leonardo',
+			'jumpercable': 'Jumper Cables',
+			'leuchtdiode': 'LED',
+			'widerstand': 'Resistor',
+			'poti': 'Potentiometer',
+			'breadboard': 'Breadboard',
+			'pushbutton': 'Push Button',
+			'arduinomicro': 'Arduino Micro',
+			'5vMotor': '5V Motor'
+		};
+		
+		return nameMap[fileName] || fileName.charAt(0).toUpperCase() + fileName.slice(1);
+	}
+
 	// Neue Funktionen für den Dialog-Flow
 	function updateMessagesFromConversation() {
 		if (!$currentConversation || !isStructuredConversation) return;
@@ -591,8 +611,11 @@ void loop() {
 										<h4>Benötigte Komponenten:</h4>
 										<div class="images-grid">
 											{#each message.componentImages as imagePath}
-												<div class="component-image">
-													<img src={imagePath} alt="Component" />
+												<div class="component-item">
+													<div class="component-image">
+														<img src={imagePath} alt={getComponentNameFromPath(imagePath)} />
+													</div>
+													<span class="component-label">{getComponentNameFromPath(imagePath)}</span>
 												</div>
 											{/each}
 										</div>
@@ -967,9 +990,9 @@ void loop() {
 	
 	.header-actions {
 		position: absolute;
-		right: 2rem;
+		right: 50%;
 		top: 50%;
-		transform: translateY(-50%);
+		transform: translate(calc(400px - 2rem), -50%);
 		display: flex;
 		gap: 1rem;
 	}
@@ -1448,6 +1471,13 @@ void loop() {
 		justify-content: flex-start;
 	}
 	
+	.component-item {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.5rem;
+	}
+	
 	.component-image {
 		/* background: rgba(37, 37, 37, 0.8); */
 		border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1463,9 +1493,9 @@ void loop() {
 	}
 	
 	.component-image:hover {
-		border-color: rgba(120, 119, 198, 0.5);
+		border-color: rgba(237, 247, 96, 0.5);
 		transform: translateY(-2px);
-		box-shadow: 0 4px 16px rgba(120, 119, 198, 0.2);
+		box-shadow: 0 4px 16px rgba(237, 247, 96, 0.2);
 	}
 	
 	.component-image img {
@@ -1475,6 +1505,18 @@ void loop() {
 		border-radius: 4px;
 		mix-blend-mode: multiply;
 		filter: brightness(1.2) contrast(1.1);
+	}
+	
+	.component-label {
+		font-size: 0.75rem;
+		color: rgba(255, 255, 255, 0.8);
+		text-align: center;
+		font-family: 'Inter', sans-serif;
+		font-weight: 500;
+		line-height: 1.2;
+		max-width: 90px;
+		word-wrap: break-word;
+		hyphens: auto;
 	}
 	
 	/* Tutorial Button */
