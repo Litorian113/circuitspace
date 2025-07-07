@@ -650,10 +650,10 @@ void loop() {
 								{#if message.showWorkspaceButtons}
 									<div class="workspace-buttons-container">
 										<button class="workspace-btn circuit-designer" on:click={() => onWorkspaceButton('circuit-designer')}>
-											⚡ Circuit Designer
+											Circuit Designer
 										</button>
 										<button class="workspace-btn real-table" on:click={() => onWorkspaceButton('real-table')}>
-											🔧 An den Tisch
+											An den Tisch
 										</button>
 									</div>
 								{/if}
@@ -661,7 +661,7 @@ void loop() {
 								{#if message.showRealTableButton}
 									<div class="real-table-button-container">
 										<button class="real-table-btn" on:click={() => onWorkspaceButton('real-workspace-after-designer')}>
-											🔧 An den Tisch
+											An den Tisch
 										</button>
 									</div>
 								{/if}
@@ -1428,11 +1428,9 @@ void loop() {
 	.component-images {
 		margin-top: 1rem;
 		padding: 1rem;
-		background: rgba(0, 0, 0, 0.4);
 		backdrop-filter: blur(40px) saturate(180%);
 		-webkit-backdrop-filter: blur(40px) saturate(180%);
 		border-radius: 12px;
-		border: 1px solid rgba(255, 255, 255, 0.1);
 	}
 	
 	.component-images h4 {
@@ -1451,7 +1449,7 @@ void loop() {
 	}
 	
 	.component-image {
-		background: rgba(37, 37, 37, 0.8);
+		/* background: rgba(37, 37, 37, 0.8); */
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		border-radius: 8px;
 		padding: 0.5rem;
@@ -1573,20 +1571,31 @@ void loop() {
 	}
 	
 	.workspace-btn.circuit-designer {
-		background: rgba(120, 119, 198, 0.1);
-		border-color: rgba(120, 119, 198, 0.5);
-		color: rgba(120, 119, 198, 1);
+		background: rgba(237, 247, 96, 0.1);
+		border-color: rgba(237, 247, 96, 0.5);
+		color: #EDF760;
 	}
 	
 	.workspace-btn.real-table {
-		background: rgba(255, 119, 198, 0.1);
-		border-color: rgba(255, 119, 198, 0.5);
-		color: rgba(255, 119, 198, 1);
+		background: rgba(202, 189, 245, 0.1);
+		border-color: rgba(202, 189, 245, 0.5);
+		color: #CABDF5;
 	}
 	
 	.workspace-btn:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 8px 24px rgba(120, 119, 198, 0.3);
+	}
+	
+	.workspace-btn.circuit-designer:hover {
+		background: #EDF760;
+		border-color: #EDF760;
+		color: #191919;
+	}
+	
+	.workspace-btn.real-table:hover {
+		background: #CABDF5;
+		border-color: #CABDF5;
+		color: #191919;
 	}
 	
 	/* Real Table Button (nach Circuit Designer) */
@@ -1598,10 +1607,10 @@ void loop() {
 	
 	.real-table-btn {
 		padding: 1rem 2rem;
-		background: rgba(255, 119, 198, 0.1);
-		border: 2px solid rgba(255, 119, 198, 0.5);
+		background: rgba(202, 189, 245, 0.1);
+		border: 2px solid rgba(202, 189, 245, 0.5);
 		border-radius: 12px;
-		color: rgba(255, 119, 198, 1);
+		color: #CABDF5;
 		cursor: pointer;
 		font-family: 'Inter', sans-serif;
 		font-weight: 600;
@@ -1612,8 +1621,9 @@ void loop() {
 	
 	.real-table-btn:hover {
 		transform: translateY(-2px);
-		box-shadow: 0 8px 24px rgba(255, 119, 198, 0.3);
-		background: rgba(255, 119, 198, 0.2);
+		background: #CABDF5;
+		border-color: #CABDF5;
+		color: #191919;
 	}
 	
 	/* Next Steps Buttons */
