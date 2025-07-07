@@ -47,9 +47,9 @@
 
 	function getStateText(state: string): string {
 		switch(state) {
-			case 'done': return 'Abgeschlossen';
-			case 'in-progress': return 'In Arbeit';
-			case 'paused': return 'Pausiert';
+			case 'done': return 'Completed';
+			case 'in-progress': return 'In Progress';
+			case 'paused': return 'Paused';
 			default: return state;
 		}
 	}
@@ -71,11 +71,11 @@
 	
 	function previewProject(project: UserProject) {
 		// For now, just show an alert. In the future, this could open a modal
-		alert(`Vorschau für ${project.name}:\n\n${project.description}\n\nKomponenten: ${project.components.length}\nSchwierigkeit: ${project.difficulty}/5\nStatus: ${getStateText(project.state)}`);
+		alert(`Preview for ${project.name}:\n\n${project.description}\n\nComponents: ${project.components.length}\nDifficulty: ${project.difficulty}/5\nStatus: ${getStateText(project.state)}`);
 	}
 
 	function deleteProject(project: UserProject) {
-		if (confirm(`Bist du sicher, dass du "${project.name}" löschen möchtest?`)) {
+		if (confirm(`Are you sure you want to delete "${project.name}"?`)) {
 			userProjects.deleteProject(project.id);
 		}
 	}
@@ -122,19 +122,19 @@
 			<div class="filter-controls">
 				<div class="filter-group">
 					<select id="difficulty-select" bind:value={selectedCategory}>
-						<option value="all">Alle</option>
-						<option value="beginner">Anfänger</option>
-						<option value="intermediate">Fortgeschritten</option>
-						<option value="advanced">Experte</option>
+						<option value="all">All</option>
+						<option value="beginner">Beginner</option>
+						<option value="intermediate">Intermediate</option>
+						<option value="advanced">Expert</option>
 					</select>
 				</div>
 				
 				<div class="filter-group">
 					<select id="status-select" bind:value={selectedState}>
-						<option value="all">Alle Status</option>
-						<option value="in-progress">In Arbeit</option>
-						<option value="done">Abgeschlossen</option>
-						<option value="paused">Pausiert</option>
+						<option value="all">All Status</option>
+						<option value="in-progress">In Progress</option>
+						<option value="done">Completed</option>
+						<option value="paused">Paused</option>
 					</select>
 				</div>
 			</div>
@@ -146,10 +146,10 @@
 			<div class="project-card">
 				<div class="card-header">
 					<div class="badges-row">
-						<div class="state-badge" style="background-color: {getStateColor(project.state)}">
+						<div class="state-badge {project.state}">
 							{getStateText(project.state)}
 						</div>
-						<div class="difficulty-badge" style="background-color: {getCategoryColor(project.category)}">
+						<div class="difficulty-badge {project.category}">
 							{project.category}
 						</div>
 					</div>
@@ -161,12 +161,12 @@
 					
 					<div class="project-meta">
 						<div class="meta-row">
-							<span class="meta-label">Dauer:</span>
+							<span class="meta-label">Duration:</span>
 							<span>{project.estimatedTime}</span>
 						</div>
 						<div class="meta-row">
-							<span class="meta-label">Komponenten:</span>
-							<span>{project.componentsCount} Teile</span>
+							<span class="meta-label">Components:</span>
+							<span>{project.componentsCount} Parts</span>
 						</div>
 					</div>
 					
@@ -182,13 +182,13 @@
 						{/each}
 					</div>
 					<div class="learning-objectives">
-						<h4>Lernziele:</h4>
+						<h4>Learning Goals:</h4>
 						<ul>
 							{#each project.learningGoals.slice(0, 3) as goal}
 								<li>{goal}</li>
 							{/each}
 							{#if project.learningGoals.length > 3}
-								<li class="more-objectives">+{project.learningGoals.length - 3} weitere...</li>
+								<li class="more-objectives">+{project.learningGoals.length - 3} more...</li>
 							{/if}
 						</ul>
 					</div>
@@ -200,19 +200,19 @@
 						on:click={() => previewProject(project)}
 						class="btn-secondary"
 					>
-						Vorschau
+						Preview
 					</button>
 					<button 
 						on:click={() => continueProject(project)}
 						class="btn-primary"
 					>
-						{project.state === 'done' ? 'Anzeigen' : 'Bearbeiten'}
+						{project.state === 'done' ? 'View' : 'Edit'}
 					</button>
 					<button 
 						on:click={() => deleteProject(project)}
 						class="btn-danger"
 					>
-						Löschen
+						Delete
 					</button>
 				</div>
 			</div>
@@ -221,10 +221,10 @@
 	
 	{#if filteredProjects.length === 0}
 		<div class="no-results">
-			<h3>Keine Projekte gefunden</h3>
-			<p>Versuche es mit anderen Suchbegriffen oder wähle eine andere Kategorie/Status.</p>
+			<h3>No projects found</h3>
+			<p>Try different search terms or select a different category/status.</p>
 			<button on:click={() => goto('/templates')} class="btn-primary">
-				Neues Projekt aus Vorlage erstellen
+				Create new project from template
 			</button>
 		</div>
 	{/if}
@@ -441,10 +441,22 @@
 		border: 1px solid rgba(202, 189, 245, 0.3);
 	}
 	
+	.state-badge.done {
+		background: #EDF760;
+		color: #000000;
+		border: 1px solid rgba(237, 247, 96, 0.3);
+	}
+	
 	.difficulty-badge {
 		background: #CABDF5;
 		color: #000000;
 		border: 1px solid rgba(202, 189, 245, 0.3);
+	}
+	
+	.difficulty-badge.advanced {
+		background: #EDF760;
+		color: #000000;
+		border: 1px solid rgba(237, 247, 96, 0.3);
 	}
 	
 	.template-meta {
