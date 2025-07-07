@@ -2,6 +2,9 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	
+	// Sidebar state
+	let isCollapsed = false;
+	
 	// Navigation functions
 	function navigateTo(path: string) {
 		goto(path);
@@ -11,19 +14,34 @@
 	function isActiveRoute(path: string): boolean {
 		return $page.url.pathname === path;
 	}
+	
+	// Toggle sidebar collapse
+	function toggleSidebar() {
+		isCollapsed = !isCollapsed;
+	}
 </script>
 
-<aside class="sidebar">
+<aside class="sidebar" class:collapsed={isCollapsed}>
 	<!-- Panel Header -->
 	<div class="sidebar-header">
 		<div class="logo-section">
-			<span class="logo-text">Circuitspace</span>
-			<img src="/sidepanel-icons/tabler-icon-layout-sidebar-right.svg" alt="Circuitspace" class="logo-icon">
+			<span class="logo-text" class:hidden={isCollapsed}>Circuitspace</span>
+			<img 
+				src="/sidepanel-icons/tabler-icon-layout-sidebar-right.svg" 
+				alt="Toggle Sidebar" 
+				class="logo-icon" 
+				class:rotated={isCollapsed}
+				on:click={toggleSidebar}
+				on:keydown={(e) => e.key === 'Enter' && toggleSidebar()}
+				tabindex="0"
+				role="button"
+				aria-label="Toggle sidebar"
+			>
 		</div>
 	</div>
 	
 	<!-- My Projects Section -->
-	<div class="sidebar-section no-border">
+	<div class="sidebar-section no-border" class:hidden={isCollapsed}>
 		<div class="section-header">
 			<img src="/sidepanel-icons/tabler-icon-archive.svg" alt="Projects" class="section-icon">
 			<span class="section-title">My Projects</span>
@@ -31,15 +49,25 @@
 	</div>
 	
 	<!-- Search Section -->
-	<div class="sidebar-section">
+	<div class="sidebar-section" class:hidden={isCollapsed}>
 		<div class="section-header">
 			<img src="/sidepanel-icons/Frame.svg" alt="Search" class="section-icon">
 			<span class="section-title">Search</span>
 		</div>
 	</div>
 	
+	<!-- Collapsed Icons Section -->
+	<div class="collapsed-icons" class:hidden={!isCollapsed}>
+		<div class="collapsed-icon-item" title="My Projects">
+			<img src="/sidepanel-icons/tabler-icon-archive.svg" alt="Projects" class="collapsed-icon">
+		</div>
+		<div class="collapsed-icon-item" title="Search">
+			<img src="/sidepanel-icons/Frame.svg" alt="Search" class="collapsed-icon">
+		</div>
+	</div>
+	
 	<!-- Main Navigation Section -->
-	<nav class="sidebar-nav">
+	<nav class="sidebar-nav" class:hidden={isCollapsed}>
 		<ul class="nav-list">
 			<li class="nav-item">
 				<button 
@@ -99,7 +127,7 @@
 	</nav>
 	
 	<!-- Panel Footer -->
-	<div class="sidebar-footer">
+	<div class="sidebar-footer" class:hidden={isCollapsed}>
 		<div class="footer-links">
 			<button class="footer-link" on:click={() => navigateTo('/privacy')}>
 				Privacy Policy
@@ -149,6 +177,15 @@
 		z-index: 1000;
 		box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
 		overflow-y: auto;
+		transition: width 0.3s ease;
+	}
+	
+	.sidebar.collapsed {
+		width: 80px;
+	}
+	
+	.hidden {
+		display: none !important;
 	}
 	
 	/* Panel Header */
@@ -164,10 +201,26 @@
 		gap: 0.75rem;
 	}
 	
+	.sidebar.collapsed .logo-section {
+		justify-content: center;
+	}
+	
 	.logo-icon {
 		width: 24px;
 		height: 24px;
 		filter: brightness(0) invert(1);
+		cursor: pointer;
+		transition: transform 0.3s ease;
+		padding: 4px;
+		border-radius: 4px;
+	}
+	
+	.logo-icon:hover {
+		background-color: rgba(240, 240, 240, 0.1);
+	}
+	
+	.logo-icon.rotated {
+		transform: rotate(180deg);
 	}
 	
 	.logo-text {
@@ -209,6 +262,38 @@
 		font-size: 1rem;
 		font-weight: 500;
 		color: #F0F0F0;
+	}
+	
+	/* Collapsed Icons Section */
+	.collapsed-icons {
+		padding: 1rem 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1rem;
+		border-bottom: 1px solid rgba(240, 240, 240, 0.1);
+	}
+	
+	.collapsed-icon-item {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: background-color 0.2s ease;
+		position: relative;
+	}
+	
+	.collapsed-icon-item:hover {
+		background-color: rgba(240, 240, 240, 0.1);
+	}
+	
+	.collapsed-icon {
+		width: 20px;
+		height: 20px;
+		filter: brightness(0) invert(1);
 	}
 	
 	.section-item {
