@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
+	import Sidebar from '$lib/components/Sidebar.svelte';
 	import PromptInput from '$lib/components/PromptInput.svelte';
 	import CodeEditor from '$lib/components/CodeEditor.svelte';
 	import ExportModal from '$lib/components/ExportModal.svelte';
@@ -556,63 +557,7 @@ void loop() {
 
 <div class="app-container">
 	<!-- Sidebar Navigation -->
-	<aside class="sidebar">
-		<div class="sidebar-header">
-			<button class="home-link" on:click={goBackHome}>
-				<h2>← Circuitspace</h2>
-			</button>
-			<div class="project-name">
-				<h3>{projectName}</h3>
-				<p>Circuit Project</p>
-			</div>
-		</div>
-		
-		<nav class="view-navigation">
-			<h4>Navigation</h4>
-			<button 
-				class="nav-item" 
-				class:active={currentView === 'chat'}
-				on:click={() => switchToView('chat')}
-			>
-				<span class="nav-icon">💬</span>
-				Circuit Chat
-			</button>
-			<button 
-				class="nav-item" 
-				class:active={currentView === 'designer'}
-				on:click={() => switchToView('designer')}
-			>
-				<span class="nav-icon">⚡</span>
-				Circuit Designer
-			</button>
-			<button 
-				class="nav-item" 
-				class:active={currentView === 'code'}
-				on:click={() => switchToView('code')}
-			>
-				<span class="nav-icon">💻</span>
-				Circuit Code
-			</button>
-		</nav>
-		
-		<div class="sidebar-info">
-			<div class="session-info">
-				<h4>Current Session</h4>
-				<p>{messages.length} messages</p>
-				<p class="timestamp">Started {new Date().toLocaleTimeString()}</p>
-			</div>
-			
-			{#if tutorialActive}
-				<div class="tutorial-info">
-					<h4>Tutorial Progress</h4>
-					<p>Step {tutorialStepIndex + 1} of {leonardoCodeTutorial.length}</p>
-					<div class="progress-bar">
-						<div class="progress" style="width: {((tutorialStepIndex + 1) / leonardoCodeTutorial.length) * 100}%"></div>
-					</div>
-				</div>
-			{/if}
-		</div>
-	</aside>
+	<Sidebar />
 
 	<!-- Main Content Area -->
 	<main class="main-content">
@@ -920,164 +865,9 @@ void loop() {
 		width: 100vw;
 	}
 	
-	/* Sidebar */
-	.sidebar {
-		width: 280px;
-		background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-		border-right: 1px solid rgba(0, 212, 170, 0.2);
-		display: flex;
-		flex-direction: column;
-		position: relative;
-	}
-	
-	.sidebar-header {
-		padding: 1.5rem;
-		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.home-link {
-		background: none;
-		border: none;
-		padding: 0;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		border-radius: 8px;
-		padding: 0.5rem 1rem;
-		margin-bottom: 1rem;
-	}
-	
-	.home-link:hover {
-		background: rgba(0, 212, 170, 0.1);
-		transform: scale(1.02);
-	}
-	
-	.sidebar-header h2 {
-		font-family: 'Space Grotesk', sans-serif;
-		font-size: 1.25rem;
-		font-weight: 600;
-		margin: 0;
-		color: #00d4aa;
-		transition: color 0.2s ease;
-	}
-	
-	.home-link:hover h2 {
-		color: #ffffff;
-	}
-	
-	.project-name {
-		text-align: center;
-	}
-	
-	.project-name h3 {
-		font-family: 'Space Grotesk', sans-serif;
-		font-size: 1.1rem;
-		font-weight: 600;
-		margin: 0 0 0.25rem 0;
-		color: #e2e8f0;
-	}
-	
-	.project-name p {
-		font-size: 0.8rem;
-		margin: 0;
-		color: #94a3b8;
-	}
-	
-	.view-navigation {
-		padding: 1.5rem;
-		flex: 1;
-	}
-	
-	.view-navigation h4 {
-		font-family: 'Space Grotesk', sans-serif;
-		font-size: 0.9rem;
-		font-weight: 600;
-		margin: 0 0 1rem 0;
-		color: #00d4aa;
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-	}
-	
-	.nav-item {
-		width: 100%;
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		padding: 0.75rem 1rem;
-		background: transparent;
-		border: none;
-		border-radius: 8px;
-		color: #e2e8f0;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		margin-bottom: 0.5rem;
-		font-family: 'IBM Plex Mono', monospace;
-		text-align: left;
-	}
-	
-	.nav-item:hover {
-		background: rgba(0, 212, 170, 0.1);
-		color: #00d4aa;
-	}
-	
-	.nav-item.active {
-		background: rgba(0, 212, 170, 0.15);
-		color: #00d4aa;
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		box-shadow: 0 0 12px rgba(0, 212, 170, 0.1);
-	}
-	
-	.nav-icon {
-		font-size: 1rem;
-	}
-	
-	.sidebar-info {
-		padding: 1.5rem;
-		border-top: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.session-info h4, .tutorial-info h4 {
-		font-family: 'Space Grotesk', sans-serif;
-		font-size: 0.9rem;
-		font-weight: 600;
-		margin: 0 0 0.5rem 0;
-		color: #00d4aa;
-	}
-	
-	.session-info p, .tutorial-info p {
-		font-size: 0.8rem;
-		margin: 0.25rem 0;
-		opacity: 0.7;
-	}
-	
-	.timestamp {
-		font-size: 0.75rem !important;
-		opacity: 0.5 !important;
-	}
-	
-	.tutorial-info {
-		margin-top: 1rem;
-		padding-top: 1rem;
-		border-top: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.progress-bar {
-		width: 100%;
-		height: 4px;
-		background: rgba(0, 212, 170, 0.2);
-		border-radius: 2px;
-		overflow: hidden;
-		margin-top: 0.5rem;
-	}
-	
-	.progress {
-		height: 100%;
-		background: linear-gradient(90deg, #00d4aa, #0ea5e9);
-		border-radius: 2px;
-		transition: width 0.3s ease;
-	}
-	
 	/* Main Content Area */
 	.main-content {
+		margin-left: 280px;
 		flex: 1;
 		display: flex;
 		flex-direction: column;
@@ -1905,8 +1695,8 @@ void loop() {
 	}
 	
 	@media (max-width: 768px) {
-		.sidebar {
-			width: 240px;
+		.main-content {
+			margin-left: 0;
 		}
 		
 		.chat-messages {
@@ -1952,37 +1742,8 @@ void loop() {
 	}
 	
 	@media (max-width: 640px) {
-		.app-container {
-			flex-direction: column;
-		}
-		
-		.sidebar {
-			width: 100%;
-			height: auto;
-			flex-direction: row;
-			border-right: none;
-			border-bottom: 1px solid rgba(0, 212, 170, 0.2);
-		}
-		
-		.view-navigation {
-			display: flex;
-			gap: 0.5rem;
-			padding: 0.5rem;
-		}
-		
-		.view-navigation h4 {
-			display: none;
-		}
-		
-		.nav-item {
-			margin-bottom: 0;
-			white-space: nowrap;
-			flex: 1;
-			justify-content: center;
-		}
-		
-		.sidebar-info {
-			display: none;
+		.main-content {
+			margin-left: 0;
 		}
 		
 		.chat-messages {
@@ -1999,74 +1760,10 @@ void loop() {
 		
 		.message.ai, .message.system {
 			margin-right: 0%;
-				}
-		
-		.message-text {
-			padding: 0.75rem 1rem;
-		}
-	}
-	
-	@media (max-width: 640px) {
-		.app-container {
-			flex-direction: column;
-		}
-		
-		.sidebar {
-			width: 100%;
-			height: auto;
-			flex-direction: row;
-			border-right: none;
-			border-bottom: 1px solid rgba(0, 212, 170, 0.2);
-		}
-		
-		.view-navigation {
-			display: flex;
-			gap: 0.5rem;
-			padding: 0.5rem;
-		}
-		
-		.view-navigation h4 {
-			display: none;
-		}
-		
-		.nav-item {
-			margin-bottom: 0;
-			white-space: nowrap;
-			flex: 1;
-			justify-content: center;
-		}
-		
-		.sidebar-info {
-			display: none;
-		}
-		
-		.chat-messages {
-			padding: 0.75rem;
-		}
-		
-		.chat-container {
-			max-width: 100%;
-			padding: 0;
-		}
-		
-		.chat-input {
-			padding: 0.75rem;
-		}
-		
-		.message.user {
-			max-width: 90%;
-		}
-		
-		.message.ai, .message.system {
-			max-width: 95%;
 		}
 		
 		.message-text {
 			padding: 0.75rem 1rem;
-		}
-		
-		.sidebar-header {
-			padding: 1rem;
 		}
 	}
 </style>

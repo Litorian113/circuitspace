@@ -4,6 +4,7 @@
 	
 	// Sidebar state
 	let isCollapsed = false;
+	let isAiChatExpanded = false;
 	
 	// Navigation functions
 	function navigateTo(path: string) {
@@ -15,9 +16,29 @@
 		return $page.url.pathname === path;
 	}
 	
+	// Check if AI Chat parent is active (any AI Chat subpage)
+	function isAiChatParentActive(): boolean {
+		const aiChatRoutes = ['/project-chat', '/circuit-designer', '/circuit-code'];
+		return aiChatRoutes.some(route => $page.url.pathname === route);
+	}
+	
 	// Toggle sidebar collapse
 	function toggleSidebar() {
 		isCollapsed = !isCollapsed;
+	}
+	
+	// Toggle AI Chat submenu
+	function toggleAiChat() {
+		isAiChatExpanded = !isAiChatExpanded;
+		// Navigate to project-chat as default
+		if (isAiChatExpanded) {
+			navigateTo('/project-chat');
+		}
+	}
+	
+	// Auto-expand AI Chat if on any AI Chat subpage
+	$: if (isAiChatParentActive()) {
+		isAiChatExpanded = true;
 	}
 </script>
 
@@ -69,15 +90,60 @@
 	<!-- Main Navigation Section -->
 	<nav class="sidebar-nav" class:hidden={isCollapsed}>
 		<ul class="nav-list">
+			<!-- AI Chat with Submenu -->
 			<li class="nav-item">
 				<button 
-					class="nav-link" 
-					class:active={isActiveRoute('/ai-chat')}
-					on:click={() => navigateTo('/ai-chat')}
+					class="nav-link parent-nav" 
+					class:active={isAiChatParentActive()}
+					on:click={toggleAiChat}
 				>
-					AI Chat
+					<span>AI Chat</span>
+					<svg 
+						class="chevron" 
+						class:expanded={isAiChatExpanded}
+						width="16" 
+						height="16" 
+						viewBox="0 0 24 24" 
+						fill="none" 
+						stroke="currentColor" 
+						stroke-width="2"
+					>
+						<polyline points="6,9 12,15 18,9"></polyline>
+					</svg>
 				</button>
+				
+				<!-- AI Chat Submenu -->
+				<ul class="submenu" class:expanded={isAiChatExpanded}>
+					<li class="submenu-item">
+						<button 
+							class="submenu-link" 
+							class:active={isActiveRoute('/project-chat')}
+							on:click={() => navigateTo('/project-chat')}
+						>
+							Circuit Chat
+						</button>
+					</li>
+					<li class="submenu-item">
+						<button 
+							class="submenu-link" 
+							class:active={isActiveRoute('/circuit-designer')}
+							on:click={() => navigateTo('/circuit-designer')}
+						>
+							Circuit Designer
+						</button>
+					</li>
+					<li class="submenu-item">
+						<button 
+							class="submenu-link" 
+							class:active={isActiveRoute('/circuit-code')}
+							on:click={() => navigateTo('/circuit-code')}
+						>
+							Circuit Code
+						</button>
+					</li>
+				</ul>
 			</li>
+			
 			<li class="nav-item">
 				<button 
 					class="nav-link" 
@@ -368,6 +434,73 @@
 	}
 	
 	.nav-link.active {
+		background-color: rgba(240, 240, 240, 0.15);
+		color: #FFFFFF;
+		font-weight: 500;
+	}
+	
+	/* Parent Navigation with Submenu */
+	.parent-nav {
+		display: flex !important;
+		align-items: center;
+		justify-content: space-between;
+		width: 100%;
+	}
+	
+	.chevron {
+		transition: transform 0.3s ease;
+		flex-shrink: 0;
+	}
+	
+	.chevron.expanded {
+		transform: rotate(180deg);
+	}
+	
+	/* Submenu Styles */
+	.submenu {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		max-height: 0;
+		overflow: hidden;
+		transition: max-height 0.3s ease, padding 0.3s ease;
+		/* background-color: rgba(202, 189, 245, 0.2); */
+		border-radius: 6px;
+		margin-top: 0.5rem;
+	}
+	
+	.submenu.expanded {
+		max-height: 200px;
+		padding: 0.5rem 0;
+	}
+	
+	.submenu-item {
+		width: 100%;
+	}
+	
+	.submenu-link {
+		display: block;
+		width: calc(100% - 1rem);
+		padding: 0.5rem 1rem;
+		background: none;
+		border: none;
+		color: rgba(240, 240, 240, 0.8);
+		font-family: 'Inter', sans-serif;
+		font-size: 0.9rem;
+		font-weight: 400;
+		text-align: left;
+		border-radius: 4px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		margin: 0 0.5rem;
+	}
+	
+	.submenu-link:hover {
+		background-color: rgba(240, 240, 240, 0.1);
+		color: #FFFFFF;
+	}
+	
+	.submenu-link.active {
 		background-color: rgba(240, 240, 240, 0.15);
 		color: #FFFFFF;
 		font-weight: 500;
