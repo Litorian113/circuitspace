@@ -46,7 +46,17 @@
 	<!-- Panel Header -->
 	<div class="sidebar-header">
 		<div class="logo-section">
-			<span class="logo-text" class:hidden={isCollapsed}>Circuitspace</span>
+			<span 
+				class="logo-text" 
+				class:hidden={isCollapsed}
+				on:click={() => navigateTo('/')}
+				on:keydown={(e) => e.key === 'Enter' && navigateTo('/')}
+				tabindex="0"
+				role="button"
+				aria-label="Go to homepage"
+			>
+				Circuitspace
+			</span>
 			<img 
 				src="/sidepanel-icons/tabler-icon-layout-sidebar-right.svg" 
 				alt="Toggle Sidebar" 
@@ -294,6 +304,15 @@
 		font-size: 1.25rem;
 		font-weight: 600;
 		color: #F0F0F0;
+		cursor: pointer;
+		transition: color 0.2s ease;
+		padding: 0.25rem 0.5rem;
+		border-radius: 4px;
+	}
+	
+	.logo-text:hover {
+		color: #FFFFFF;
+		background-color: rgba(240, 240, 240, 0.1);
 	}
 	
 	/* My Projects Section */
