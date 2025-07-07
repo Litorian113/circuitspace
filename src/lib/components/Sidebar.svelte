@@ -306,8 +306,8 @@
 	}
 	
 	.logo-icon {
-		width: 24px;
-		height: 24px;
+		width: 32px;
+		height: 32px;
 		filter: brightness(0) invert(1);
 		cursor: pointer;
 		transition: transform 0.3s ease;
@@ -347,11 +347,11 @@
 	
 	.sidebar-section.no-border {
 		border-bottom: none;
-		padding-bottom: 0.75rem;
+		padding-bottom: 0rem;
 	}
 	
 	.sidebar-section.no-border + .sidebar-section {
-		padding-top: 0.75rem;
+		padding-top: 0rem;
 	}
 	
 	.section-header {

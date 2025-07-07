@@ -82,7 +82,11 @@
 </script>
 
 <svelte:head>
-	<title>Meine Projekte - Circuitspace</title>
+	<title>My Projects - Circuitspace</title>
+	<meta name="description" content="Manage and edit your electronics projects" />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 </svelte:head>
 
 <!-- Sidebar -->
@@ -99,67 +103,43 @@
 	</header>
 	
 	<div class="filters-section">
-		<div class="search-container">
-			<input 
-				type="text" 
-				bind:value={searchQuery}
-				placeholder="Nach Projekten suchen..."
-				class="search-input"
-			/>
-		</div>
-		
-		<div class="category-filters">
-			<button 
-				class="filter-btn {selectedCategory === 'all' ? 'active' : ''}"
-				on:click={() => selectedCategory = 'all'}
-			>
-				Alle
-			</button>
-			<button 
-				class="filter-btn {selectedCategory === 'beginner' ? 'active' : ''}"
-				on:click={() => selectedCategory = 'beginner'}
-			>
-				Anfänger
-			</button>
-			<button 
-				class="filter-btn {selectedCategory === 'intermediate' ? 'active' : ''}"
-				on:click={() => selectedCategory = 'intermediate'}
-			>
-				Fortgeschritten
-			</button>
-			<button 
-				class="filter-btn {selectedCategory === 'advanced' ? 'active' : ''}"
-				on:click={() => selectedCategory = 'advanced'}
-			>
-				Experte
-			</button>
-		</div>
-
-		<div class="state-filters">
-			<button 
-				class="filter-btn {selectedState === 'all' ? 'active' : ''}"
-				on:click={() => selectedState = 'all'}
-			>
-				Alle Status
-			</button>
-			<button 
-				class="filter-btn {selectedState === 'in-progress' ? 'active' : ''}"
-				on:click={() => selectedState = 'in-progress'}
-			>
-				In Arbeit
-			</button>
-			<button 
-				class="filter-btn {selectedState === 'done' ? 'active' : ''}"
-				on:click={() => selectedState = 'done'}
-			>
-				Abgeschlossen
-			</button>
-			<button 
-				class="filter-btn {selectedState === 'paused' ? 'active' : ''}"
-				on:click={() => selectedState = 'paused'}
-			>
-				Pausiert
-			</button>
+		<div class="filter-row">
+			<!-- Search Box with Icon -->
+			<div class="search-box">
+				<input 
+					type="text" 
+					placeholder="Search..." 
+					bind:value={searchQuery}
+				/>
+				<div class="search-divider"></div>
+				<div class="search-icon">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<circle cx="11" cy="11" r="8"/>
+						<path d="21 21l-4.35-4.35"/>
+					</svg>
+				</div>
+			</div>
+			
+			<!-- Filter Controls -->
+			<div class="filter-controls">
+				<div class="filter-group">
+					<select id="difficulty-select" bind:value={selectedCategory}>
+						<option value="all">Alle</option>
+						<option value="beginner">Anfänger</option>
+						<option value="intermediate">Fortgeschritten</option>
+						<option value="advanced">Experte</option>
+					</select>
+				</div>
+				
+				<div class="filter-group">
+					<select id="status-select" bind:value={selectedState}>
+						<option value="all">Alle Status</option>
+						<option value="in-progress">In Arbeit</option>
+						<option value="done">Abgeschlossen</option>
+						<option value="paused">Pausiert</option>
+					</select>
+				</div>
+			</div>
 		</div>
 	</div>
 	
@@ -279,9 +259,9 @@
 
 	.projects-page {
 		min-height: 100vh;
-		background: linear-gradient(135deg, #0a0f1a 0%, #1e293b 100%);
+		background: #191919;
 		color: #e2e8f0;
-		font-family: 'IBM Plex Mono', monospace;
+		font-family: 'Inter', sans-serif;
 		margin-left: var(--sidebar-width, 280px);
 		transition: margin-left 0.3s ease;
 		width: calc(100vw - var(--sidebar-width, 280px));
@@ -332,93 +312,134 @@
 	.filters-section {
 		padding: 2rem 3rem;
 		display: flex;
-		gap: 2rem;
+		justify-content: flex-start;
 		align-items: center;
+	}
+	
+	.filter-row {
+		display: flex;
+		align-items: center;
+		gap: 2rem;
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		width: 100%;
+		max-width: 1200px;
+	}
+	
+	/* Search Box Styling */
+	.search-box {
+		display: flex;
+		align-items: center;
+		background: rgba(35, 35, 35, 0.8);
+		border-radius: 12px;
+		border: 1px solid rgba(226, 232, 240, 0.2);
+		transition: all 0.2s ease;
+		min-width: 350px;
+		flex: 1;
+		max-width: 500px;
+	}
+	
+	.search-box:focus-within {
+		border-color: rgba(226, 232, 240, 0.4);
+		box-shadow: 0 0 0 3px rgba(226, 232, 240, 0.1);
+	}
+	
+	.search-box input {
+		flex: 1;
+		padding: 0.875rem 1rem;
+		background: transparent;
+		border: none;
+		color: #e2e8f0;
+		font-size: 0.875rem;
+		font-family: 'Inter', sans-serif;
+		outline: none;
+	}
+	
+	.search-box input::placeholder {
+		color: rgba(226, 232, 240, 0.5);
+	}
+	
+	.search-divider {
+		width: 1px;
+		height: 24px;
+		background: rgba(226, 232, 240, 0.2);
+		margin: 0 0.75rem;
+	}
+	
+	.search-icon {
+		padding: 0 1rem;
+		color: rgba(226, 232, 240, 0.5);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 50px;
+	}
+	
+	.search-icon svg {
+		width: 18px;
+		height: 18px;
+		flex-shrink: 0;
+	}
+	
+	.filter-controls {
+		display: flex;
+		gap: 2rem;
 		flex-wrap: wrap;
 	}
 	
-	.search-container {
-		flex: 1;
-		min-width: 300px;
-	}
-	
-	.search-input {
-		width: 100%;
-		padding: 1rem;
-		background: rgba(30, 41, 59, 0.8);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 12px;
-		color: #e2e8f0;
-		font-size: 1rem;
-		font-family: inherit;
-		transition: all 0.2s ease;
-	}
-	
-	.search-input:focus {
-		outline: none;
-		border-color: #00d4aa;
-		box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
-	}
-	
-	.category-filters,
-	.state-filters {
+	.filter-group {
 		display: flex;
-		gap: 0.5rem;
+		align-items: center;
 	}
 	
-	.state-filters {
-		border-left: 1px solid rgba(0, 212, 170, 0.3);
-		padding-left: 2rem;
-	}
-	
-	.filter-btn {
-		padding: 0.75rem 1.5rem;
-		background: rgba(30, 41, 59, 0.8);
-		color: #94a3b8;
-		border: 1px solid rgba(148, 163, 184, 0.2);
-		border-radius: 8px;
+	.filter-group select {
+		padding: 0.5rem 2rem 0.5rem 0.75rem;
+		border: none;
+		background: transparent;
+		color: #e2e8f0;
+		font-family: 'Inter', sans-serif;
+		font-size: 0.875rem;
 		cursor: pointer;
-		transition: all 0.2s ease;
-		font-family: inherit;
+		outline: none;
+		appearance: none;
+		background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+		background-position: right 0.5rem center;
+		background-repeat: no-repeat;
+		background-size: 1.5em 1.5em;
 	}
 	
-	.filter-btn:hover {
-		background: rgba(0, 212, 170, 0.1);
-		color: #00d4aa;
-		border-color: rgba(0, 212, 170, 0.3);
-	}
-	
-	.filter-btn.active {
-		background: rgba(0, 212, 170, 0.2);
-		color: #00d4aa;
-		border-color: #00d4aa;
+	.filter-group select:hover {
+		color: #CABDF5;
 	}
 	
 	.projects-grid {
+		padding: 3rem;
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
 		gap: 2rem;
-		padding: 0 3rem 3rem 3rem;
 	}
 	
 	.project-card {
-		background: rgba(30, 41, 59, 0.8);
-		border: 1px solid rgba(0, 212, 170, 0.2);
+		background: rgba(35, 35, 35, 0.8);
 		border-radius: 16px;
 		overflow: hidden;
 		transition: all 0.3s ease;
 		backdrop-filter: blur(10px);
+		position: relative;
+		padding: 1.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
 	}
 	
 	.project-card:hover {
-		transform: translateY(-4px);
-		border-color: #00d4aa;
-		box-shadow: 0 20px 40px rgba(0, 212, 170, 0.1);
+		transform: translateY(-8px);
 	}
 	
 	.card-header {
-		padding: 1.5rem;
-		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
 	}
 	
 	.header-top {
@@ -426,12 +447,16 @@
 		justify-content: space-between;
 		align-items: flex-start;
 		gap: 1rem;
+		width: 100%;
 	}
 	
 	.card-header h3 {
 		margin: 0;
+		font-family: 'Inter', sans-serif;
 		font-size: 1.25rem;
-		color: #ffffff;
+		font-weight: 700;
+		color: #f1f5f9;
+		line-height: 1.2;
 		flex: 1;
 	}
 	
@@ -445,11 +470,23 @@
 	.state-badge,
 	.difficulty-badge {
 		padding: 0.25rem 0.75rem;
-		border-radius: 12px;
+		border-radius: 20px;
 		font-size: 0.75rem;
 		font-weight: 600;
 		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+	
+	.state-badge {
+		background: #CABDF5;
 		color: #000000;
+		border: 1px solid rgba(202, 189, 245, 0.3);
+	}
+	
+	.difficulty-badge {
+		background: #CABDF5;
+		color: #000000;
+		border: 1px solid rgba(202, 189, 245, 0.3);
 	}
 	
 	.template-meta {
@@ -477,13 +514,16 @@
 	}
 	
 	.card-content {
-		padding: 1.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
 	}
 	
 	.description {
+		font-size: 0.9rem;
 		color: #94a3b8;
-		line-height: 1.6;
-		margin-bottom: 1.5rem;
+		line-height: 1.4;
+		margin: 0;
 	}
 	
 	.template-meta {
@@ -505,15 +545,17 @@
 	}
 	
 	.learning-objectives {
-		margin-bottom: 1.5rem;
+		margin-bottom: 1rem;
 	}
 	
 	.learning-objectives h4 {
 		margin: 0 0 0.75rem 0;
 		font-size: 0.9rem;
-		color: #00d4aa;
+		color: #CABDF5;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
+		font-family: 'Inter', sans-serif;
+		font-weight: 600;
 	}
 	
 	.learning-objectives ul {
@@ -533,7 +575,7 @@
 		content: '▸';
 		position: absolute;
 		left: -1rem;
-		color: #00d4aa;
+		color: #CABDF5;
 	}
 	
 	.more-objectives {
@@ -545,56 +587,71 @@
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.5rem;
-		margin-bottom: 1.5rem;
+		margin-bottom: 1rem;
 	}
 	
 	.tag {
-		padding: 0.25rem 0.5rem;
-		background: rgba(0, 212, 170, 0.1);
-		color: #00d4aa;
-		border-radius: 6px;
-		font-size: 0.8rem;
-		border: 1px solid rgba(0, 212, 170, 0.2);
+		background: rgba(202, 189, 245, 0.1);
+		color: #CABDF5;
+		padding: 0.25rem 0.75rem;
+		border-radius: 20px;
+		font-size: 0.75rem;
+		font-weight: 500;
+		border: 1px solid rgba(202, 189, 245, 0.3);
 	}
 	
 	.card-actions {
 		display: flex;
-		gap: 1rem;
-		padding: 1.5rem;
-		border-top: 1px solid rgba(0, 212, 170, 0.1);
+		gap: 0.75rem;
+		margin-top: 0.5rem;
 	}
 	
 	.btn-secondary,
-	.btn-primary {
+	.btn-primary,
+	.btn-danger {
 		flex: 1;
 		padding: 0.75rem 1rem;
 		border-radius: 8px;
+		font-family: 'Inter', sans-serif;
 		font-weight: 600;
+		font-size: 0.875rem;
 		cursor: pointer;
 		transition: all 0.2s ease;
-		border: none;
-		font-family: inherit;
+		border: 2px solid;
 	}
 	
 	.btn-secondary {
-		background: rgba(148, 163, 184, 0.1);
-		color: #94a3b8;
-		border: 1px solid rgba(148, 163, 184, 0.2);
+		background: transparent;
+		color: #CABDF5;
+		border-color: #CABDF5;
 	}
 	
 	.btn-secondary:hover {
-		background: rgba(148, 163, 184, 0.2);
-		color: #ffffff;
+		background: rgba(202, 189, 245, 0.1);
+		transform: translateY(-1px);
 	}
 	
 	.btn-primary {
-		background: linear-gradient(135deg, #00d4aa 0%, #00b8d4 100%);
-		color: #000000;
+		background: transparent;
+		color: #CABDF5;
+		border-color: #CABDF5;
 	}
 	
 	.btn-primary:hover {
+		background: #CABDF5;
+		color: #0f172a;
 		transform: translateY(-1px);
-		box-shadow: 0 8px 16px rgba(0, 212, 170, 0.3);
+	}
+	
+	.btn-danger {
+		background: transparent;
+		color: #ff6b6b;
+		border-color: #ff6b6b;
+	}
+	
+	.btn-danger:hover {
+		background: rgba(255, 107, 107, 0.1);
+		transform: translateY(-1px);
 	}
 	
 	.no-results {
@@ -623,7 +680,12 @@
 		
 		.filters-section {
 			flex-direction: column;
-			align-items: stretch;
+			align-items: flex-start;
+			padding: 1rem 1.5rem;
+		}
+		
+		.filter-row {
+			justify-content: flex-start;
 		}
 		
 		.category-filters {
