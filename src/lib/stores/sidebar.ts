@@ -1,4 +1,5 @@
 import { writable } from 'svelte/store';
+import { browser } from '$app/environment';
 
 // Sidebar state management
 export const sidebarCollapsed = writable(false);
@@ -10,6 +11,9 @@ export const getSidebarWidth = (collapsed: boolean): number => {
 
 // CSS custom property for dynamic margin
 export const setSidebarWidth = (collapsed: boolean) => {
-	const width = getSidebarWidth(collapsed);
-	document.documentElement.style.setProperty('--sidebar-width', `${width}px`);
+	// Only execute on client side, not during SSR
+	if (browser) {
+		const width = getSidebarWidth(collapsed);
+		document.documentElement.style.setProperty('--sidebar-width', `${width}px`);
+	}
 };

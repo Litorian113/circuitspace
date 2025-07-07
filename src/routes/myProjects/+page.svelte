@@ -2,22 +2,24 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import Sidebar from '$lib/components/Sidebar.svelte';
-	import { projectTemplates, type ProjectTemplate } from '$lib/stores/projectTemplates';
+	import { userProjects, type UserProject } from '$lib/stores/userProjects';
 	import { currentProject, updateProjectCode, addComponent } from '$lib/stores/project';
 	
 	let selectedCategory: 'all' | 'beginner' | 'intermediate' | 'advanced' = 'all';
+	let selectedState: 'all' | 'in-progress' | 'done' | 'paused' = 'all';
 	let searchQuery = '';
-	let filteredTemplates: ProjectTemplate[] = [];
+	let filteredProjects: UserProject[] = [];
 	
 	$: {
-		filteredTemplates = projectTemplates.filter(template => {
-			const matchesCategory = selectedCategory === 'all' || template.category === selectedCategory;
+		filteredProjects = $userProjects.filter(project => {
+			const matchesCategory = selectedCategory === 'all' || project.category === selectedCategory;
+			const matchesState = selectedState === 'all' || project.state === selectedState;
 			const matchesSearch = searchQuery === '' || 
-				template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				template.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-				template.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+				project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				project.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
 			
-			return matchesCategory && matchesSearch;
+			return matchesCategory && matchesState && matchesSearch;
 		});
 	}
 	
@@ -33,41 +35,65 @@
 			default: return '#888';
 		}
 	}
+
+	function getStateColor(state: string): string {
+		switch(state) {
+			case 'done': return '#00d4aa';
+			case 'in-progress': return '#ffa500';
+			case 'paused': return '#64748b';
+			default: return '#888';
+		}
+	}
+
+	function getStateText(state: string): string {
+		switch(state) {
+			case 'done': return 'Abgeschlossen';
+			case 'in-progress': return 'In Arbeit';
+			case 'paused': return 'Pausiert';
+			default: return state;
+		}
+	}
 	
-	function selectTemplate(template: ProjectTemplate) {
-		// Update the current project with template data
-		currentProject.update(project => ({
-			...project,
-			name: template.name,
-			description: template.description,
-			components: template.components,
-			code: template.code,
+	function continueProject(project: UserProject) {
+		// Update the current project with user project data
+		currentProject.update(currentProj => ({
+			...currentProj,
+			name: project.name,
+			description: project.description,
+			components: project.components,
+			code: project.code,
 			updatedAt: new Date()
 		}));
 		
-		// Navigate to project chat with template loaded
+		// Navigate to project chat with project loaded
 		goto('/project-chat');
 	}
 	
-	function previewTemplate(template: ProjectTemplate) {
+	function previewProject(project: UserProject) {
 		// For now, just show an alert. In the future, this could open a modal
-		alert(`Preview for ${template.name}:\n\n${template.description}\n\nComponents: ${template.components.length}\nDifficulty: ${template.difficulty}/5`);
+		alert(`Vorschau für ${project.name}:\n\n${project.description}\n\nKomponenten: ${project.components.length}\nSchwierigkeit: ${project.difficulty}/5\nStatus: ${getStateText(project.state)}`);
+	}
+
+	function deleteProject(project: UserProject) {
+		if (confirm(`Bist du sicher, dass du "${project.name}" löschen möchtest?`)) {
+			userProjects.deleteProject(project.id);
+		}
 	}
 </script>
 
 <svelte:head>
-	<title>Projekt-Vorlagen - Circuitspace</title>
+	<title>Meine Projekte - Circuitspace</title>
 </svelte:head>
 
 <!-- Sidebar -->
 <Sidebar />
 
 <!-- Main Content -->
-<div class="templates-page">
+<div class="projects-page">
 	<header class="page-header">
 		<div class="header-content">
-			<h1>Projekt-Vorlagen</h1>
-			<p>Starte dein nächstes Electronics-Projekt mit unseren bewährten Vorlagen</p>
+			<h1>Meine Projekte</h1>
+			<p>Verwalte und bearbeite deine Electronics-Projekte</p>
 		</div>
 		<button on:click={() => goto('/')} class="back-btn">← Zurück</button>
 	</header>
@@ -108,50 +134,92 @@
 				Experte
 			</button>
 		</div>
+
+		<div class="state-filters">
+			<button 
+				class="filter-btn {selectedState === 'all' ? 'active' : ''}"
+				on:click={() => selectedState = 'all'}
+			>
+				Alle Status
+			</button>
+			<button 
+				class="filter-btn {selectedState === 'in-progress' ? 'active' : ''}"
+				on:click={() => selectedState = 'in-progress'}
+			>
+				In Arbeit
+			</button>
+			<button 
+				class="filter-btn {selectedState === 'done' ? 'active' : ''}"
+				on:click={() => selectedState = 'done'}
+			>
+				Abgeschlossen
+			</button>
+			<button 
+				class="filter-btn {selectedState === 'paused' ? 'active' : ''}"
+				on:click={() => selectedState = 'paused'}
+			>
+				Pausiert
+			</button>
+		</div>
 	</div>
 	
-	<div class="templates-grid">
-		{#each filteredTemplates as template (template.id)}
-			<div class="template-card">
+	<div class="projects-grid">
+		{#each filteredProjects as project (project.id)}
+			<div class="project-card">
 				<div class="card-header">
-					<h3>{template.name}</h3>
-					<div class="difficulty-badge" style="background-color: {getCategoryColor(template.category)}">
-						{template.category}
+					<div class="header-top">
+						<h3>{project.name}</h3>
+						<div class="badges">
+							<div class="state-badge" style="background-color: {getStateColor(project.state)}">
+								{getStateText(project.state)}
+							</div>
+							<div class="difficulty-badge" style="background-color: {getCategoryColor(project.category)}">
+								{project.category}
+							</div>
+						</div>
 					</div>
 				</div>
 				
 				<div class="card-content">
-					<p class="description">{template.description}</p>
+					<p class="description">{project.description}</p>
 					
-					<div class="template-meta">
+					<div class="project-meta">
 						<div class="meta-row">
 							<span class="meta-label">Schwierigkeit:</span>
-							<span class="difficulty-stars">{getDifficultyStars(template.difficulty)}</span>
+							<span class="difficulty-stars">{getDifficultyStars(project.difficulty)}</span>
 						</div>
 						<div class="meta-row">
 							<span class="meta-label">Dauer:</span>
-							<span>{template.estimatedTime}</span>
+							<span>{project.estimatedTime}</span>
 						</div>
 						<div class="meta-row">
 							<span class="meta-label">Komponenten:</span>
-							<span>{template.components.length} Teile</span>
+							<span>{project.componentsCount} Teile</span>
+						</div>
+						<div class="meta-row">
+							<span class="meta-label">Erstellt:</span>
+							<span>{project.createdAt.toLocaleDateString('de-DE')}</span>
+						</div>
+						<div class="meta-row">
+							<span class="meta-label">Zuletzt bearbeitet:</span>
+							<span>{project.updatedAt.toLocaleDateString('de-DE')}</span>
 						</div>
 					</div>
 					
 					<div class="learning-objectives">
 						<h4>Lernziele:</h4>
 						<ul>
-							{#each template.learningObjectives.slice(0, 3) as objective}
-								<li>{objective}</li>
+							{#each project.learningGoals.slice(0, 3) as goal}
+								<li>{goal}</li>
 							{/each}
-							{#if template.learningObjectives.length > 3}
-								<li class="more-objectives">+{template.learningObjectives.length - 3} weitere...</li>
+							{#if project.learningGoals.length > 3}
+								<li class="more-objectives">+{project.learningGoals.length - 3} weitere...</li>
 							{/if}
 						</ul>
 					</div>
 					
 					<div class="tags">
-						{#each template.tags.slice(0, 4) as tag}
+						{#each project.tags.slice(0, 4) as tag}
 							<span class="tag">#{tag}</span>
 						{/each}
 					</div>
@@ -159,42 +227,65 @@
 				
 				<div class="card-actions">
 					<button 
-						on:click={() => previewTemplate(template)}
+						on:click={() => previewProject(project)}
 						class="btn-secondary"
 					>
 						Vorschau
 					</button>
 					<button 
-						on:click={() => selectTemplate(template)}
+						on:click={() => continueProject(project)}
 						class="btn-primary"
 					>
-						Projekt starten
+						{project.state === 'done' ? 'Anzeigen' : 'Bearbeiten'}
+					</button>
+					<button 
+						on:click={() => deleteProject(project)}
+						class="btn-danger"
+					>
+						Löschen
 					</button>
 				</div>
 			</div>
 		{/each}
 	</div>
 	
-	{#if filteredTemplates.length === 0}
+	{#if filteredProjects.length === 0}
 		<div class="no-results">
 			<h3>Keine Projekte gefunden</h3>
-			<p>Versuche es mit anderen Suchbegriffen oder wähle eine andere Kategorie.</p>
+			<p>Versuche es mit anderen Suchbegriffen oder wähle eine andere Kategorie/Status.</p>
+			<button on:click={() => goto('/templates')} class="btn-primary">
+				Neues Projekt aus Vorlage erstellen
+			</button>
 		</div>
 	{/if}
 </div>
 
 <style>
+	:global(*) {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+	}
+	
+	:global(body) {
+		margin: 0;
+		padding: 0;
+		overflow-x: hidden;
+	}
+	
 	:global(:root) {
 		--sidebar-width: 280px; /* Default sidebar width */
 	}
 
-	.templates-page {
+	.projects-page {
 		min-height: 100vh;
 		background: linear-gradient(135deg, #0a0f1a 0%, #1e293b 100%);
 		color: #e2e8f0;
 		font-family: 'IBM Plex Mono', monospace;
 		margin-left: var(--sidebar-width, 280px);
 		transition: margin-left 0.3s ease;
+		width: calc(100vw - var(--sidebar-width, 280px));
+		position: relative;
 	}
 	
 	.page-header {
@@ -269,9 +360,15 @@
 		box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
 	}
 	
-	.category-filters {
+	.category-filters,
+	.state-filters {
 		display: flex;
 		gap: 0.5rem;
+	}
+	
+	.state-filters {
+		border-left: 1px solid rgba(0, 212, 170, 0.3);
+		padding-left: 2rem;
 	}
 	
 	.filter-btn {
@@ -297,14 +394,14 @@
 		border-color: #00d4aa;
 	}
 	
-	.templates-grid {
+	.projects-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
 		gap: 2rem;
 		padding: 0 3rem 3rem 3rem;
 	}
 	
-	.template-card {
+	.project-card {
 		background: rgba(30, 41, 59, 0.8);
 		border: 1px solid rgba(0, 212, 170, 0.2);
 		border-radius: 16px;
@@ -313,18 +410,22 @@
 		backdrop-filter: blur(10px);
 	}
 	
-	.template-card:hover {
+	.project-card:hover {
 		transform: translateY(-4px);
 		border-color: #00d4aa;
 		box-shadow: 0 20px 40px rgba(0, 212, 170, 0.1);
 	}
 	
 	.card-header {
+		padding: 1.5rem;
+		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
+	}
+	
+	.header-top {
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-start;
-		padding: 1.5rem;
-		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
+		gap: 1rem;
 	}
 	
 	.card-header h3 {
@@ -334,6 +435,14 @@
 		flex: 1;
 	}
 	
+	.badges {
+		display: flex;
+		gap: 0.5rem;
+		flex-direction: column;
+		align-items: flex-end;
+	}
+	
+	.state-badge,
 	.difficulty-badge {
 		padding: 0.25rem 0.75rem;
 		border-radius: 12px;
@@ -341,7 +450,30 @@
 		font-weight: 600;
 		text-transform: uppercase;
 		color: #000000;
-		margin-left: 1rem;
+	}
+	
+	.template-meta {
+		margin-bottom: 1.5rem;
+	}
+	
+	.btn-danger {
+		flex: 1;
+		padding: 0.75rem 1rem;
+		border-radius: 8px;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		border: none;
+		font-family: inherit;
+		background: rgba(255, 107, 107, 0.1);
+		color: #ff6b6b;
+		border: 1px solid rgba(255, 107, 107, 0.2);
+	}
+	
+	.btn-danger:hover {
+		background: rgba(255, 107, 107, 0.2);
+		color: #ffffff;
+		transform: translateY(-1px);
 	}
 	
 	.card-content {
@@ -478,8 +610,9 @@
 	
 	/* Responsive Design */
 	@media (max-width: 768px) {
-		.templates-page {
+		.projects-page {
 			margin-left: 0;
+			width: 100vw;
 		}
 		
 		.page-header {
@@ -497,12 +630,12 @@
 			justify-content: center;
 		}
 		
-		.templates-grid {
+		.projects-grid {
 			grid-template-columns: 1fr;
 			padding: 0 1rem 2rem 1rem;
 		}
 		
-		.template-card {
+		.project-card {
 			margin: 0;
 		}
 	}

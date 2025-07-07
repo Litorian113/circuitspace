@@ -86,10 +86,13 @@
 	
 	<!-- My Projects Section -->
 	<div class="sidebar-section no-border" class:hidden={isCollapsed}>
-		<div class="section-header">
+		<button 
+			class="section-header clickable" 
+			on:click={() => navigateTo('/myProjects')}
+		>
 			<img src="/sidepanel-icons/tabler-icon-archive.svg" alt="Projects" class="section-icon">
 			<span class="section-title">My Projects</span>
-		</div>
+		</button>
 	</div>
 	
 	<!-- Search Section -->
@@ -102,9 +105,13 @@
 	
 	<!-- Collapsed Icons Section -->
 	<div class="collapsed-icons" class:hidden={!isCollapsed}>
-		<div class="collapsed-icon-item" title="My Projects">
+		<button 
+			class="collapsed-icon-item" 
+			title="My Projects" 
+			on:click={() => navigateTo('/myProjects')}
+		>
 			<img src="/sidepanel-icons/tabler-icon-archive.svg" alt="Projects" class="collapsed-icon">
-		</div>
+		</button>
 		<div class="collapsed-icon-item" title="Search">
 			<img src="/sidepanel-icons/Frame.svg" alt="Search" class="collapsed-icon">
 		</div>
@@ -351,6 +358,33 @@
 		display: flex;
 		align-items: center;
 		gap: 0.75rem;
+		width: 100%;
+		padding: 0.75rem 1rem;
+		background: none;
+		border: none;
+		color: #F0F0F0;
+		font-family: 'Inter', sans-serif !important;
+		font-size: 1rem !important;
+		font-weight: 400;
+		text-align: left;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		box-sizing: border-box;
+		line-height: 1.5;
+	}
+	
+	.section-header:hover {
+		background-color: rgba(240, 240, 240, 0.1);
+		color: #FFFFFF;
+	}
+	
+	.section-header:hover .section-icon {
+		filter: brightness(0) invert(1);
+	}
+	
+	.section-header:hover .section-title {
+		color: #FFFFFF;
 	}
 	
 	.section-icon {
@@ -386,6 +420,9 @@
 		cursor: pointer;
 		transition: background-color 0.2s ease;
 		position: relative;
+		background: none;
+		border: none;
+		padding: 0;
 	}
 	
 	.collapsed-icon-item:hover {
