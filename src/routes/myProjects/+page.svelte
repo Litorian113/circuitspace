@@ -96,10 +96,8 @@
 <div class="projects-page">
 	<header class="page-header">
 		<div class="header-content">
-			<h1>Meine Projekte</h1>
-			<p>Verwalte und bearbeite deine Electronics-Projekte</p>
+			<h1>My Projects</h1>
 		</div>
-		<button on:click={() => goto('/')} class="back-btn">← Zurück</button>
 	</header>
 	
 	<div class="filters-section">
@@ -270,43 +268,18 @@
 	
 	.page-header {
 		display: flex;
-		justify-content: space-between;
+		justify-content: flex-start;
 		align-items: center;
 		padding: 2rem 3rem;
-		border-bottom: 1px solid rgba(0, 212, 170, 0.2);
-		background: rgba(30, 41, 59, 0.5);
+		border-bottom: 1px solid rgba(202, 189, 245, 0.2);
+		background: #191919;
 		backdrop-filter: blur(10px);
 	}
 	
 	.header-content h1 {
 		margin: 0;
 		font-size: 2.5rem;
-		background: linear-gradient(135deg, #00d4aa 0%, #00b8d4 100%);
-		-webkit-background-clip: text;
-		-webkit-text-fill-color: transparent;
-		background-clip: text;
-	}
-	
-	.header-content p {
-		margin: 0.5rem 0 0 0;
-		color: #94a3b8;
-		font-size: 1.1rem;
-	}
-	
-	.back-btn {
-		padding: 0.75rem 1.5rem;
-		background: rgba(0, 212, 170, 0.1);
-		color: #00d4aa;
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 8px;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		font-family: inherit;
-	}
-	
-	.back-btn:hover {
-		background: rgba(0, 212, 170, 0.2);
-		transform: translateY(-1px);
+		color: #ffffff;
 	}
 	
 	.filters-section {

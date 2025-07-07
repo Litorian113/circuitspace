@@ -31,7 +31,7 @@
 <svelte:head>
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
-	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 </svelte:head>
 
 <!-- Page Transition Overlay -->
@@ -179,7 +179,7 @@
 	}
 	
 	.transition-text {
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-size: 1.5rem;
 		font-weight: 600;
 		background: linear-gradient(135deg, rgba(120, 119, 198, 1), rgba(255, 119, 198, 1));

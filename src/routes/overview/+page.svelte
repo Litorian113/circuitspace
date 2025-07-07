@@ -199,7 +199,7 @@
 	<meta name="description" content="Explore electronic components and learn with interactive quizzes" />
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
-	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 </svelte:head>
 
 <!-- Sidebar -->
@@ -380,7 +380,7 @@
 	:global(body) {
 		margin: 0;
 		padding: 0;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		background: #191919;
 		color: #e2e8f0;
 		overflow-x: hidden;
@@ -497,7 +497,7 @@
 		background: transparent;
 		font-size: 1rem;
 		color: #e2e8f0;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		outline: none;
 	}
 
@@ -543,7 +543,7 @@
 		border: none;
 		background: transparent;
 		color: #e2e8f0;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-size: 0.875rem;
 		cursor: pointer;
 		outline: none;
@@ -605,7 +605,7 @@
 	}
 
 	.level-text {
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-weight: 600;
 		color: #e2e8f0;
 		font-size: 0.9rem;
@@ -646,7 +646,7 @@
 	}
 
 	.component-title {
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-size: 1.25rem;
 		font-weight: 700;
 		color: #f1f5f9;
@@ -709,7 +709,7 @@
 	}
 
 	.progress-label {
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-weight: 600;
 		color: #CABDF5;
 		font-size: 0.9rem;
@@ -760,7 +760,7 @@
 		flex: 1;
 		padding: 0.75rem 1rem;
 		border-radius: 8px;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-weight: 600;
 		font-size: 0.875rem;
 		cursor: pointer;
@@ -1015,7 +1015,7 @@
 		border: none;
 		border-radius: 12px;
 		color: #0a0f1a;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-weight: 600;
 		cursor: pointer;
 		transition: all 0.3s ease;
