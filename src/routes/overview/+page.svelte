@@ -386,6 +386,10 @@
 		overflow-x: hidden;
 	}
 
+	:global(:root) {
+		--sidebar-width: 280px; /* Default sidebar width */
+	}
+
 	.app-container {
 		min-height: 100vh;
 		background: #191919;
@@ -395,11 +399,12 @@
 
 	/* Main Content */
 	.main-content {
-		margin-left: 280px;
+		margin-left: var(--sidebar-width);
 		display: flex;
 		flex-direction: column;
 		overflow-y: auto;
 		background: #191919;
+		transition: margin-left 0.3s ease;
 	}
 
 	.components-header {
@@ -669,7 +674,7 @@
 
 	.component-image-box img {
 		max-width: 100%;
-		max-height: 80px;
+		max-height: 150px;
 		object-fit: contain;
 	}
 

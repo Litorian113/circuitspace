@@ -1,10 +1,23 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
+	import { onMount } from 'svelte';
+	import { sidebarCollapsed, setSidebarWidth } from '$lib/stores/sidebar';
 	
 	// Sidebar state
 	let isCollapsed = false;
 	let isAiChatExpanded = false;
+	
+	// Subscribe to global sidebar state
+	$: sidebarCollapsed.set(isCollapsed);
+	
+	// Set CSS custom property on mount and when collapsed state changes
+	$: setSidebarWidth(isCollapsed);
+	
+	onMount(() => {
+		// Initialize CSS custom property
+		setSidebarWidth(isCollapsed);
+	});
 	
 	// Navigation functions
 	function navigateTo(path: string) {
@@ -254,6 +267,10 @@
 		box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
 		overflow-y: auto;
 		transition: width 0.3s ease;
+		font-family: 'Inter', sans-serif !important;
+		/* Prevent font scaling during layout changes */
+		font-size: 1rem !important;
+		box-sizing: border-box;
 	}
 	
 	.sidebar.collapsed {
@@ -300,8 +317,8 @@
 	}
 	
 	.logo-text {
-		font-family: 'Inter', sans-serif;
-		font-size: 1.25rem;
+		font-family: 'Inter', sans-serif !important;
+		font-size: 1.25rem !important;
 		font-weight: 600;
 		color: #F0F0F0;
 		cursor: pointer;
@@ -343,8 +360,8 @@
 	}
 	
 	.section-title {
-		font-family: 'Inter', sans-serif;
-		font-size: 1rem;
+		font-family: 'Inter', sans-serif !important;
+		font-size: 1rem !important;
 		font-weight: 500;
 		color: #F0F0F0;
 	}
@@ -403,8 +420,8 @@
 	}
 	
 	.item-text {
-		font-family: 'Inter', sans-serif;
-		font-size: 0.9rem;
+		font-family: 'Inter', sans-serif !important;
+		font-size: 0.9rem !important;
 		color: #F0F0F0;
 	}
 	
@@ -415,6 +432,9 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		/* Prevent layout shifts */
+		min-height: 0;
+		box-sizing: border-box;
 	}
 	
 	.nav-list {
@@ -438,13 +458,16 @@
 		background: none;
 		border: none;
 		color: #F0F0F0;
-		font-family: 'Inter', sans-serif;
-		font-size: 1rem;
+		font-family: 'Inter', sans-serif !important;
+		font-size: 1rem !important;
 		font-weight: 400;
 		text-align: left;
 		border-radius: 8px;
 		cursor: pointer;
 		transition: all 0.2s ease;
+		/* Prevent layout shifts */
+		box-sizing: border-box;
+		line-height: 1.5;
 	}
 	
 	.nav-link:hover {
@@ -480,16 +503,17 @@
 		list-style: none;
 		padding: 0;
 		margin: 0;
-		max-height: 0;
+		height: 0;
 		overflow: hidden;
-		transition: max-height 0.3s ease, padding 0.3s ease;
-		/* background-color: rgba(202, 189, 245, 0.2); */
+		transition: height 0.3s ease;
 		border-radius: 6px;
 		margin-top: 0.5rem;
+		/* Prevent layout shift by using fixed sizing */
+		box-sizing: border-box;
 	}
 	
 	.submenu.expanded {
-		max-height: 200px;
+		height: 120px; /* Fixed height instead of max-height */
 		padding: 0.5rem 0;
 	}
 	
@@ -504,14 +528,17 @@
 		background: none;
 		border: none;
 		color: rgba(240, 240, 240, 0.8);
-		font-family: 'Inter', sans-serif;
-		font-size: 0.9rem;
+		font-family: 'Inter', sans-serif !important;
+		font-size: 0.9rem !important;
 		font-weight: 400;
 		text-align: left;
 		border-radius: 4px;
 		cursor: pointer;
 		transition: all 0.2s ease;
 		margin: 0 0.5rem;
+		/* Prevent layout shifts */
+		box-sizing: border-box;
+		line-height: 1.4;
 	}
 	
 	.submenu-link:hover {
@@ -543,8 +570,8 @@
 		background: none;
 		border: none;
 		color: #F0F0F0;
-		font-family: 'Inter', sans-serif;
-		font-size: 0.8rem;
+		font-family: 'Inter', sans-serif !important;
+		font-size: 0.8rem !important;
 		text-align: left;
 		cursor: pointer;
 		opacity: 0.7;
@@ -574,8 +601,8 @@
 	}
 	
 	.copyright {
-		font-family: 'Inter', sans-serif;
-		font-size: 0.75rem;
+		font-family: 'Inter', sans-serif !important;
+		font-size: 0.75rem !important;
 		color: #F0F0F0;
 		opacity: 0.6;
 		line-height: 1.4;
@@ -610,7 +637,7 @@
 		
 		.nav-link {
 			text-align: center;
-			font-size: 0.9rem;
+			font-size: 0.9rem !important;
 			padding: 0.5rem;
 		}
 	}

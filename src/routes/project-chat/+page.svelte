@@ -903,35 +903,31 @@ void loop() {
 <ExportModal bind:isOpen={showExportModal} />
 
 <style>
-	:global(body) {
-		margin: 0;
-		padding: 0;
+	:global(:root) {
+		--sidebar-width: 280px; /* Default sidebar width */
+	}
+	
+	.app-container {
 		font-family: 'Inter', sans-serif;
 		background: #191919;
 		color: rgba(255, 255, 255, 0.9);
+		display: flex;
+		height: 100vh;
+		width: 100vw;
 		overflow: hidden;
 		min-height: 100vh;
 	}
 	
-	:global(body::before) {
-		display: none;
-	}
-	
-	.app-container {
-		display: flex;
-		height: 100vh;
-		width: 100vw;
-	}
-	
 	/* Main Content Area */
 	.main-content {
-		margin-left: 280px;
+		margin-left: var(--sidebar-width, 280px);
 		flex: 1;
 		display: flex;
 		flex-direction: column;
 		background: #191919;
 		min-height: 0;
 		overflow: hidden;
+		transition: margin-left 0.3s ease;
 	}
 	
 	.main-content::before {

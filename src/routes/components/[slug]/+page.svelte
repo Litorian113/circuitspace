@@ -337,23 +337,16 @@
 		color: #e2e8f0;
 		font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
 	}
+	
+	:global(:root) {
+		--sidebar-width: 280px; /* Default sidebar width */
+	}
 
 	/* App Layout */
 	.app-container {
 		display: flex;
 		min-height: 100vh;
 		background: #0f1115;
-	}
-
-	/* Main Content */
-	.main-content {
-		flex: 1;
-		overflow-y: auto;
-		height: 100vh;
-		background: #0f1115;
-		padding: 2rem;
-		min-height: 100vh;
-		transition: margin-left 0.3s ease;
 	}
 
 	/* Main Content */

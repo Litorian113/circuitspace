@@ -107,6 +107,10 @@
 		min-height: 100vh;
 	}
 	
+	:global(:root) {
+		--sidebar-width: 280px; /* Default sidebar width */
+	}
+	
 	:global(body::before) {
 		display: none;
 	}
@@ -206,10 +210,11 @@
 	
 	/* Main Content */
 	.main-container {
-		margin-left: 280px;
+		margin-left: var(--sidebar-width, 280px);
 		min-height: 100vh;
 		position: relative;
 		z-index: 1;
+		transition: margin-left 0.3s ease;
 	}
 	
 	.main-container::before {

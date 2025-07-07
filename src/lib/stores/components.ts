@@ -222,7 +222,7 @@ export const componentLibrary: ComponentDetails[] = [
 		name: 'Breadboard',
 		category: 'Prototyping',
 		difficulty: 'beginner',
-		image: '/small_components/breadboard.png',
+		image: '/big_components/breadboard.png',
 		description: 'A solderless construction base used for building temporary electronic circuits and prototypes.',
 		detailedDescription: 'A breadboard is an essential tool for electronics prototyping that allows you to build circuits without soldering. It consists of a plastic board with numerous holes that are internally connected in specific patterns, enabling easy insertion and connection of electronic components.',
 		specifications: {
@@ -316,7 +316,7 @@ export const componentLibrary: ComponentDetails[] = [
 		name: 'LED (Light Emitting Diode)',
 		category: 'Output',
 		difficulty: 'beginner',
-		image: '/small_components/led.png',
+		image: '/big_components/leuchtdiode.png',
 		description: 'A semiconductor device that emits light when current flows through it in the forward direction.',
 		detailedDescription: 'LEDs are semiconductor devices that emit light through electroluminescence. They are highly efficient, long-lasting, and available in many colors. LEDs have polarity and require current limiting resistors to prevent damage.',
 		specifications: {
@@ -407,7 +407,7 @@ export const componentLibrary: ComponentDetails[] = [
 		name: 'Jumper Cable',
 		category: 'Connection',
 		difficulty: 'beginner',
-		image: '/small_components/cable.png',
+		image: '/big_components/jumpercable.png',
 		description: 'Flexible wires with connectors used to establish electrical connections between components.',
 		detailedDescription: 'Jumper cables are essential for connecting electronic components in breadboard circuits and prototypes. They come in various types: male-to-male, male-to-female, and female-to-female connectors, each serving different connection needs.',
 		specifications: {
@@ -503,7 +503,7 @@ export const componentLibrary: ComponentDetails[] = [
 		name: 'Potentiometer',
 		category: 'Input',
 		difficulty: 'intermediate',
-		image: '/small_components/poti.png',
+		image: '/big_components/poti.png',
 		description: 'A variable resistor with three terminals that can be used to control voltage or resistance.',
 		detailedDescription: 'A potentiometer is a manually adjustable variable resistor with three terminals. It consists of a resistive element and a sliding contact (wiper) that moves along the element. This creates a voltage divider that can provide variable output voltage.',
 		specifications: {
@@ -594,7 +594,7 @@ export const componentLibrary: ComponentDetails[] = [
 		name: 'Push Button',
 		category: 'Input',
 		difficulty: 'beginner',
-		image: '/components/pushbutton.png',
+		image: '/big_components/pushbutton.png',
 		description: 'A momentary switch that makes or breaks a connection when pressed and returns to its default state when released.',
 		detailedDescription: 'Push buttons are momentary switches that temporarily change their state when pressed. They are fundamental input devices in electronics, providing user interface capabilities for controlling circuits and microcontrollers. Most push buttons have two pairs of terminals for reliable connections.',
 		specifications: {
@@ -690,7 +690,7 @@ export const componentLibrary: ComponentDetails[] = [
 		name: 'Resistor',
 		category: 'Passive',
 		difficulty: 'beginner',
-		image: '/small_components/resistor.png',
+		image: '/big_components/widerstand.png',
 		description: 'A passive component that opposes the flow of electric current, creating voltage drops and limiting current.',
 		detailedDescription: 'Resistors are fundamental passive components that resist the flow of electric current. They are used to control voltage and current levels, divide voltages, and protect other components. Resistor values are indicated by color bands and follow Ohm\'s law (V = I × R).',
 		specifications: {
@@ -786,7 +786,7 @@ export const componentLibrary: ComponentDetails[] = [
 		name: 'Arduino Leonardo (Keyestudio)',
 		category: 'Microcontroller',
 		difficulty: 'advanced',
-		image: '/big_components/arduino.png',
+		image: '/big_components/leonardoKeyestudio.png',
 		description: 'A versatile microcontroller board based on the ATmega32U4 with built-in USB communication.',
 		detailedDescription: 'The Arduino Leonardo is a microcontroller board based on the ATmega32U4. It has 20 digital input/output pins, a 16 MHz crystal oscillator, a micro USB connection, a power jack, an ICSP header, and a reset button. Unlike other Arduino boards, the Leonardo can act as a USB device, making it ideal for projects that need to emulate keyboards, mice, or other USB devices.',
 		specifications: {
