@@ -44,7 +44,7 @@ export const componentLibrary: ComponentDetails[] = [
 		name: '5V DC Motor',
 		category: 'Actuator',
 		difficulty: 'intermediate',
-		image: '/components/5vMotor.png',
+		image: '/big_components/motor.png',
 		description: 'A small direct current motor that converts electrical energy into mechanical rotation.',
 		detailedDescription: 'DC motors are fundamental actuators in electronics that convert electrical energy into rotational mechanical energy. They work on the principle of electromagnetic induction and are widely used in robotics, automation, and various mechanical applications.',
 		specifications: {
@@ -137,7 +137,7 @@ export const componentLibrary: ComponentDetails[] = [
 		name: 'Arduino Micro',
 		category: 'Microcontroller',
 		difficulty: 'advanced',
-		image: '/components/arduinomicro.png',
+		image: '/big_components/arduino_micro.png',
 		description: 'A compact microcontroller board based on the ATmega32U4 with built-in USB connectivity.',
 		detailedDescription: 'The Arduino Micro is a small, complete, and breadboard-friendly board based on the ATmega32U4. It has built-in USB communication, eliminating the need for a secondary processor. This makes it ideal for projects requiring direct USB communication or HID emulation.',
 		specifications: {
@@ -222,7 +222,7 @@ export const componentLibrary: ComponentDetails[] = [
 		name: 'Breadboard',
 		category: 'Prototyping',
 		difficulty: 'beginner',
-		image: '/components/breadboard.png',
+		image: '/small_components/breadboard.png',
 		description: 'A solderless construction base used for building temporary electronic circuits and prototypes.',
 		detailedDescription: 'A breadboard is an essential tool for electronics prototyping that allows you to build circuits without soldering. It consists of a plastic board with numerous holes that are internally connected in specific patterns, enabling easy insertion and connection of electronic components.',
 		specifications: {
@@ -316,7 +316,7 @@ export const componentLibrary: ComponentDetails[] = [
 		name: 'LED (Light Emitting Diode)',
 		category: 'Output',
 		difficulty: 'beginner',
-		image: '/components/leuchtdiode.png',
+		image: '/small_components/led.png',
 		description: 'A semiconductor device that emits light when current flows through it in the forward direction.',
 		detailedDescription: 'LEDs are semiconductor devices that emit light through electroluminescence. They are highly efficient, long-lasting, and available in many colors. LEDs have polarity and require current limiting resistors to prevent damage.',
 		specifications: {
@@ -407,7 +407,7 @@ export const componentLibrary: ComponentDetails[] = [
 		name: 'Jumper Cable',
 		category: 'Connection',
 		difficulty: 'beginner',
-		image: '/components/jumpercable.png',
+		image: '/small_components/cable.png',
 		description: 'Flexible wires with connectors used to establish electrical connections between components.',
 		detailedDescription: 'Jumper cables are essential for connecting electronic components in breadboard circuits and prototypes. They come in various types: male-to-male, male-to-female, and female-to-female connectors, each serving different connection needs.',
 		specifications: {
@@ -503,7 +503,7 @@ export const componentLibrary: ComponentDetails[] = [
 		name: 'Potentiometer',
 		category: 'Input',
 		difficulty: 'intermediate',
-		image: '/components/poti.png',
+		image: '/small_components/poti.png',
 		description: 'A variable resistor with three terminals that can be used to control voltage or resistance.',
 		detailedDescription: 'A potentiometer is a manually adjustable variable resistor with three terminals. It consists of a resistive element and a sliding contact (wiper) that moves along the element. This creates a voltage divider that can provide variable output voltage.',
 		specifications: {
@@ -690,7 +690,7 @@ export const componentLibrary: ComponentDetails[] = [
 		name: 'Resistor',
 		category: 'Passive',
 		difficulty: 'beginner',
-		image: '/components/widerstand.png',
+		image: '/small_components/resistor.png',
 		description: 'A passive component that opposes the flow of electric current, creating voltage drops and limiting current.',
 		detailedDescription: 'Resistors are fundamental passive components that resist the flow of electric current. They are used to control voltage and current levels, divide voltages, and protect other components. Resistor values are indicated by color bands and follow Ohm\'s law (V = I × R).',
 		specifications: {
@@ -786,7 +786,7 @@ export const componentLibrary: ComponentDetails[] = [
 		name: 'Arduino Leonardo (Keyestudio)',
 		category: 'Microcontroller',
 		difficulty: 'advanced',
-		image: '/components/leonardoKeyestudio.png',
+		image: '/big_components/arduino.png',
 		description: 'A versatile microcontroller board based on the ATmega32U4 with built-in USB communication.',
 		detailedDescription: 'The Arduino Leonardo is a microcontroller board based on the ATmega32U4. It has 20 digital input/output pins, a 16 MHz crystal oscillator, a micro USB connection, a power jack, an ICSP header, and a reset button. Unlike other Arduino boards, the Leonardo can act as a USB device, making it ideal for projects that need to emulate keyboards, mice, or other USB devices.',
 		specifications: {

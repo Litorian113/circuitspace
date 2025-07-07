@@ -279,48 +279,73 @@
 	<!-- Components Grid -->
 	<div class="components-grid">
 		{#each filteredComponents as component (component.id)}
-			<div 
-				class="component-card"
-				on:click={() => goToComponent(component.id)}
-				on:keydown={(e) => e.key === 'Enter' && goToComponent(component.id)}
-				tabindex="0"
-				role="button"
-			>
-				<div class="component-image">
-					<img src={component.image} alt={component.name} />
-					<div class="difficulty-badge" style="background-color: {getDifficultyColor(component.difficulty)}">
+			<div class="component-card">
+				<!-- Header Section -->
+				<div class="card-header">
+					<div class="header-left">
+						<img src="/special-icon/tabler-icon-progress-check.svg" alt="Progress" class="progress-icon" />
+						<span class="level-text">Level {getComponentProgress(component.id).level}</span>
+					</div>
+					<div class="difficulty-tag {component.difficulty}">
 						{component.difficulty === 'beginner' ? 'Beginner' : 
-						 component.difficulty === 'intermediate' ? 'Intermediate' : 'Advanced'}
-					</div>					{#if getComponentProgress(component.id).level > 1 || getComponentProgress(component.id).experience > 0}
-					<div class="component-level-badge level-{getComponentProgress(component.id).level}" style="background: {getLevelColor(component.id)}">
-						<span class="level-number">{getLevelIndicator(component.id)}</span>
+						 component.difficulty === 'intermediate' ? 'Intermediate' : 'Expert'}
 					</div>
-				{/if}
 				</div>
-				
-				<div class="component-info">
-					<div class="component-title-row">
-						<h3>{component.name}</h3>
-					</div>
-					<span class="category-tag">{component.category}</span>
+
+				<!-- Title and Description -->
+				<div class="card-content">
+					<h3 class="component-title">{component.name}</h3>
 					<p class="component-description">{component.description}</p>
-					
-					<div class="progress-section">
-						<div class="progress-header">
-							<span class="progress-label">Level {getComponentProgress(component.id).level}/5</span>
+				</div>
+
+				<!-- Component Image Box -->
+				<div class="component-image-box">
+					<img src={component.image} alt={component.name} />
+				</div>
+
+				<!-- Tag Section -->
+				<div class="tag-section">
+					<span class="category-tag">{component.category}</span>
+				</div>
+
+				<!-- Progress Section -->
+				<div class="progress-section">
+					<div class="progress-header">
+						<span class="progress-label">Level {getComponentProgress(component.id).level}/5</span>
+						<div class="progress-details">
+							<span class="earn-exp">Earn {(5 - getComponentProgress(component.id).level) * 20} exp</span>
 							<span class="progress-percentage">{Math.round(getProgressPercentage(component.id))}%</span>
 						</div>
-						<div class="progress-bar">
-							<div 
-								class="progress-fill" 
-								style="width: {getProgressPercentage(component.id)}%"
-							></div>
-						</div>
-						<div class="quiz-info">
-							<span class="xp-earned">{getComponentProgress(component.id).experience} XP</span>
-							<span class="quiz-count">{getComponentProgress(component.id).quizzesTaken}/5 Daily Quizzes</span>
-						</div>
 					</div>
+					<div class="progress-bar">
+						<div 
+							class="progress-fill" 
+							style="width: {getProgressPercentage(component.id)}%"
+						></div>
+					</div>
+				</div>
+
+				<!-- Action Buttons -->
+				<div class="action-buttons">
+					<button 
+						class="action-btn quiz-btn"
+						on:click={(e) => {
+							e.stopPropagation();
+							goToComponent(component.id);
+						}}
+					>
+						Start Quiz
+					</button>
+					<button 
+						class="action-btn project-btn"
+						on:click={(e) => {
+							e.stopPropagation();
+							// Navigate to project creation with this component
+							goto(`/project-chat?component=${component.id}`);
+						}}
+					>
+						Start Project
+					</button>
 				</div>
 			</div>
 		{/each}
@@ -347,14 +372,14 @@
 		margin: 0;
 		padding: 0;
 		font-family: 'Space Grotesk', sans-serif;
-		background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+		background: #191919;
 		color: #e2e8f0;
 		overflow-x: hidden;
 	}
 
 	.app-container {
 		min-height: 100vh;
-		background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+		background: #191919;
 	}
 
 	/* Sidebar Styling - Same as project-chat */
@@ -365,7 +390,7 @@
 		display: flex;
 		flex-direction: column;
 		overflow-y: auto;
-		background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+		background: #191919;
 	}
 
 	.components-header {
@@ -374,7 +399,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		background: rgba(15, 23, 42, 0.5);
+		background: rgba(25, 25, 25, 0.5);
 		backdrop-filter: blur(8px);
 	}
 
@@ -423,8 +448,6 @@
 	/* Filters */
 	.filters-section {
 		padding: 2rem 3rem;
-		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
-		background: rgba(30, 41, 59, 0.3);
 	}
 
 	.search-group {
@@ -438,7 +461,7 @@
 		border: 2px solid rgba(0, 212, 170, 0.3);
 		border-radius: 12px;
 		font-size: 1rem;
-		background: rgba(15, 23, 42, 0.8);
+		background: rgba(25, 25, 25, 0.8);
 		color: #e2e8f0;
 		font-family: 'Space Grotesk', sans-serif;
 		transition: all 0.3s ease;
@@ -476,7 +499,7 @@
 		padding: 0.75rem 1rem;
 		border: 2px solid rgba(0, 212, 170, 0.3);
 		border-radius: 8px;
-		background: rgba(15, 23, 42, 0.8);
+		background: rgba(25, 25, 25, 0.8);
 		color: #e2e8f0;
 		font-family: 'Space Grotesk', sans-serif;
 		cursor: pointer;
@@ -497,85 +520,225 @@
 	}
 
 	.component-card {
-		background: rgba(30, 41, 59, 0.8);
-		border: 2px solid rgba(0, 212, 170, 0.2);
+		background: rgba(35, 35, 35, 0.8);
 		border-radius: 16px;
 		overflow: hidden;
-		cursor: pointer;
 		transition: all 0.3s ease;
 		backdrop-filter: blur(10px);
 		position: relative;
-	}
-	
-	/* Level-basierte Karten-Färbung */
-	.component-card:has(.level-5) {
-		border-color: rgba(0, 212, 170, 0.5);
-		background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 35, 42, 0.8) 100%);
-		box-shadow: 0 4px 20px rgba(0, 212, 170, 0.1);
-	}
-	
-	.component-card:has(.level-4) {
-		border-color: rgba(14, 165, 233, 0.4);
-		background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 30, 45, 0.8) 100%);
-		box-shadow: 0 4px 20px rgba(14, 165, 233, 0.1);
-	}
-	
-	.component-card:has(.level-3) {
-		border-color: rgba(6, 182, 212, 0.4);
-		background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 35, 45, 0.8) 100%);
-		box-shadow: 0 4px 20px rgba(6, 182, 212, 0.1);
-	}
-	
-	.component-card:has(.level-2) {
-		border-color: rgba(8, 145, 178, 0.3);
-		background: linear-gradient(135deg, rgba(30, 41, 59, 0.9) 0%, rgba(15, 35, 42, 0.8) 100%);
+		padding: 1.5rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
 	}
 
 	.component-card:hover {
 		transform: translateY(-8px);
-		border-color: currentColor;
-	}
-	
-	.component-card:has(.level-5):hover {
-		border-color: #00d4aa;
-		box-shadow: 0 20px 40px rgba(0, 212, 170, 0.3);
-		transform: translateY(-12px) scale(1.02);
-	}
-	
-	.component-card:has(.level-4):hover {
-		border-color: #0ea5e9;
-		box-shadow: 0 20px 40px rgba(14, 165, 233, 0.25);
-		transform: translateY(-10px) scale(1.01);
-	}
-	
-	.component-card:has(.level-3):hover {
-		border-color: #06b6d4;
-		box-shadow: 0 20px 40px rgba(6, 182, 212, 0.2);
-		transform: translateY(-10px);
-	}
-	
-	.component-card:has(.level-2):hover {
-		border-color: #0891b2;
-		box-shadow: 0 20px 40px rgba(8, 145, 178, 0.15);
-	}
-	
-	.component-card:hover .component-level-badge {
-		transform: scale(1.1);
-	}
-	
-	.component-card:hover .progress-fill {
-		box-shadow: 0 0 20px rgba(0, 212, 170, 0.6);
+
+
 	}
 
-	.component-card:focus {
-		outline: none;
-		border-color: #00d4aa;
-		transform: translateY(-4px);
+	/* Card Header */
+	.card-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.header-left {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.progress-icon {
+		width: 20px;
+		height: 20px;
+		filter: invert(1);
+	}
+
+	.level-text {
+		font-family: 'Space Grotesk', sans-serif;
+		font-weight: 600;
+		color: #e2e8f0;
+		font-size: 0.9rem;
+	}
+
+	.difficulty-tag {
+		padding: 0.25rem 0.75rem;
+		border-radius: 20px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.difficulty-tag.beginner {
+		background: rgba(34, 197, 94, 0.2);
+		color: #22c55e;
+		border: 1px solid rgba(34, 197, 94, 0.3);
+	}
+
+	.difficulty-tag.intermediate {
+		background: rgba(251, 191, 36, 0.2);
+		color: #fbbf24;
+		border: 1px solid rgba(251, 191, 36, 0.3);
+	}
+
+	.difficulty-tag.advanced {
+		background: rgba(239, 68, 68, 0.2);
+		color: #ef4444;
+		border: 1px solid rgba(239, 68, 68, 0.3);
+	}
+
+	/* Card Content */
+	.card-content {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.component-title {
+		font-family: 'Space Grotesk', sans-serif;
+		font-size: 1.25rem;
+		font-weight: 700;
+		color: #f1f5f9;
+		margin: 0;
+		line-height: 1.2;
+	}
+
+	.component-description {
+		font-size: 0.9rem;
+		color: #94a3b8;
+		line-height: 1.4;
+		margin: 0;
+	}
+
+	/* Component Image Box */
+	.component-image-box {
+		background: rgba(25, 25, 25, 0.6);
+		border-radius: 12px;
+		padding: 1.5rem;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 120px;
+	}
+
+	.component-image-box img {
+		max-width: 100%;
+		max-height: 80px;
+		object-fit: contain;
+	}
+
+	/* Tag Section */
+	.tag-section {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	.category-tag {
+		background: rgba(202, 189, 245, 0.1);
+		color: #CABDF5;
+		padding: 0.25rem 0.75rem;
+		border-radius: 20px;
+		font-size: 0.75rem;
+		font-weight: 500;
+		border: 1px solid rgba(202, 189, 245, 0.2);
+	}
+
+	/* Progress Section */
+	.progress-section {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.progress-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.progress-label {
+		font-family: 'Space Grotesk', sans-serif;
+		font-weight: 600;
+		color: #CABDF5;
+		font-size: 0.9rem;
+	}
+
+	.progress-details {
+		display: flex;
+		justify-content: space-between;
+		width: 100%;
+		font-size: 0.8rem;
+	}
+
+	.earn-exp {
+		color: #CABDF5;
+		font-weight: 500;
+	}
+
+	.progress-percentage {
+		color: #CABDF5;
+		font-weight: 600;
+	}
+
+	.progress-bar {
+		height: 8px;
+		background: rgba(25, 25, 25, 0.8);
+		border-radius: 4px;
+		overflow: hidden;
+		border: 1px solid rgba(202, 189, 245, 0.2);
+	}
+
+	.progress-fill {
+		height: 100%;
+		background: linear-gradient(90deg, #CABDF5, #a78bfa);
+		transition: width 0.5s ease;
+		border-radius: 4px;
+	}
+
+	/* Action Buttons */
+	.action-buttons {
+		display: flex;
+		gap: 0.75rem;
+		margin-top: 0.5rem;
+	}
+
+	.action-btn {
+		flex: 1;
+		padding: 0.75rem 1rem;
+		border-radius: 8px;
+		font-family: 'Space Grotesk', sans-serif;
+		font-weight: 600;
+		font-size: 0.875rem;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		border: 2px solid #CABDF5;
+		background: transparent;
+		color: #CABDF5;
+	}
+
+	.action-btn:hover {
+		background: rgba(202, 189, 245, 0.1);
+		transform: translateY(-1px);
+	}
+
+	.quiz-btn:hover {
+		background: #CABDF5;
+		color: #0f172a;
+	}
+
+	.project-btn:hover {
+		background: rgba(202, 189, 245, 0.2);
 	}
 
 	.component-image {
 		height: 200px;
-		background: rgba(15, 23, 42, 0.8);
+		background: rgba(25, 25, 25, 0.8);
 		display: flex;
 		align-items: center;
 		justify-content: center;
