@@ -269,6 +269,21 @@
 		z-index: 1;
 	}
 	
+	.main-container::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background-image: 
+			linear-gradient(90deg, rgba(37, 37, 37, 1) 1px, transparent 1px);
+		background-size: 10% 100%;
+		background-repeat: repeat-x;
+		pointer-events: none;
+		z-index: -1;
+	}
+	
 	.container {
 		max-width: 1200px;
 		margin: 0 auto;
@@ -282,6 +297,7 @@
 		align-items: center;
 		padding: 2rem 0;
 		position: relative;
+		z-index: 1;
 	}
 	
 	.hero-section::before {
@@ -441,8 +457,10 @@
 	/* How It Works Section */
 	.how-it-works-section {
 		padding: 3rem 0 6rem 0;
-		background: rgba(255, 255, 255, 0.02);
+		/* background: rgba(37, 37, 37, 0.6); */
 		margin-top: -5vh;
+		position: relative;
+		z-index: 1;
 	}
 	
 	.section-title {
