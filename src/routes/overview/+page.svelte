@@ -321,16 +321,16 @@
 				<div class="progress-section">
 					<div class="progress-header">
 						<span class="progress-label">Level {getComponentProgress(component.id).level}/5</span>
-						<div class="progress-details">
-							<span class="earn-exp">Earn {(5 - getComponentProgress(component.id).level) * 20} exp</span>
-							<span class="progress-percentage">{Math.round(getProgressPercentage(component.id))}%</span>
-						</div>
 					</div>
 					<div class="progress-bar">
 						<div 
 							class="progress-fill" 
 							style="width: {getProgressPercentage(component.id)}%"
 						></div>
+					</div>
+                    <div class="progress-details">
+						<span class="earn-exp">Earn {(5 - getComponentProgress(component.id).level) * 20} exp</span>
+						<span class="progress-percentage">{Math.round(getProgressPercentage(component.id))}%</span>
 					</div>
 				</div>
 
@@ -404,7 +404,7 @@
 
 	.components-header {
 		padding: 2rem 3rem;
-		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
+		border-bottom: 1px solid rgba(202, 189, 245, 0.1);
 		background: rgba(25, 25, 25, 0.5);
 		backdrop-filter: blur(8px);
 	}
@@ -413,7 +413,7 @@
 		font-size: 2rem;
 		font-weight: 700;
 		margin: 0 0 0.5rem 0;
-		color: #00d4aa;
+		color: #FFFFFF;
 	}
 
 	.page-description {
@@ -425,13 +425,13 @@
 	/* Stats Section */
 	.stats-section {
 		padding: 2rem 3rem;
-		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
+		border-bottom: 1px solid rgba(202, 189, 245, 0.1);
 	}
 
 	.header-stats {
 		display: flex;
 		gap: 1.5rem;
-		justify-content: center;
+		justify-content: left;
 	}
 
 	.stat-card {
@@ -616,21 +616,21 @@
 	}
 
 	.difficulty-tag.beginner {
-		background: rgba(34, 197, 94, 0.2);
-		color: #22c55e;
-		border: 1px solid rgba(34, 197, 94, 0.3);
+		background: #CABDF5;
+		color: #000000;
+		border: 1px solid rgba(202, 189, 245, 0.3);
 	}
 
 	.difficulty-tag.intermediate {
-		background: rgba(251, 191, 36, 0.2);
-		color: #fbbf24;
-		border: 1px solid rgba(251, 191, 36, 0.3);
+		background: #CABDF5;
+		color: #000000;
+		border: 1px solid rgba(202, 189, 245, 0.3);
 	}
 
 	.difficulty-tag.advanced {
-		background: rgba(239, 68, 68, 0.2);
-		color: #ef4444;
-		border: 1px solid rgba(239, 68, 68, 0.3);
+		background: #CABDF5;
+		color: #000000;
+		border: 1px solid rgba(202, 189, 245, 0.3);
 	}
 
 	/* Card Content */
@@ -686,7 +686,7 @@
 		border-radius: 20px;
 		font-size: 0.75rem;
 		font-weight: 500;
-		border: 1px solid rgba(202, 189, 245, 0.2);
+		border: 1px solid rgba(202, 189, 245, 0.3);
 	}
 
 	/* Progress Section */
@@ -698,10 +698,9 @@
 
 	.progress-header {
 		display: flex;
-		justify-content: space-between;
-		align-items: flex-start;
-		flex-direction: column;
-		gap: 0.5rem;
+		justify-content: flex-start;
+		align-items: center;
+		margin-bottom: 0.5rem;
 	}
 
 	.progress-label {
@@ -716,6 +715,7 @@
 		justify-content: space-between;
 		width: 100%;
 		font-size: 0.8rem;
+		margin-bottom: 0.75rem;
 	}
 
 	.earn-exp {
@@ -733,7 +733,7 @@
 		background: rgba(25, 25, 25, 0.8);
 		border-radius: 4px;
 		overflow: hidden;
-		border: 1px solid rgba(202, 189, 245, 0.2);
+		border: 1px solid rgba(202, 189, 245, 0.3);
 	}
 
 	.progress-fill {
@@ -741,6 +741,7 @@
 		background: linear-gradient(90deg, #CABDF5, #a78bfa);
 		transition: width 0.5s ease;
 		border-radius: 4px;
+		box-shadow: 0 0 8px rgba(202, 189, 245, 0.4);
 	}
 
 	/* Action Buttons */
@@ -897,14 +898,14 @@
 
 	.category-tag {
 		display: inline-block;
-		background: rgba(0, 212, 170, 0.2);
-		color: #00d4aa;
+		background: rgba(202, 189, 245, 0.1);
+		color: #CABDF5;
 		padding: 0.25rem 0.75rem;
 		border-radius: 20px;
 		font-size: 0.75rem;
 		font-weight: 500;
 		margin-bottom: 1rem;
-		border: 1px solid rgba(0, 212, 170, 0.3);
+		border: 1px solid rgba(202, 189, 245, 0.3);
 	}
 
 	.component-description {
@@ -915,7 +916,7 @@
 	}
 
 	.progress-section {
-		border-top: 1px solid rgba(0, 212, 170, 0.2);
+		border-top: 1px solid rgba(202, 189, 245, 0.3);
 		padding-top: 1rem;
 	}
 
@@ -934,27 +935,26 @@
 
 	.progress-percentage {
 		font-weight: 600;
-		color: #00d4aa;
+		color: #CABDF5;
 		font-family: 'IBM Plex Mono', monospace;
 	}
 
 	.progress-bar {
 		width: 100%;
 		height: 8px;
-		background: rgba(15, 23, 42, 0.8);
+		background: rgba(25, 25, 25, 0.8);
 		border-radius: 4px;
 		overflow: hidden;
-		margin-bottom: 0.5rem;
-		border: 1px solid rgba(0, 212, 170, 0.2);
+		border: 1px solid rgba(202, 189, 245, 0.3);
 	}
 
 	.progress-fill {
 		height: 100%;
-		background: linear-gradient(90deg, #00d4aa, #0ea5e9);
+		background: linear-gradient(90deg, #CABDF5, #a78bfa);
 		transition: width 0.3s ease;
 		border-radius: 3px;
 		position: relative;
-		box-shadow: 0 0 10px rgba(0, 212, 170, 0.4);
+		box-shadow: 0 0 8px rgba(202, 189, 245, 0.4);
 	}
 
 	.quiz-info {
