@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { createEventDispatcher } from 'svelte';
+	import Sidebar from './Sidebar.svelte';
 	import { 
 		allComponentPins, 
 		getComponentPins, 
@@ -507,11 +508,11 @@
 		
 		// Draw component border with selection highlight (full size including margin)
 		if (selectedComponent?.id === component.id) {
-			ctx.strokeStyle = '#00d4aa';
+			ctx.strokeStyle = '#CABDF5';
 			ctx.lineWidth = 3;
 			ctx.setLineDash([5, 5]);
 		} else {
-			ctx.strokeStyle = 'rgba(0, 212, 170, 0.4)';
+			ctx.strokeStyle = 'rgba(202, 189, 245, 0.4)';
 			ctx.lineWidth = 2;
 			ctx.setLineDash([]);
 		}
@@ -533,31 +534,31 @@
 				
 				// Enhanced pin radius for better connectivity
 				const pinRadius = isHighlighted ? 18 : (isConnected ? 16 : 14); // Vergrößert für bessere Klickbarkeit
-				ctx.fillStyle = isHighlighted ? '#fbbf24' : (isConnected ? '#1e293b' : '#1e293b');
+				ctx.fillStyle = isHighlighted ? '#ECF65F' : (isConnected ? '#1e293b' : '#1e293b');
 				ctx.beginPath();
 				ctx.arc(pin.x, pin.y, pinRadius, 0, 2 * Math.PI);
 				ctx.fill();
 				
 				// Pin circle with type-based coloring
 				if (isHighlighted) {
-					ctx.fillStyle = '#fbbf24';
+					ctx.fillStyle = '#ECF65F';
 				} else if (isConnected) {
 					// Connected pins get a brighter color with border
 					switch (pin.type) {
 						case 'power': ctx.fillStyle = '#f87171'; break;
 						case 'ground': ctx.fillStyle = '#6b7280'; break;
-						case 'digital': ctx.fillStyle = '#60a5fa'; break;
-						case 'analog': ctx.fillStyle = '#34d399'; break;
-						case 'pwm': ctx.fillStyle = '#fbbf24'; break;
+						case 'digital': ctx.fillStyle = '#CABDF5'; break;
+						case 'analog': ctx.fillStyle = '#CABDF5'; break;
+						case 'pwm': ctx.fillStyle = '#ECF65F'; break;
 						default: ctx.fillStyle = '#94a3b8';
 					}
 				} else {
 					switch (pin.type) {
 						case 'power': ctx.fillStyle = '#ef4444'; break;
 						case 'ground': ctx.fillStyle = '#374151'; break;
-						case 'digital': ctx.fillStyle = '#3b82f6'; break;
-						case 'analog': ctx.fillStyle = '#10b981'; break;
-						case 'pwm': ctx.fillStyle = '#f59e0b'; break;
+						case 'digital': ctx.fillStyle = '#CABDF5'; break;
+						case 'analog': ctx.fillStyle = '#CABDF5'; break;
+						case 'pwm': ctx.fillStyle = '#ECF65F'; break;
 						default: ctx.fillStyle = '#64748b';
 					}
 				}
@@ -567,10 +568,10 @@
 				
 				// Pin border - special styling for connected pins
 				if (isHighlighted) {
-					ctx.strokeStyle = '#fbbf24';
+					ctx.strokeStyle = '#ECF65F';
 					ctx.lineWidth = 5; // Vergrößert für bessere Sichtbarkeit
 				} else if (isConnected) {
-					ctx.strokeStyle = '#00d4aa';
+					ctx.strokeStyle = '#CABDF5';
 					ctx.lineWidth = 4;
 				} else {
 					ctx.strokeStyle = '#ffffff';
@@ -582,16 +583,16 @@
 				if (isConnected && !isHighlighted) {
 					ctx.beginPath();
 					ctx.arc(pin.x, pin.y, pinRadius + 4, 0, 2 * Math.PI); // Angepasst für größere Pins
-					ctx.strokeStyle = '#00d4aa';
-					ctx.lineWidth = 3; // Vergrößert für bessere Sichtbarkeit
+					ctx.strokeStyle = '#CABDF5';
+					ctx.lineWidth = 3; // Vergrößert von 2
 					ctx.setLineDash([4, 4]);
 					ctx.stroke();
 					ctx.setLineDash([]);
 				}
 				
 				// Pin label with enhanced spacing and readability
-				ctx.fillStyle = isConnected ? '#00d4aa' : '#ffffff';
-				ctx.font = 'bold 13px IBM Plex Mono'; // Vergrößert von 12px für bessere Lesbarkeit
+				ctx.fillStyle = isConnected ? '#CABDF5' : '#ffffff';
+				ctx.font = 'bold 13px Inter'; // Vergrößert von 12px für bessere Lesbarkeit
 				ctx.textAlign = 'center';
 				
 				let labelX = pin.x;
@@ -613,7 +614,7 @@
 				ctx.fillRect(bgX, labelY - 14, labelWidth + 8, 16);
 				
 				// Label text
-				ctx.fillStyle = isHighlighted ? '#fbbf24' : '#00d4aa';
+				ctx.fillStyle = isHighlighted ? '#ECF65F' : '#CABDF5';
 				ctx.fillText(pin.name, labelX, labelY);
 			});
 		}
@@ -622,14 +623,14 @@
 	function drawConnections() {
 		connections.forEach(connection => {
 			// Enhanced connection drawing with bezier curves
-			ctx.strokeStyle = connection.color || '#00d4aa';
+			ctx.strokeStyle = connection.color || '#CABDF5';
 			ctx.lineWidth = 6; // Vergrößert von 4 für bessere Sichtbarkeit
 			ctx.setLineDash([]);
 			ctx.lineCap = 'round';
 			ctx.lineJoin = 'round';
 			
 			// Add glow effect
-			ctx.shadowColor = connection.color || '#00d4aa';
+			ctx.shadowColor = connection.color || '#CABDF5';
 			ctx.shadowBlur = 8;
 			ctx.shadowOffsetX = 0;
 			ctx.shadowOffsetY = 0;
@@ -676,7 +677,7 @@
 			ctx.shadowBlur = 0;
 			
 			// Draw enhanced connection endpoints - vergrößert für bessere Sichtbarkeit
-			ctx.fillStyle = connection.color || '#00d4aa';
+			ctx.fillStyle = connection.color || '#CABDF5';
 			
 			// From endpoint
 			ctx.beginPath();
@@ -701,8 +702,8 @@
 				connectionStart.pin.x, connectionStart.pin.y, 
 				mousePos.x, mousePos.y
 			);
-			gradient.addColorStop(0, '#00d4aa');
-			gradient.addColorStop(1, highlightedPin ? '#10b981' : '#fbbf24');
+			gradient.addColorStop(0, '#CABDF5');
+			gradient.addColorStop(1, highlightedPin ? '#ECF65F' : '#ECF65F');
 			
 			ctx.strokeStyle = gradient;
 			ctx.lineWidth = highlightedPin ? 8 : 6; // Vergrößert von 5/4 für bessere Sichtbarkeit
@@ -710,7 +711,7 @@
 			ctx.lineCap = 'round';
 			
 			// Add pulsing glow effect
-			ctx.shadowColor = '#00d4aa';
+			ctx.shadowColor = '#CABDF5';
 			ctx.shadowBlur = highlightedPin ? 15 : 10; // Verstärkter Glow-Effekt
 			
 			ctx.beginPath();
@@ -766,11 +767,11 @@
 		}
 		
 		// Determine wire color based on pin types
-		let color = '#00d4aa'; // Default
+		let color = '#CABDF5'; // Default
 		if (from.pin.type === 'power' || to.pin.type === 'power') color = '#ef4444'; // Red for power
 		if (from.pin.type === 'ground' || to.pin.type === 'ground') color = '#374151'; // Black for ground
-		if (from.pin.type === 'pwm' || to.pin.type === 'pwm') color = '#f59e0b'; // Orange for PWM
-		if (from.pin.type === 'analog' || to.pin.type === 'analog') color = '#10b981'; // Green for analog
+		if (from.pin.type === 'pwm' || to.pin.type === 'pwm') color = '#ECF65F'; // Yellow for PWM
+		if (from.pin.type === 'analog' || to.pin.type === 'analog') color = '#CABDF5'; // Lilac for analog
 		
 		const connection: Connection = {
 			id: `conn-${Date.now()}`,
@@ -1190,227 +1191,104 @@
 	}
 </script>
 
+<svelte:head>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+</svelte:head>
+
 <div class="fullscreen-designer">
-	<!-- Left Sidebar: Components -->
-	<aside class="components-sidebar">
-		<div class="sidebar-header">
-			<button class="back-btn" on:click={exitFullscreen}>
-				← Back to Chat
-			</button>
-			<h2>{tutorialComponents ? 'LED Dimmer Circuit Designer' : 'Circuit Designer'}</h2>
-			{#if tutorialComponents}
-				<p class="tutorial-note">🎯 Tutorial-Modus: Verwende die Komponenten für das LED Dimmer Projekt mit den korrekten Pin-Verbindungen.</p>
-			{/if}
-		</div>
-		
-		<!-- Category Filter (if not in tutorial mode) -->
-		{#if !tutorialComponents}
-			<div class="category-filter">
-				<select bind:value={selectedCategory}>
-					<option value="All">All Components</option>
-					{#each categories as category}
-						<option value={category}>{category}</option>
-					{/each}
-				</select>
-			</div>
-		{/if}
-		
-		<!-- Components Grid -->
-		<div class="components-grid">
-			{#each filteredComponents as component}
-				<div 
-					class="component-card"
-					class:selected={selectedComponentId === component.id}
-					on:click={() => addComponentToBoard(component.id)}
-					on:keydown={(e) => e.key === 'Enter' && addComponentToBoard(component.id)}
-					role="button"
-					tabindex="0"
-				>
-					<div class="component-image">
-						<img src={component.image} alt={component.name} />
-					</div>
-					<div class="component-info">
-						<h4>{component.name}</h4>
-						<p class="category">{component.category}</p>
-						<p class="description">{component.description}</p>
-					</div>
-				</div>
-			{/each}
-		</div>
-		
-		<!-- Tools -->
-		<div class="tools-section">
-			<h3>Tools</h3>
-			<button class="tool-btn" on:click={clearBoard}>
-				🗑️ Clear Board
-			</button>
-			<button class="tool-btn" on:click={toggleGridSnap}>
-				{snapToGrid ? '📐' : '🎯'} Grid: {snapToGrid ? 'ON' : 'OFF'}
-			</button>
-			<button class="tool-btn" on:click={exportBoard}>
-				💾 Export PNG
-			</button>
-			
-			<!-- Zoom Controls -->
-			<div class="zoom-controls">
-				<h4>Zoom & View</h4>
-				<div class="zoom-buttons">
-					<button class="zoom-btn" on:click={() => zoomIn()}>
-						🔍+ Zoom In
-					</button>
-					<button class="zoom-btn" on:click={() => zoomOut()}>
-						🔍- Zoom Out
-					</button>
-				</div>
-				<div class="zoom-level">
-					Zoom: {Math.round(zoomLevel * 100)}%
-				</div>
-				<div class="view-buttons">
-					<button class="view-btn" on:click={resetView}>
-						🎯 Reset View
-					</button>
-					<button class="view-btn" on:click={fitToView}>
-						📦 Fit All
-					</button>
-				</div>
-			</div>
-		</div>
-		
-		<!-- Component Info -->
-		{#if selectedComponent}
-			<div class="selected-component-info">
-				<h3>Selected Component</h3>
-				<h4>{selectedComponent.name}</h4>
-				<div class="component-details">
-					<div class="detail-row">
-						<span>Position:</span>
-						<span>{Math.round(selectedComponent.x)}, {Math.round(selectedComponent.y)}</span>
-					</div>
-					<div class="detail-row">
-						<span>Pins:</span>
-						<span>{selectedComponent.pins.length}</span>
-					</div>
-				</div>
-				<div class="pin-list">
-					<h5>Pin Configuration:</h5>
-					{#each selectedComponent.pins as pin}
-						<div class="pin-item">
-							<span class="pin-name" style="color: {
-								pin.type === 'power' ? '#ef4444' : 
-								pin.type === 'ground' ? '#374151' : 
-								pin.type === 'pwm' ? '#f59e0b' : 
-								pin.type === 'analog' ? '#10b981' : 
-								pin.type === 'digital' ? '#3b82f6' : '#64748b'
-							}">{pin.name}</span>
-							<span class="pin-type">({pin.type})</span>
-						</div>
-					{/each}
-				</div>
-				<button class="delete-btn" on:click={() => {
-					placedComponents = placedComponents.filter(c => c.id !== selectedComponent?.id);
-					selectedComponent = null;
-					drawBoard();
-				}}>
-					Delete Component
-				</button>
-			</div>
-		{/if}
-	</aside>
+	<!-- Navigation Sidebar -->
+	<Sidebar />
 	
-	<!-- Main Canvas Area -->
-	<main class="canvas-area">
-		<div class="canvas-header">
-			<h1>LED Dimmer Circuit Board</h1>
-			<div class="canvas-stats">
-				<span>{placedComponents.length} components • {connections.length} connections</span>
-				{#if selectedComponent}
-					<span>• {selectedComponent.name} selected</span>
-				{/if}
+	<!-- Main Content Area -->
+	<div class="main-content">
+		<!-- Canvas Area -->
+		<main class="canvas-area">
+			<div class="canvas-header">
+				<button class="back-btn" on:click={exitFullscreen}>
+					← Back to Chat
+				</button>
+				<h1>{tutorialComponents ? 'LED Dimmer Circuit Designer' : 'Circuit Designer'}</h1>
+				<div class="canvas-stats">
+					<span>{placedComponents.length} components • {connections.length} connections</span>
+					{#if selectedComponent}
+						<span>• {selectedComponent.name} selected</span>
+					{/if}
+				</div>
 			</div>
-		</div>
+			
+			<div class="canvas-container">
+				<div class="canvas-wrapper">
+					<canvas bind:this={canvas} class="circuit-canvas"></canvas>
+				</div>
+			</div>
+		</main>
 		
-		<div class="canvas-container">
-			<div class="canvas-wrapper">
-				<canvas bind:this={canvas} class="circuit-canvas"></canvas>
+		<!-- Bottom Components Panel -->
+		<aside class="components-panel">
+			<!-- Components Grid -->
+			<div class="components-grid">
+				{#each filteredComponents as component}
+					<div 
+						class="component-card"
+						class:selected={selectedComponentId === component.id}
+						on:click={() => addComponentToBoard(component.id)}
+						on:keydown={(e) => e.key === 'Enter' && addComponentToBoard(component.id)}
+						role="button"
+						tabindex="0"
+					>
+						<div class="component-image">
+							<img src={component.image} alt={component.name} />
+						</div>
+						<div class="component-info">
+							<h4>{component.name}</h4>
+							<p class="category">{component.category}</p>
+							<p class="description">{component.description}</p>
+						</div>
+					</div>
+				{/each}
 			</div>
 			
-			<!-- Tutorial Instructions -->
+			<!-- Tutorial Step Guide (only in tutorial mode) -->
 			{#if tutorialComponents}
-				<div class="tutorial-panel">
-					<div class="tutorial-header">
-						<h3>LED Dimmer Pin-Out Guide</h3>
-					</div>
-					<div class="tutorial-content">
-						<div class="connection-rules">
-							{#each ledDimmerConnections as rule, index}
-								{@const connectionKey1 = `${rule.from.component}-${rule.from.pin}-${rule.to.component}-${rule.to.pin}`}
-								{@const connectionKey2 = `${rule.to.component}-${rule.to.pin}-${rule.from.component}-${rule.from.pin}`}
-								{@const isCompleted = completedConnections.some(key => key === connectionKey1 || key === connectionKey2)}
-								<div class="connection-rule" class:completed={isCompleted}>
-									<span class="rule-number">{index + 1}</span>
-									<div>
-										<span class="rule-description">{rule.description}</span>
-										<div class="rule-connection">
-											<span class="from-pin">{rule.from.component}.{rule.from.pin}</span>
-											<span class="arrow">→</span>
-											<span class="to-pin">{rule.to.component}.{rule.to.pin}</span>
-										</div>
-										{#if isCompleted}
-											<span class="completion-mark">✅ Completed</span>
-										{/if}
-									</div>
+				<div class="tutorial-step-guide">
+					{#if completedConnections.length < ledDimmerConnections.length}
+						{@const currentStep = ledDimmerConnections[completedConnections.length]}
+						<div class="current-step-card">
+							<div class="step-header">
+								<span class="step-number">{completedConnections.length + 1}</span>
+								<div class="step-progress">
+									<span class="step-title">Current Step</span>
+									<span class="progress-text">{completedConnections.length + 1} of {ledDimmerConnections.length}</span>
 								</div>
-							{/each}
-						</div>
-						<div class="tutorial-progress">
-							<div class="progress-bar">
-								<div 
-									class="progress-fill" 
-									style="width: {(completedConnections.length / ledDimmerConnections.length) * 100}%"
-								></div>
 							</div>
-							<span class="progress-text">
-								{completedConnections.length} / {ledDimmerConnections.length} connections completed
-							</span>
+							<div class="step-content">
+								<h4 class="step-description">{currentStep.description}</h4>
+								<div class="connection-visual">
+									<span class="from-pin">{currentStep.from.component}.{currentStep.from.pin}</span>
+									<span class="arrow">→</span>
+									<span class="to-pin">{currentStep.to.component}.{currentStep.to.pin}</span>
+								</div>
+								<div class="step-instructions">
+									<p>🎯 Click on <strong>{currentStep.from.pin}</strong> pin, then drag to <strong>{currentStep.to.pin}</strong> pin</p>
+								</div>
+							</div>
 						</div>
-					</div>
+					{:else}
+						<div class="completion-card">
+							<div class="completion-icon">🎉</div>
+							<h4>All Steps Complete!</h4>
+							<p>Your LED Dimmer circuit is ready!</p>
+							<div class="completion-stats">
+								{completedConnections.length} / {ledDimmerConnections.length} connections
+							</div>
+						</div>
+					{/if}
 				</div>
 			{/if}
-			
-			{#if placedComponents.length === 0}
-				<div class="empty-state">
-					<h3>Build Your LED Dimmer Circuit</h3>
-					<p>Click components from the sidebar to add them to your board</p>
-					<div class="shortcuts">
-						<div class="shortcut-item">
-							<kbd>Click</kbd> Select component
-						</div>
-						<div class="shortcut-item">
-							<kbd>Drag</kbd> Move component
-						</div>
-						<div class="shortcut-item">
-							<kbd>Pin-to-Pin</kbd> Create connections
-						</div>
-						<div class="shortcut-item">
-							<kbd>Mouse Wheel</kbd> Zoom in/out
-						</div>
-						<div class="shortcut-item">
-							<kbd>Middle/Right Click + Drag</kbd> Pan view
-						</div>
-						<div class="shortcut-item">
-							<kbd>+/-</kbd> Zoom in/out
-						</div>
-						<div class="shortcut-item">
-							<kbd>0</kbd> Reset view
-						</div>
-						<div class="shortcut-item">
-							<kbd>F</kbd> Fit all components
-						</div>
-					</div>
-				</div>
-			{/if}
-		</div>
-	</main>
+		</aside>
+	</div>
 </div>
 
 <style>
@@ -1420,428 +1298,174 @@
 		left: 0;
 		width: 100vw;
 		height: 100vh;
-		background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+		background: #191919;
 		display: flex;
 		z-index: 1000;
-		font-family: 'IBM Plex Mono', monospace;
+		font-family: 'Inter', sans-serif;
 	}
 	
-	/* Components Sidebar */
-	.components-sidebar {
-		width: 320px;
-		background: rgba(15, 23, 42, 0.95);
-		border-right: 1px solid rgba(0, 212, 170, 0.3);
-		overflow-y: auto;
+	/* Main Content Area */
+	.main-content {
+		flex: 1;
 		display: flex;
 		flex-direction: column;
+		margin-left: var(--sidebar-width, 280px);
+		height: 100vh;
+		overflow: hidden;
 	}
 	
-	.sidebar-header {
-		padding: 1.5rem;
-		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.back-btn {
-		background: rgba(0, 212, 170, 0.1);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 8px;
-		color: #00d4aa;
-		padding: 0.5rem 1rem;
-		font-family: inherit;
-		font-size: 0.875rem;
-		cursor: pointer;
-		transition: all 0.3s ease;
-		margin-bottom: 1rem;
-		width: 100%;
-	}
-	
-	.back-btn:hover {
-		background: rgba(0, 212, 170, 0.2);
-		transform: translateY(-1px);
-	}
-	
-	.sidebar-header h2 {
-		margin: 0;
-		color: #00d4aa;
-		font-family: 'Space Grotesk', sans-serif;
-		font-size: 1.3rem;
-		font-weight: 600;
-	}
-	
-	.tutorial-note {
-		margin: 0.75rem 0 0 0;
-		color: #fbbf24;
-		font-size: 0.8rem;
-		line-height: 1.4;
-		padding: 0.75rem;
-		background: rgba(251, 191, 36, 0.1);
-		border: 1px solid rgba(251, 191, 36, 0.3);
-		border-radius: 6px;
-	}
-	
-	.category-filter {
-		padding: 1rem 1.5rem;
-		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.category-filter select {
-		width: 100%;
-		background: rgba(30, 41, 59, 0.8);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 6px;
-		color: #e2e8f0;
-		padding: 0.5rem;
-		font-family: inherit;
-		font-size: 0.875rem;
-	}
-	
-	.components-grid {
-		flex: 1;
-		padding: 1rem;
-		display: flex;
-		flex-direction: column;
-		gap: 0.75rem;
-	}
-	
-	.component-card {
-		background: rgba(30, 41, 59, 0.6);
-		border: 1px solid rgba(0, 212, 170, 0.2);
-		border-radius: 8px;
-		padding: 1rem;
-		cursor: pointer;
-		transition: all 0.3s ease;
-		display: flex;
-		gap: 0.75rem;
-		align-items: center;
-	}
-	
-	.component-card:hover {
-		background: rgba(0, 212, 170, 0.1);
-		border-color: rgba(0, 212, 170, 0.4);
-		transform: translateY(-2px);
-	}
-	
-	.component-image {
-		width: 50px;
-		height: 50px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background: rgba(30, 41, 59, 0.4);
-		border-radius: 6px;
-		border: 2px solid rgba(0, 212, 170, 0.3);
-	}
-	
-	.component-image img {
-		max-width: 40px;
-		max-height: 40px;
-		object-fit: contain;
-	}
-	
-	.component-info {
-		flex: 1;
-	}
-	
-	.component-info h4 {
-		margin: 0 0 0.25rem 0;
-		color: #e2e8f0;
-		font-size: 0.9rem;
-		font-weight: 600;
-	}
-	
-	.component-info .category {
-		margin: 0 0 0.25rem 0;
-		color: #00d4aa;
-		font-size: 0.75rem;
-		font-weight: 500;
-		text-transform: uppercase;
-	}
-	
-	.component-info .description {
-		margin: 0;
-		color: #94a3b8;
-		font-size: 0.75rem;
-		line-height: 1.3;
-	}
-	
-	.tools-section {
-		padding: 1.5rem;
-		border-top: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.tools-section h3 {
-		margin: 0 0 1rem 0;
-		color: #00d4aa;
-		font-size: 1rem;
-		font-weight: 600;
-	}
-	
-	.tool-btn {
-		width: 100%;
-		background: rgba(30, 41, 59, 0.8);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 6px;
-		color: #e2e8f0;
-		padding: 0.75rem;
-		font-family: inherit;
-		font-size: 0.8rem;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		margin-bottom: 0.5rem;
-		text-align: left;
-	}
-	
-	.tool-btn:hover {
-		background: rgba(0, 212, 170, 0.1);
-		border-color: rgba(0, 212, 170, 0.5);
-	}
-	
-	/* Zoom Controls */
-	.zoom-controls {
-		margin-top: 1.5rem;
-		padding-top: 1rem;
-		border-top: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.zoom-controls h4 {
-		margin: 0 0 1rem 0;
-		color: #00d4aa;
-		font-size: 0.9rem;
-		font-weight: 600;
-		text-transform: uppercase;
-	}
-	
-	.zoom-buttons {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 0.75rem;
-	}
-	
-	.zoom-btn, .view-btn {
-		flex: 1;
-		background: rgba(30, 41, 59, 0.8);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 6px;
-		color: #e2e8f0;
-		padding: 0.5rem;
-		font-family: inherit;
-		font-size: 0.75rem;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		text-align: center;
-	}
-	
-	.zoom-btn:hover, .view-btn:hover {
-		background: rgba(0, 212, 170, 0.1);
-		border-color: rgba(0, 212, 170, 0.5);
-		transform: translateY(-1px);
-	}
-	
-	.zoom-level {
-		text-align: center;
-		font-size: 0.8rem;
-		color: #94a3b8;
-		margin-bottom: 0.75rem;
-		padding: 0.5rem;
-		background: rgba(0, 0, 0, 0.2);
-		border-radius: 4px;
-		border: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.view-buttons {
-		display: flex;
-		gap: 0.5rem;
-	}
-	.zoom-controls {
-		margin-top: 1.5rem;
-		padding-top: 1rem;
-		border-top: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.zoom-controls h4 {
-		margin: 0 0 1rem 0;
-		color: #00d4aa;
-		font-size: 0.9rem;
-		font-weight: 600;
-		text-transform: uppercase;
-	}
-	
-	.zoom-buttons {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 0.75rem;
-	}
-	
-	.zoom-btn, .view-btn {
-		flex: 1;
-		background: rgba(30, 41, 59, 0.8);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 6px;
-		color: #e2e8f0;
-		padding: 0.5rem;
-		font-family: inherit;
-		font-size: 0.75rem;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		text-align: center;
-	}
-	
-	.zoom-btn:hover, .view-btn:hover {
-		background: rgba(0, 212, 170, 0.1);
-		border-color: rgba(0, 212, 170, 0.5);
-		transform: translateY(-1px);
-	}
-	
-	.zoom-level {
-		text-align: center;
-		font-size: 0.8rem;
-		color: #94a3b8;
-		margin-bottom: 0.75rem;
-		padding: 0.5rem;
-		background: rgba(0, 0, 0, 0.2);
-		border-radius: 4px;
-		border: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.view-buttons {
-		display: flex;
-		gap: 0.5rem;
-	}
-	
-	.view-btn {
-		flex: 1;
-		background: rgba(30, 41, 59, 0.8);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 6px;
-		color: #e2e8f0;
-		padding: 0.5rem;
-		font-family: inherit;
-		font-size: 0.75rem;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		text-align: center;
-	}
-	
-	.view-btn:hover {
-		background: rgba(0, 212, 170, 0.1);
-		border-color: rgba(0, 212, 170, 0.5);
-	}
-	
-	.selected-component-info {
-		padding: 1.5rem;
-		border-top: 1px solid rgba(0, 212, 170, 0.1);
-		background: rgba(0, 0, 0, 0.2);
-	}
-	
-	.selected-component-info h3 {
-		margin: 0 0 0.5rem 0;
-		color: #00d4aa;
-		font-size: 0.9rem;
-		font-weight: 600;
-		text-transform: uppercase;
-	}
-	
-	.selected-component-info h4 {
-		margin: 0 0 1rem 0;
-		color: #e2e8f0;
-		font-size: 1.1rem;
-	}
-	
-	.component-details {
-		margin-bottom: 1rem;
-	}
-	
-	.detail-row {
-		display: flex;
-		justify-content: space-between;
-		margin-bottom: 0.5rem;
-		font-size: 0.8rem;
-	}
-	
-	.detail-row span:first-child {
-		color: #94a3b8;
-	}
-	
-	.detail-row span:last-child {
-		color: #e2e8f0;
-	}
-	
-	.pin-list {
-		margin-bottom: 1rem;
-		border: 1px solid rgba(0, 212, 170, 0.1);
-		border-radius: 6px;
-		padding: 0.75rem;
-		max-height: 150px;
-		overflow-y: auto;
-	}
-	
-	.pin-list h5 {
-		margin: 0 0 0.5rem 0;
-		color: #00d4aa;
-		font-size: 0.8rem;
-		font-weight: 600;
-	}
-	
-	.pin-item {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 0.25rem 0;
-		font-size: 0.75rem;
-	}
-	
-	.pin-name {
-		font-weight: 500;
-	}
-	
-	.pin-type {
-		color: #64748b;
-		font-size: 0.7rem;
-	}
-	
-	.delete-btn {
-		width: 100%;
-		padding: 0.75rem;
-		background: rgba(239, 68, 68, 0.1);
-		border: 1px solid rgba(239, 68, 68, 0.3);
-		border-radius: 6px;
-		color: #f87171;
-		font-size: 0.8rem;
-		cursor: pointer;
-		transition: all 0.2s ease;
-	}
-	
-	.delete-btn:hover {
-		background: rgba(239, 68, 68, 0.2);
-		border-color: #ef4444;
-	}
-	
-	/* Main Canvas Area */
+	/* Canvas Area */
 	.canvas-area {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
 		position: relative;
+		height: calc(100vh - 200px); /* Reserve space for bottom panel */
 	}
 	
 	.canvas-header {
-		padding: 1.5rem 2rem;
-		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
-		background: rgba(15, 23, 42, 0.8);
+		padding: 1rem 2rem;
+		border-bottom: 1px solid rgba(202, 189, 245, 0.1);
+		background: rgba(35, 35, 35, 0.8);
 		backdrop-filter: blur(8px);
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+	
+	.back-btn {
+		background: rgba(202, 189, 245, 0.1);
+		border: 1px solid rgba(202, 189, 245, 0.3);
+		border-radius: 8px;
+		color: #CABDF5;
+		padding: 0.5rem 1rem;
+		font-family: 'Inter', sans-serif;
+		font-size: 0.875rem;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		white-space: nowrap;
+	}
+	
+	.back-btn:hover {
+		background: rgba(202, 189, 245, 0.2);
+		transform: translateY(-1px);
 	}
 	
 	.canvas-header h1 {
-		margin: 0 0 0.5rem 0;
-		color: #00d4aa;
-		font-family: 'Space Grotesk', sans-serif;
-		font-size: 1.75rem;
+		margin: 0;
+		color: #CABDF5;
+		font-family: 'Inter', sans-serif;
+		font-size: 1.5rem;
 		font-weight: 600;
+		flex: 1;
 	}
 	
 	.canvas-stats {
 		color: #94a3b8;
 		font-size: 0.875rem;
+		font-family: 'Inter', sans-serif;
+		white-space: nowrap;
+	}
+	
+	.category-filter {
+		min-width: 200px;
+		margin-right: 1rem;
+	}
+	
+	.category-filter select {
+		width: 100%;
+		background: rgba(35, 35, 35, 0.8);
+		border: 1px solid rgba(202, 189, 245, 0.3);
+		border-radius: 6px;
+		color: #e2e8f0;
+		padding: 0.5rem;
+		font-family: 'Inter', sans-serif;
+		font-size: 0.875rem;
+	}
+	
+	.components-grid {
+		display: flex;
+		gap: 0.75rem;
+		min-width: 0;
+		flex: 1;
+	}
+	
+	.component-card {
+		background: rgba(35, 35, 35, 0.6);
+		border: 1px solid rgba(202, 189, 245, 0.2);
+		border-radius: 8px;
+		padding: 0.75rem;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		min-width: 120px;
+		max-width: 140px;
+		text-align: center;
+	}
+	
+	.component-card:hover {
+		background: rgba(202, 189, 245, 0.1);
+		border-color: rgba(202, 189, 245, 0.4);
+		transform: translateY(-2px);
+	}
+	
+	.component-image {
+		width: 40px;
+		height: 40px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(35, 35, 35, 0.4);
+		border-radius: 6px;
+		border: 2px solid rgba(202, 189, 245, 0.3);
+		margin-bottom: 0.5rem;
+	}
+	
+	.component-image img {
+		max-width: 32px;
+		max-height: 32px;
+		object-fit: contain;
+	}
+	
+	.component-info h4 {
+		margin: 0 0 0.25rem 0;
+		color: #e2e8f0;
+		font-size: 0.8rem;
+		font-weight: 600;
+		font-family: 'Inter', sans-serif;
+	}
+	
+	.component-info .category {
+		margin: 0 0 0.25rem 0;
+		color: #CABDF5;
+		font-size: 0.7rem;
+		font-weight: 500;
+		text-transform: uppercase;
+		font-family: 'Inter', sans-serif;
+	}
+	
+	.component-info .description {
+		margin: 0;
+		color: #94a3b8;
+		font-size: 0.65rem;
+		line-height: 1.3;
+		font-family: 'Inter', sans-serif;
+	}
+	
+
+	
+	/* Bottom Components Panel */
+	.components-panel {
+		height: 200px;
+		background: rgba(35, 35, 35, 0.95);
+		border-top: 1px solid rgba(202, 189, 245, 0.3);
+		display: flex;
+		gap: 1rem;
+		padding: 1rem;
+		overflow-x: auto;
+		overflow-y: hidden;
 	}
 	
 	.canvas-container {
@@ -1859,36 +1483,11 @@
 		position: relative;
 		width: 100%;
 		height: 100%;
-		min-height: 400px;
-		max-height: calc(100vh - 200px); /* Verhindert Overflow */
 		overflow: hidden;
-		border-radius: 8px;
+		border-radius: 12px;
 		margin: 1rem;
 		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
-		background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-	}
-	
-	/* Responsive Anpassungen für kleinere Bildschirme */
-	@media (max-width: 1200px) {
-		.canvas-wrapper {
-			margin: 0.5rem;
-			max-height: calc(100vh - 150px);
-		}
-	}
-	
-	@media (max-width: 768px) {
-		.canvas-wrapper {
-			margin: 0.25rem;
-			max-height: calc(100vh - 120px);
-			min-height: 300px;
-		}
-	}
-	
-	@media (max-height: 600px) {
-		.canvas-wrapper {
-			max-height: calc(100vh - 100px);
-			min-height: 250px;
-		}
+		background: linear-gradient(135deg, #191919 0%, #2a2a2a 100%);
 	}
 	
 	.circuit-canvas {
@@ -1899,257 +1498,177 @@
 		cursor: default;
 	}
 	
-	/* Tutorial Panel */
-	.tutorial-panel {
-		position: absolute;
-		top: 1rem;
-		right: 1rem;
-		width: 350px;
-		max-height: 60vh;
-		background: rgba(15, 23, 42, 0.95);
-		border: 1px solid rgba(0, 212, 170, 0.3);
+	/* Tutorial Step Guide in Components Panel */
+	.tutorial-step-guide {
+		flex: 1;
+		min-width: 300px;
+		max-width: 400px;
+		margin-left: 1rem;
+		background: rgba(45, 45, 45, 0.8);
+		border: 1px solid rgba(202, 189, 245, 0.3);
 		border-radius: 12px;
-		backdrop-filter: blur(12px);
-		overflow: hidden;
-		z-index: 100;
-	}
-	
-	.tutorial-header {
-		padding: 1rem 1.5rem;
-		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.tutorial-header h3 {
-		margin: 0;
-		color: #00d4aa;
-		font-family: 'Space Grotesk', sans-serif;
-		font-size: 1.1rem;
-		font-weight: 600;
-	}
-	
-	.tutorial-content {
 		padding: 1rem;
-		max-height: 50vh;
-		overflow-y: auto;
+		display: flex;
+		flex-direction: column;
 	}
 	
-	.connection-rules {
+	.current-step-card {
+		background: rgba(202, 189, 245, 0.1);
+		border: 1px solid rgba(202, 189, 245, 0.3);
+		border-radius: 8px;
+		padding: 1rem;
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
+	
+	.step-header {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		margin-bottom: 0.75rem;
+	}
+	
+	.step-number {
+		background: #CABDF5;
+		color: #191919;
+		border-radius: 50%;
+		width: 28px;
+		height: 28px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 700;
+		font-size: 0.85rem;
+		font-family: 'Inter', sans-serif;
+		flex-shrink: 0;
+	}
+	
+	.step-progress {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+	
+	.step-title {
+		color: #CABDF5;
+		font-family: 'Inter', sans-serif;
+		font-size: 0.85rem;
+		font-weight: 600;
+		margin: 0;
+	}
+	
+	.progress-text {
+		color: #94a3b8;
+		font-size: 0.7rem;
+		font-family: 'Inter', sans-serif;
+	}
+	
+	.step-content {
+		flex: 1;
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
 	}
 	
-	.connection-rule {
-		padding: 0.75rem;
-		background: rgba(30, 41, 59, 0.6);
-		border: 1px solid rgba(0, 212, 170, 0.2);
-		border-radius: 8px;
-		transition: all 0.3s ease;
-	}
-	
-	.connection-rule.completed {
-		background: rgba(16, 185, 129, 0.1);
-		border-color: #10b981;
-	}
-	
-	.rule-number {
-		display: inline-block;
-		width: 20px;
-		height: 20px;
-		background: #00d4aa;
-		color: #0f172a;
-		border-radius: 50%;
-		font-size: 0.75rem;
-		font-weight: 600;
-		text-align: center;
-		line-height: 20px;
-		margin-right: 0.75rem;
-	}
-	
-	.rule-description {
+	.step-description {
 		color: #e2e8f0;
-		font-size: 0.8rem;
-		display: block;
-		margin-bottom: 0.5rem;
+		font-size: 0.85rem;
+		line-height: 1.4;
+		margin: 0;
+		font-family: 'Inter', sans-serif;
+		font-weight: 500;
 	}
 	
-	.rule-connection {
-		font-family: 'IBM Plex Mono', monospace;
-		font-size: 0.75rem;
+	.connection-visual {
+		background: rgba(35, 35, 35, 0.8);
+		border: 1px solid rgba(202, 189, 245, 0.2);
+		border-radius: 6px;
+		padding: 0.75rem;
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
+		font-family: 'IBM Plex Mono', monospace;
+		font-size: 0.75rem;
+		overflow-x: auto;
 	}
 	
 	.from-pin, .to-pin {
-		background: rgba(0, 212, 170, 0.1);
-		color: #00d4aa;
-		padding: 0.25rem 0.5rem;
+		background: rgba(202, 189, 245, 0.1);
+		border: 1px solid rgba(202, 189, 245, 0.3);
 		border-radius: 4px;
-		border: 1px solid rgba(0, 212, 170, 0.3);
+		padding: 0.25rem 0.5rem;
+		color: #CABDF5;
+		font-weight: 500;
+		white-space: nowrap;
+		font-size: 0.7rem;
 	}
 	
 	.arrow {
-		color: #fbbf24;
+		color: #ECF65F;
 		font-weight: bold;
+		font-size: 0.9rem;
+		margin: 0 0.25rem;
 	}
 	
-	.completion-mark {
-		color: #10b981;
-		font-size: 0.7rem;
-		font-weight: 600;
-		margin-top: 0.25rem;
-		display: block;
+	.step-instructions {
+		background: rgba(35, 35, 35, 0.6);
+		border-radius: 6px;
+		padding: 0.75rem;
+		margin-top: auto;
 	}
 	
-	.tutorial-progress {
-		margin-top: 1rem;
-		padding-top: 1rem;
-		border-top: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.progress-bar {
-		width: 100%;
-		height: 6px;
-		background: rgba(30, 41, 59, 0.8);
-		border-radius: 3px;
-		overflow: hidden;
-		margin-bottom: 0.5rem;
-	}
-	
-	.progress-fill {
-		height: 100%;
-		background: linear-gradient(90deg, #10b981, #00d4aa);
-		border-radius: 3px;
-		transition: width 0.5s ease;
-	}
-	
-	.progress-text {
-		color: #94a3b8;
+	.step-instructions p {
+		margin: 0;
+		color: #e2e8f0;
 		font-size: 0.75rem;
+		line-height: 1.4;
+		font-family: 'Inter', sans-serif;
+	}
+	
+	.step-instructions strong {
+		color: #ECF65F;
+		font-weight: 600;
+	}
+	
+	.completion-card {
 		text-align: center;
-		display: block;
-	}
-	
-	.empty-state {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		text-align: center;
-		color: #64748b;
-		pointer-events: none;
-	}
-	
-	.empty-state h3 {
-		margin: 0 0 0.5rem 0;
-		font-family: 'Space Grotesk', sans-serif;
-		font-size: 1.5rem;
-		color: #94a3b8;
-	}
-	
-	.empty-state p {
-		margin: 0 0 1.5rem 0;
-		font-size: 1rem;
-	}
-	
-	.shortcuts {
+		padding: 1.5rem 1rem;
+		background: rgba(34, 197, 94, 0.1);
+		border: 1px solid rgba(34, 197, 94, 0.3);
+		border-radius: 8px;
+		height: 100%;
 		display: flex;
 		flex-direction: column;
-		gap: 0.5rem;
-	}
-	
-	.shortcut-item {
-		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		font-size: 0.9rem;
-		color: #94a3b8;
+		justify-content: center;
+		gap: 0.75rem;
 	}
 	
-	kbd {
-		background: rgba(0, 0, 0, 0.3);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 4px;
-		padding: 0.3rem 0.5rem;
-		font-family: inherit;
-		font-size: 0.8rem;
-		color: #00d4aa;
+	.completion-icon {
+		font-size: 2rem;
 	}
 	
-	/* Zoom Controls */
-	.zoom-controls {
-		margin-top: 1.5rem;
-		padding-top: 1rem;
-		border-top: 1px solid rgba(0, 212, 170, 0.1);
-	}
-	
-	.zoom-controls h4 {
-		margin: 0 0 1rem 0;
-		color: #00d4aa;
-		font-size: 0.9rem;
+	.completion-card h4 {
+		margin: 0;
+		color: #22c55e;
+		font-family: 'Inter', sans-serif;
+		font-size: 1rem;
 		font-weight: 600;
-		text-transform: uppercase;
 	}
 	
-	.zoom-buttons {
-		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 0.75rem;
-	}
-	
-	.zoom-btn, .view-btn {
-		flex: 1;
-		background: rgba(30, 41, 59, 0.8);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 6px;
+	.completion-card p {
+		margin: 0;
 		color: #e2e8f0;
-		padding: 0.5rem;
-		font-family: inherit;
-		font-size: 0.75rem;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		text-align: center;
-	}
-	
-	.zoom-btn:hover, .view-btn:hover {
-		background: rgba(0, 212, 170, 0.1);
-		border-color: rgba(0, 212, 170, 0.5);
-		transform: translateY(-1px);
-	}
-	
-	.zoom-level {
-		text-align: center;
 		font-size: 0.8rem;
-		color: #94a3b8;
-		margin-bottom: 0.75rem;
-		padding: 0.5rem;
-		background: rgba(0, 0, 0, 0.2);
-		border-radius: 4px;
-		border: 1px solid rgba(0, 212, 170, 0.1);
+		line-height: 1.4;
+		font-family: 'Inter', sans-serif;
 	}
 	
-	.view-buttons {
-		display: flex;
-		gap: 0.5rem;
-	}
-	
-	.view-btn {
-		flex: 1;
-		background: rgba(30, 41, 59, 0.8);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 6px;
-		color: #e2e8f0;
-		padding: 0.5rem;
-		font-family: inherit;
+	.completion-stats {
+		color: #22c55e;
 		font-size: 0.75rem;
-		cursor: pointer;
-		transition: all 0.2s ease;
-		text-align: center;
-	}
-	
-	.view-btn:hover {
-		background: rgba(0, 212, 170, 0.1);
-		border-color: rgba(0, 212, 170, 0.5);
+		font-weight: 600;
+		font-family: 'Inter', sans-serif;
 	}
 </style>
