@@ -150,7 +150,7 @@
 	<meta name="description" content={component?.description || 'Electronic Component'} />
 	<link rel="preconnect" href="https://fonts.googleapis.com">
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
-	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 </svelte:head>
 
 <div>
@@ -335,7 +335,7 @@
 		padding: 0;
 		background: #0f1115;
 		color: #e2e8f0;
-		font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+		font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 	}
 	
 	:global(:root) {
@@ -367,7 +367,7 @@
 		font-weight: 500;
 		cursor: pointer;
 		transition: all 0.2s ease;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 	}
 
 	.back-button:hover {
@@ -408,7 +408,7 @@
 		font-weight: 700;
 		color: #f1f5f9;
 		margin: 1rem 0;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 	}
 
 	.category-badge {
@@ -495,7 +495,7 @@
 		cursor: pointer;
 		transition: all 0.3s ease;
 		width: 100%;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 	}
 
 	.quiz-button:hover {
@@ -531,7 +531,7 @@
 		font-size: 1.25rem;
 		font-weight: 600;
 		margin-bottom: 1rem;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 	}
 
 	.detail-card p {
@@ -619,7 +619,7 @@
 		font-size: 1.5rem;
 		font-weight: 600;
 		margin: 0;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 	}
 
 	.question-counter {
@@ -633,7 +633,7 @@
 		font-weight: 600;
 		margin-bottom: 1.5rem;
 		line-height: 1.5;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 	}
 
 	.quiz-options {
@@ -653,7 +653,7 @@
 		transition: all 0.3s ease;
 		text-align: left;
 		font-size: 1rem;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 	}
 
 	.quiz-option:hover {
@@ -702,7 +702,7 @@
 		cursor: pointer;
 		transition: all 0.3s ease;
 		width: 100%;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 	}
 
 	.submit-answer-btn:disabled {
@@ -723,7 +723,7 @@
 		color: #00d4aa;
 		font-size: 2rem;
 		margin-bottom: 2rem;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 	}
 
 	.results-summary {
@@ -735,7 +735,7 @@
 		font-weight: 700;
 		color: #00d4aa;
 		margin-bottom: 0.5rem;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 	}
 
 	.score-text {
@@ -766,7 +766,7 @@
 		font-weight: 600;
 		cursor: pointer;
 		transition: all 0.3s ease;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 	}
 
 	.close-quiz-btn:hover {
