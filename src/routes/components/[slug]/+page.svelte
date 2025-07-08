@@ -642,7 +642,7 @@
 		font-size: 0.95rem;
 		font-weight: 500;
 		transition: all 0.3s ease;
-		text-align: center;
+		text-align: left;
 	}
 
 	.application-box:hover {
@@ -687,7 +687,7 @@
 		overflow-y: auto;
 		transition: max-height 0.3s ease;
 		scrollbar-width: thin;
-		scrollbar-color: #00d4aa #1a1b23;
+		scrollbar-color: #CABDF5 #1a1b23;
 	}
 
 	.specifications.expanded {
@@ -704,7 +704,7 @@
 	}
 
 	.specifications::-webkit-scrollbar-thumb {
-		background: #00d4aa;
+		background: #CABDF5;
 		border-radius: 4px;
 	}
 
@@ -727,7 +727,7 @@
 	}
 
 	.spec-value {
-		color: #00d4aa;
+		color: #CABDF5;
 		font-weight: 500;
 	}
 
