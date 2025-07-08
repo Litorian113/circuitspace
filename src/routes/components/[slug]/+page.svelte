@@ -248,21 +248,26 @@
 			<!-- Common Uses -->
 			<div class="detail-card">
 				<h3>Common Applications</h3>
-				<ul>
+				<div class="applications-grid">
 					{#each component.commonUses as use}
-						<li>{use}</li>
+						<div class="application-box">{use}</div>
 					{/each}
-				</ul>
+				</div>
 			</div>
 
 			<!-- Safety Tips -->
 			<div class="detail-card">
 				<h3>Safety Guidelines</h3>
-				<ul class="safety-list">
+				<div class="safety-grid">
 					{#each component.safetyTips as tip}
-						<li>⚠️ {tip}</li>
+						<div class="safety-item">
+							<svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="safety-icon">
+								<path d="M12 9V13M12 17H12.01M5.07183 19H18.9282C20.4678 19 21.4301 17.3333 20.6603 16L13.7321 4C12.9623 2.66667 11.0377 2.66667 10.2679 4L3.33975 16C2.56995 17.3333 3.53223 19 5.07183 19Z" stroke="#CABDF5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+							<span class="safety-text">{tip}</span>
+						</div>
 					{/each}
-				</ul>
+				</div>
 			</div>
 
 			<!-- Pinouts (if available) -->
@@ -622,6 +627,58 @@
 		margin-bottom: 0.5rem;
 	}
 
+	.applications-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+	}
+
+	.application-box {
+		background: rgba(202, 189, 245, 0.05);
+		border: 1px solid #CABDF5;
+		border-radius: 8px;
+		padding: 0.75rem 1rem;
+		color: #ffffff;
+		font-size: 0.95rem;
+		font-weight: 500;
+		transition: all 0.3s ease;
+		text-align: center;
+	}
+
+	.application-box:hover {
+		background: rgba(202, 189, 245, 0.1);
+		transform: translateY(-1px);
+		box-shadow: 0 2px 8px rgba(202, 189, 245, 0.2);
+	}
+
+	.safety-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.safety-item {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.75rem;
+		padding: 0.5rem 0;
+	}
+
+	.safety-icon {
+		flex-shrink: 0;
+		width: 24px;
+		height: 24px;
+		margin-top: 0.125rem;
+	}
+
+	.safety-text {
+		flex: 1;
+		color: #ffffff;
+		font-size: 0.95rem;
+		font-weight: 400;
+		line-height: 1.5;
+	}
+
 	.specifications {
 		display: flex;
 		flex-direction: column;
@@ -672,11 +729,6 @@
 	.spec-value {
 		color: #00d4aa;
 		font-weight: 500;
-	}
-
-	.safety-list li {
-		color: #fbbf24;
-		margin-bottom: 0.75rem;
 	}
 
 	/* Quiz Modal Styles */
