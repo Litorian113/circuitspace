@@ -47,15 +47,15 @@ export const leonardoLedDimmerConversation: Conversation = {
 		{
 			id: 'project-understanding',
 			type: 'ai',
-			content: `Ich glaube das ich habe jetzt vollständig dein Projekt verstanden. 
+			content: `I believe I have now fully understood your project.
 
-Wir bauen einen **LED Dimmer mit Arduino Leonardo**, bei dem:
-- Ein Potentiometer die LED-Helligkeit steuert
-- PWM für stufenlose Helligkeitsregelung verwendet wird
-- Alle Verbindungen über ein Breadboard laufen
-- Ein Schutzwiderstand die LED vor Überstrom schützt
+We are building an **Arduino Leonardo LED Dimmer**, where:
+- A potentiometer controls the LED brightness
+- PWM is used for stepless brightness control
+- All connections run through a breadboard
+- A protective resistor protects the LED from overcurrent
 
-Hast du sonst noch Fragen zum Projekt oder können wir weitermachen?`,
+Do you have any other questions about the project, or can we proceed?`,
 			nextSteps: ['continue-project', 'ask-question'],
 			showProjectButtons: true,
 			isCompleted: false
@@ -63,24 +63,24 @@ Hast du sonst noch Fragen zum Projekt oder können wir weitermachen?`,
 		{
 			id: 'component-analysis',
 			type: 'ai',
-			content: `Perfekt! Für dieses LED-Dimmer Projekt mit einem Arduino Leonardo benötigen Sie folgende Komponenten:
+			content: `Perfect! For this LED dimmer project with an Arduino Leonardo, you will need the following components:
 
-**Komponenten Liste:**
+**Component List:**
 
-🔸 **Arduino Leonardo (Keyestudio)** - Der Hauptcontroller
-🔸 **Breadboard** - Für die Schaltungsaufbau  
-🔸 **LED (Diode)** - Die Leuchtdiode die gedimmt werden soll
-🔸 **Resistor (Widerstand)** - Schutz für die LED (220Ω empfohlen)
-🔸 **Potentiometer** - Zur Helligkeitsregelung der LED
-🔸 **Jumper Cables** - Verbindungskabel für die Schaltung
+🔸 **Arduino Leonardo (Keyestudio)** - The main controller
+🔸 **Breadboard** - For the circuit assembly
+🔸 **LED (Diode)** - The light-emitting diode to be dimmed
+🔸 **Resistor** - Protection for the LED (220Ω recommended)
+🔸 **Potentiometer** - For controlling the LED brightness
+🔸 **Jumper Cables** - Connection cables for the circuit
 
-**Über das Projekt:**
-Diese Schaltung ermöglicht es Ihnen, die Helligkeit einer LED stufenlos über ein Potentiometer zu regulieren. Der Arduino Leonardo liest den analogen Wert des Potentiometers ein und wandelt ihn in ein PWM-Signal um, das die LED entsprechend dimmt.
+**About the project:**
+This circuit allows you to steplessly regulate the brightness of an LED using a potentiometer. The Arduino Leonardo reads the analog value of the potentiometer and converts it into a PWM signal that dims the LED accordingly.
 
-**Wo möchten Sie mit dem Aufbau beginnen?**`,
+**Where would you like to start building?**`,
 			componentImages: [
 				'/components/leonardoKeyestudio.png',
-				'/components/jumpercable.png', 
+				'/components/jumpercable.png',
 				'/components/leuchtdiode.png',
 				'/components/widerstand.png',
 				'/components/poti.png',
@@ -93,97 +93,97 @@ Diese Schaltung ermöglicht es Ihnen, die Helligkeit einer LED stufenlos über e
 		{
 			id: 'circuit-designer-path',
 			type: 'ai',
-			content: `Ausgezeichnet! Sie haben die Schaltung im Circuit Designer erfolgreich aufgebaut! 🎉
+			content: `Excellent! You have successfully built the circuit in the Circuit Designer! 🎉
 
-Alle Pin-Verbindungen sind korrekt:
-✅ LED mit Schutzwiderstand an Pin 9 (PWM)
-✅ Potentiometer an Pin A0 (Analog Input)
-✅ Korrekte Stromversorgung und Ground-Verbindungen
+All pin connections are correct:
+✅ LED with protective resistor on Pin 9 (PWM)
+✅ Potentiometer on Pin A0 (Analog Input)
+✅ Correct power and ground connections
 
-**Jetzt können Sie zum praktischen Aufbau am Tisch übergehen!**`,
+**Now you can proceed to the practical setup at your desk!**`,
 			nextSteps: ['real-workspace-after-designer'],
-			showRealTableButton: true, // Nur "An den Tisch" Button zeigen
+			showRealTableButton: true, // Show "Let's build on the desk" button only
 			isCompleted: false
 		},
 		{
 			id: 'real-workspace-steps',
 			type: 'ai',
-			content: `Perfekt! Lassen Sie uns Schritt für Schritt die Schaltung am Arbeitsplatz aufbauen.
+			content: `Perfect! Let's build the circuit step by step at the workspace.
 
-**Bereiten Sie folgende Komponenten vor:**
+**Prepare the following components:**
 - Arduino Leonardo
 - Breadboard
-- LED, Widerstand (220Ω), Potentiometer
+- LED, Resistor (220Ω), Potentiometer
 - Jumper Cables
 
-Ich werde Ihnen beim Aufbau helfen und jeden Schritt verfolgen...`,
+I will help you with the assembly and follow every step...`,
 			delayedSteps: [
 				{
 					id: 'workspace-prep',
-					content: '🔌 **Schritt 1/7:** Arduino Leonardo mit USB-Kabel an Computer angeschlossen - Erkannt! ✅',
+					content: '🔌 **Step 1/7:** Arduino Leonardo connected to computer with USB cable - Detected! ✅',
 					delay: 2000
 				},
 				{
-					id: 'breadboard-ready', 
-					content: '🛠️ **Schritt 2/7:** Breadboard auf dem Arbeitsplatz bereitgestellt - Erkannt! ✅',
+					id: 'breadboard-ready',
+					content: '🛠️ **Step 2/7:** Breadboard placed on the workspace - Detected! ✅',
 					delay: 4000
 				},
 				{
 					id: 'led-placement',
-					content: '💡 **Schritt 3/7:** LED in Breadboard eingesteckt (Anode längeres Bein) - Korrekt platziert! ✅',
+					content: '💡 **Step 3/7:** LED inserted into breadboard (anode is the longer leg) - Correctly placed! ✅',
 					delay: 6000
 				},
 				{
 					id: 'resistor-connection',
-					content: '⚡ **Schritt 4/7:** 220Ω Widerstand zwischen LED-Kathode und GND-Rail - Verbindung hergestellt! ✅',
+					content: '⚡ **Step 4/7:** 220Ω resistor between LED cathode and GND rail - Connection established! ✅',
 					delay: 8000
 				},
 				{
 					id: 'potentiometer-placement',
-					content: '🎛️ **Schritt 5/7:** Potentiometer in Breadboard eingesteckt - Position bestätigt! ✅',
+					content: '🎛️ **Step 5/7:** Potentiometer inserted into breadboard - Position confirmed! ✅',
 					delay: 10000
 				},
 				{
 					id: 'power-connections',
-					content: '🔗 **Schritt 6/7:** Stromversorgung: 5V und GND vom Arduino zum Breadboard - Verbindungen aktiv! ✅',
+					content: '🔗 **Step 6/7:** Power supply: 5V and GND from Arduino to breadboard - Connections active! ✅',
 					delay: 12000
 				},
 				{
 					id: 'signal-connections',
-					content: '📡 **Schritt 7/7:** Signal-Verbindungen: Pin 9 → LED, Pin A0 → Potentiometer - Alle Pins korrekt! ✅',
+					content: '📡 **Step 7/7:** Signal connections: Pin 9 → LED, Pin A0 → Potentiometer - All pins correct! ✅',
 					delay: 14000
 				},
 				{
 					id: 'circuit-complete',
-					content: `🎉 **Hardware-Aufbau komplett!** 
+					content: `🎉 **Hardware setup complete!**
 
-Ich habe erkannt, dass Sie die Schaltung erfolgreich verbunden haben:
-✅ Arduino Leonardo → Breadboard Stromversorgung
-✅ LED + Widerstand → Pin 9 (PWM-Ausgang)  
-✅ Potentiometer → Pin A0 (Analog-Eingang)
-✅ Alle Ground-Verbindungen hergestellt
+I have detected that you have successfully connected the circuit:
+✅ Arduino Leonardo → Breadboard power supply
+✅ LED + Resistor → Pin 9 (PWM output)
+✅ Potentiometer → Pin A0 (Analog input)
+✅ All ground connections established
 
-**Die Hardware ist bereit für die Programmierung!**`,
+**The hardware is ready for programming!**`,
 					delay: 16000
 				}
 			],
 			nextSteps: ['start-code-tutorial'],
-			showTutorialButton: false, // Wird erst nach den delayed steps angezeigt
+			showTutorialButton: false, // Will be shown after the delayed steps
 			isCompleted: false
 		},
 		{
 			id: 'start-code-tutorial',
 			type: 'ai',
-			content: `🎉 **Hardware-Aufbau erfolgreich abgeschlossen!**
+			content: `🎉 **Hardware setup successfully completed!**
 
-Ihre LED-Dimmer Schaltung ist jetzt bereit. Alle Komponenten sind korrekt verkabelt:
-- LED + Widerstand an Pin 9 (PWM)
-- Potentiometer an Pin A0 (Analog)
-- Stromversorgung korrekt angeschlossen
+Your LED dimmer circuit is now ready. All components are correctly wired:
+- LED + Resistor on Pin 9 (PWM)
+- Potentiometer on Pin A0 (Analog)
+- Power supply correctly connected
 
-**Jetzt fehlt nur noch der Code!** 
+**Now, only the code is missing!**
 
-Das Arduino benötigt die Software um die Hardware zu steuern. Sind Sie bereit für das interaktive Code-Tutorial?`,
+The Arduino needs the software to control the hardware. Are you ready for the interactive code tutorial?`,
 			nextSteps: ['code-tutorial'],
 			showTutorialButton: true,
 			isCompleted: false
@@ -191,7 +191,7 @@ Das Arduino benötigt die Software um die Hardware zu steuern. Sind Sie bereit f
 	]
 };
 
-// Code Tutorial Steps für interaktive IDE-Anleitung
+// Code Tutorial Steps for interactive IDE guide
 export interface CodeTutorialStep {
 	id: string;
 	title: string;
@@ -204,215 +204,215 @@ export interface CodeTutorialStep {
 export const leonardoCodeTutorial: CodeTutorialStep[] = [
 	{
 		id: 'step-1-setup',
-		title: 'Schritt 1: Grundstruktur & Kommentare',
-		description: 'Lassen Sie uns mit der Grundstruktur und Dokumentation beginnen.',
+		title: 'Step 1: Basic Structure & Comments',
+		description: 'Let\'s start with the basic structure and documentation.',
 		code: `/*
   Arduino Leonardo LED Dimmer
-  Helligkeit einer LED über Potentiometer steuern
-  
+  Control the brightness of an LED via a potentiometer
+
   Hardware:
   - Arduino Leonardo
-  - LED an Pin 9 (PWM-fähig)
-  - Potentiometer an Pin A0
-  - 220Ω Widerstand für LED
+  - LED on Pin 9 (PWM-capable)
+  - Potentiometer on Pin A0
+  - 220Ω resistor for LED
 */`,
-		explanation: 'Ein guter Code beginnt immer mit Dokumentation. Hier definieren wir was unser Projekt macht und welche Hardware verwendet wird.'
+		explanation: 'Good code always starts with documentation. Here we define what our project does and what hardware is used.'
 	},
 	{
 		id: 'step-2-pins',
-		title: 'Schritt 2: Pin-Definitionen',
-		description: 'Jetzt definieren wir die Hardware-Pins für unser Projekt.',
+		title: 'Step 2: Pin Definitions',
+		description: 'Now we define the hardware pins for our project.',
 		code: `/*
   Arduino Leonardo LED Dimmer
-  Helligkeit einer LED über Potentiometer steuern
-  
+  Control the brightness of an LED via a potentiometer
+
   Hardware:
   - Arduino Leonardo
-  - LED an Pin 9 (PWM-fähig)
-  - Potentiometer an Pin A0
-  - 220Ω Widerstand für LED
+  - LED on Pin 9 (PWM-capable)
+  - Potentiometer on Pin A0
+  - 220Ω resistor for LED
 */
 
-// Pin-Definitionen
-const int potPin = A0;      // Potentiometer an Analog Pin A0
-const int ledPin = 9;       // LED an Digital Pin 9 (PWM-fähig)`,
-		explanation: 'Mit const int definieren wir unveränderliche Konstanten für unsere Pins. Pin 9 unterstützt PWM (Pulsweitenmodulation) für die LED-Helligkeitssteuerung.'
+// Pin Definitions
+const int potPin = A0;      // Potentiometer on Analog Pin A0
+const int ledPin = 9;       // LED on Digital Pin 9 (PWM-capable)`,
+		explanation: 'With const int, we define unchangeable constants for our pins. Pin 9 supports PWM (Pulse Width Modulation) for LED brightness control.'
 	},
 	{
 		id: 'step-3-setup',
-		title: 'Schritt 3: Setup-Funktion',
-		description: 'Die setup() Funktion läuft einmal beim Start des Arduino.',
+		title: 'Step 3: Setup Function',
+		description: 'The setup() function runs once when the Arduino starts.',
 		code: `/*
   Arduino Leonardo LED Dimmer
-  Helligkeit einer LED über Potentiometer steuern
-  
+  Control the brightness of an LED via a potentiometer
+
   Hardware:
   - Arduino Leonardo
-  - LED an Pin 9 (PWM-fähig)
-  - Potentiometer an Pin A0
-  - 220Ω Widerstand für LED
+  - LED on Pin 9 (PWM-capable)
+  - Potentiometer on Pin A0
+  - 220Ω resistor for LED
 */
 
-// Pin-Definitionen
-const int potPin = A0;      // Potentiometer an Analog Pin A0
-const int ledPin = 9;       // LED an Digital Pin 9 (PWM-fähig)
+// Pin Definitions
+const int potPin = A0;      // Potentiometer on Analog Pin A0
+const int ledPin = 9;       // LED on Digital Pin 9 (PWM-capable)
 
 void setup() {
-  // Serielle Kommunikation starten für Debugging
+  // Start serial communication for debugging
   Serial.begin(9600);
-  
-  // LED Pin als Ausgang definieren
+
+  // Define LED pin as an output
   pinMode(ledPin, OUTPUT);
-  
-  // Potentiometer Pin ist automatisch als Eingang konfiguriert
-  Serial.println("Arduino Leonardo LED Dimmer gestartet!");
+
+  // Potentiometer pin is automatically configured as an input
+  Serial.println("Arduino Leonardo LED Dimmer started!");
 }`,
-		explanation: 'Serial.begin() startet die Kommunikation zum Computer. pinMode() konfiguriert Pin 9 als Ausgang für die LED. Analog-Pins sind automatisch Eingänge.'
+		explanation: 'Serial.begin() starts the communication with the computer. pinMode() configures Pin 9 as an output for the LED. Analog pins are inputs by default.'
 	},
 	{
 		id: 'step-4-loop-basic',
-		title: 'Schritt 4: Grundlegende Loop-Struktur',
-		description: 'Die loop() Funktion läuft endlos und enthält unsere Hauptlogik.',
+		title: 'Step 4: Basic Loop Structure',
+		description: 'The loop() function runs endlessly and contains our main logic.',
 		code: `/*
   Arduino Leonardo LED Dimmer
-  Helligkeit einer LED über Potentiometer steuern
-  
+  Control the brightness of an LED via a potentiometer
+
   Hardware:
   - Arduino Leonardo
-  - LED an Pin 9 (PWM-fähig)
-  - Potentiometer an Pin A0
-  - 220Ω Widerstand für LED
+  - LED on Pin 9 (PWM-capable)
+  - Potentiometer on Pin A0
+  - 220Ω resistor for LED
 */
 
-// Pin-Definitionen
-const int potPin = A0;      // Potentiometer an Analog Pin A0
-const int ledPin = 9;       // LED an Digital Pin 9 (PWM-fähig)
+// Pin Definitions
+const int potPin = A0;      // Potentiometer on Analog Pin A0
+const int ledPin = 9;       // LED on Digital Pin 9 (PWM-capable)
 
 void setup() {
-  // Serielle Kommunikation starten für Debugging
+  // Start serial communication for debugging
   Serial.begin(9600);
-  
-  // LED Pin als Ausgang definieren
+
+  // Define LED pin as an output
   pinMode(ledPin, OUTPUT);
-  
-  // Potentiometer Pin ist automatisch als Eingang konfiguriert
-  Serial.println("Arduino Leonardo LED Dimmer gestartet!");
+
+  // Potentiometer pin is automatically configured as an input
+  Serial.println("Arduino Leonardo LED Dimmer started!");
 }
 
 void loop() {
-  // Potentiometer-Wert lesen (0-1023)
+  // Read potentiometer value (0-1023)
   int potValue = analogRead(potPin);
-  
-  // Hier kommt die Logik...
+
+  // The logic comes here...
 }`,
-		explanation: 'analogRead() liest den analogen Wert des Potentiometers. Der Wertebereich ist 0-1023 (10-bit Auflösung).'
+		explanation: 'analogRead() reads the analog value of the potentiometer. The value range is 0-1023 (10-bit resolution).'
 	},
 	{
 		id: 'step-5-mapping',
-		title: 'Schritt 5: Werte-Mapping für PWM',
-		description: 'Wir wandeln den Potentiometer-Wert in PWM-Werte für die LED um.',
+		title: 'Step 5: Value Mapping for PWM',
+		description: 'We convert the potentiometer value into PWM values for the LED.',
 		code: `/*
   Arduino Leonardo LED Dimmer
-  Helligkeit einer LED über Potentiometer steuern
-  
+  Control the brightness of an LED via a potentiometer
+
   Hardware:
   - Arduino Leonardo
-  - LED an Pin 9 (PWM-fähig)
-  - Potentiometer an Pin A0
-  - 220Ω Widerstand für LED
+  - LED on Pin 9 (PWM-capable)
+  - Potentiometer on Pin A0
+  - 220Ω resistor for LED
 */
 
-// Pin-Definitionen
-const int potPin = A0;      // Potentiometer an Analog Pin A0
-const int ledPin = 9;       // LED an Digital Pin 9 (PWM-fähig)
+// Pin Definitions
+const int potPin = A0;      // Potentiometer on Analog Pin A0
+const int ledPin = 9;       // LED on Digital Pin 9 (PWM-capable)
 
 void setup() {
-  // Serielle Kommunikation starten für Debugging
+  // Start serial communication for debugging
   Serial.begin(9600);
-  
-  // LED Pin als Ausgang definieren
+
+  // Define LED pin as an output
   pinMode(ledPin, OUTPUT);
-  
-  // Potentiometer Pin ist automatisch als Eingang konfiguriert
-  Serial.println("Arduino Leonardo LED Dimmer gestartet!");
+
+  // Potentiometer pin is automatically configured as an input
+  Serial.println("Arduino Leonardo LED Dimmer started!");
 }
 
 void loop() {
-  // Potentiometer-Wert lesen (0-1023)
+  // Read potentiometer value (0-1023)
   int potValue = analogRead(potPin);
-  
-  // Wert auf PWM-Bereich (0-255) abbilden
+
+  // Map value to PWM range (0-255)
   int brightness = map(potValue, 0, 1023, 0, 255);
-  
-  // LED-Helligkeit setzen
+
+  // Set LED brightness
   analogWrite(ledPin, brightness);
 }`,
-		explanation: 'map() wandelt den Potentiometer-Bereich (0-1023) in PWM-Bereich (0-255) um. analogWrite() steuert die LED-Helligkeit per PWM.'
+		explanation: 'map() converts the potentiometer range (0-1023) to the PWM range (0-255). analogWrite() controls the LED brightness via PWM.'
 	},
 	{
 		id: 'step-6-debugging',
-		title: 'Schritt 6: Debug-Ausgabe & Timing',
-		description: 'Fügen wir Debug-Ausgaben und optimales Timing hinzu.',
+		title: 'Step 6: Debug Output & Timing',
+		description: 'Let\'s add debug outputs and optimal timing.',
 		code: `/*
   Arduino Leonardo LED Dimmer
-  Helligkeit einer LED über Potentiometer steuern
-  
+  Control the brightness of an LED via a potentiometer
+
   Hardware:
   - Arduino Leonardo
-  - LED an Pin 9 (PWM-fähig)
-  - Potentiometer an Pin A0
-  - 220Ω Widerstand für LED
+  - LED on Pin 9 (PWM-capable)
+  - Potentiometer on Pin A0
+  - 220Ω resistor for LED
 */
 
-// Pin-Definitionen
-const int potPin = A0;      // Potentiometer an Analog Pin A0
-const int ledPin = 9;       // LED an Digital Pin 9 (PWM-fähig)
+// Pin Definitions
+const int potPin = A0;      // Potentiometer on Analog Pin A0
+const int ledPin = 9;       // LED on Digital Pin 9 (PWM-capable)
 
 void setup() {
-  // Serielle Kommunikation starten für Debugging
+  // Start serial communication for debugging
   Serial.begin(9600);
-  
-  // LED Pin als Ausgang definieren
+
+  // Define LED pin as an output
   pinMode(ledPin, OUTPUT);
-  
-  // Potentiometer Pin ist automatisch als Eingang konfiguriert
-  Serial.println("Arduino Leonardo LED Dimmer gestartet!");
+
+  // Potentiometer pin is automatically configured as an input
+  Serial.println("Arduino Leonardo LED Dimmer started!");
 }
 
 void loop() {
-  // Potentiometer-Wert lesen (0-1023)
+  // Read potentiometer value (0-1023)
   int potValue = analogRead(potPin);
-  
-  // Wert auf PWM-Bereich (0-255) abbilden
+
+  // Map value to PWM range (0-255)
   int brightness = map(potValue, 0, 1023, 0, 255);
-  
-  // LED-Helligkeit setzen
+
+  // Set LED brightness
   analogWrite(ledPin, brightness);
-  
-  // Debug-Ausgabe
+
+  // Debug output
   Serial.print("Potentiometer: ");
   Serial.print(potValue);
-  Serial.print(" | LED Helligkeit: ");
+  Serial.print(" | LED Brightness: ");
   Serial.println(brightness);
-  
-  // Kurze Pause für stabile Werte
+
+  // Short pause for stable values
   delay(50);
 }`,
-		explanation: 'Serial.print() zeigt die aktuellen Werte im Serial Monitor. delay(50) sorgt für stabile Werte und verhindert Spam in der Ausgabe.'
+		explanation: 'Serial.print() displays the current values in the Serial Monitor. delay(50) ensures stable values and prevents spam in the output.'
 	}
 ];
 
-// Store für aktuelle Konversation
+// Store for current conversation
 export const currentConversation = writable<Conversation | null>(null);
 
-// Store für Konversationsschritt
+// Store for Konversationsschritt
 export const conversationStep = writable<number>(0);
 
-// Store für aktuellen Tutorial-Schritt
+// Store for current tutorial step
 export const currentTutorialStep = writable<number>(0);
 export const isTutorialActive = writable<boolean>(false);
 
-// Hilfsfunktionen
+// Helper functions
 export function startConversation(conversationId: string) {
 	if (conversationId === 'leonardo-led-dimmer') {
 		currentConversation.set(leonardoLedDimmerConversation);
@@ -460,20 +460,25 @@ export function resetConversation() {
 // Funktion um zu prüfen ob eine Eingabe ein vordefiniertes Projekt ist
 export function detectProjectType(input: string): string | null {
 	const lowerInput = input.toLowerCase();
-	
+
 	// Arduino Leonardo LED Dimmer keywords
-	if (lowerInput.includes('leonardo') && 
+	if (
+		lowerInput.includes('leonardo') &&
 		(lowerInput.includes('led') || lowerInput.includes('diode') || lowerInput.includes('leuchtdiode')) &&
-		(lowerInput.includes('dimmer') || lowerInput.includes('helligkeit') || 
-		 lowerInput.includes('potentiometer') || lowerInput.includes('brightness') || 
-		 lowerInput.includes('poti') || lowerInput.includes('regulieren'))) {
+		(lowerInput.includes('dimmer') ||
+			lowerInput.includes('helligkeit') ||
+			lowerInput.includes('potentiometer') ||
+			lowerInput.includes('brightness') ||
+			lowerInput.includes('poti') ||
+			lowerInput.includes('regulieren'))
+	) {
 		return 'leonardo-led-dimmer';
 	}
-	
+
 	return null;
 }
 
-// Hilfsfunktionen für Tutorial
+// Helper functions for Tutorial
 export function startCodeTutorial() {
 	currentTutorialStep.set(0);
 	isTutorialActive.set(true);

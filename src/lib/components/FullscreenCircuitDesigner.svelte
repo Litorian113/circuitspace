@@ -1222,9 +1222,6 @@
 		<!-- Canvas Area -->
 		<main class="canvas-area">
 			<div class="canvas-header">
-				<button class="back-btn" on:click={exitFullscreen}>
-					← Back to Chat
-				</button>
 				<h1>{tutorialComponents ? 'LED Dimmer Circuit Designer' : 'Circuit Designer'}</h1>
 				<div class="canvas-stats">
 					<span>{placedComponents.length} components • {connections.length} connections</span>
@@ -1314,24 +1311,6 @@
 		display: flex;
 		align-items: center;
 		gap: 1rem;
-	}
-	
-	.back-btn {
-		background: rgba(202, 189, 245, 0.1);
-		border: 1px solid rgba(202, 189, 245, 0.3);
-		border-radius: 8px;
-		color: #CABDF5;
-		padding: 0.5rem 1rem;
-		font-family: 'Inter', sans-serif;
-		font-size: 0.875rem;
-		cursor: pointer;
-		transition: all 0.3s ease;
-		white-space: nowrap;
-	}
-	
-	.back-btn:hover {
-		background: rgba(202, 189, 245, 0.2);
-		transform: translateY(-1px);
 	}
 	
 	.canvas-header h1 {

@@ -79,18 +79,18 @@
 		tutorialCompleted = true;
 		// Add completion message after a short delay
 		setTimeout(() => {
-			addMessage('ai', `🎉 **Fantastisch! Code Tutorial erfolgreich abgeschlossen!** 
+			addMessage('ai', `🎉 **Fantastic! Code Tutorial successfully completed!** 
 
-✅ **Der Arduino Code wurde erfolgreich hochgeladen**
-✅ **Die LED sollte nun leuchten und auf das Potentiometer reagieren**
-✅ **Ihr LED-Dimmer Projekt ist vollständig funktionsfähig!**
+✅ **Arduino code has been successfully uploaded**
+✅ **The LED should now light up and respond to the potentiometer**
+✅ **Your LED dimmer project is fully functional!**
 
-**Herzlichen Glückwunsch!** Sie haben erfolgreich:
-- Die Hardware korrekt verkabelt
-- Den Arduino Code verstanden und implementiert  
-- Ein voll funktionsfähiges LED-Dimmer System erstellt
+**Congratulations!** You have successfully:
+- Correctly wired the hardware
+- Understood and implemented the Arduino code  
+- Created a fully functional LED dimmer system
 
-**Was möchten Sie als nächstes tun?**`, {
+**What would you like to do next?**`, {
 				showCompletionButtons: true
 			});
 		}, 1000);
@@ -216,7 +216,7 @@
 									const tutorialMessage: Message = {
 										id: ++messageId,
 										type: 'ai',
-										content: 'Möchten Sie jetzt mit dem Code Tutorial beginnen?',
+										content: 'Would you like to start the Code Tutorial now?',
 										timestamp: new Date(),
 										showTutorialButton: true,
 										stepId: 'tutorial-prompt'
@@ -297,9 +297,9 @@
 			// Clear any remaining timeouts
 			delayedStepTimeouts.forEach(timeout => clearTimeout(timeout));
 			delayedStepTimeouts = [];
-			addMessage('ai', "Willkommen zurück bei Circuitspace! Beschreiben Sie Ihr nächstes Projekt und ich helfe Ihnen beim Design und der Implementierung.");
+			addMessage('ai', "Welcome back to Circuitspace! Describe your next project and I'll help you with the design and implementation.");
 		} else if (action === 'go-home') {
-			// Zurück zur Startseite
+			// Back to homepage
 			goBackHome();
 		}
 	}
@@ -333,13 +333,13 @@
 - Loop mit analogem Einlesen und PWM-Steuerung
 - Debug-Ausgabe und optimales Timing
 
-**Nächste Schritte:**
-Jetzt sind wir bereit für die praktische Umsetzung! Möchten Sie:
+**Next Steps:**
+Now we're ready for practical implementation! Would you like to:
 
-🔹 **Circuit Designer** - Die Schaltung hier virtuell aufbauen und testen
-🔹 **Realer Tisch** - Direkt zur physischen Umsetzung am Arbeitsplatz wechseln
+🔹 **Circuit Designer** - Build and test the circuit virtually here
+🔹 **Real Table** - Switch directly to physical implementation at the workspace
 
-Wie möchten Sie fortfahren?`, {
+How would you like to proceed?`, {
 			showNextStepsButtons: true
 		});
 		
@@ -388,8 +388,8 @@ Wie möchten Sie fortfahren?`, {
 		messages = messages.filter(msg => 
 			!msg.stepId?.startsWith('delayed-') && 
 			!msg.stepId?.includes('tutorial') &&
-			!(msg.content.includes('Circuit Designer') && msg.content.includes('Realer Tisch')) &&
-			!msg.content.includes('Code Tutorial erfolgreich abgeschlossen') &&
+			!(msg.content.includes('Circuit Designer') && msg.content.includes('Real Table')) &&
+			!msg.content.includes('Code Tutorial successfully completed') &&
 			!msg.content.includes('Was wurde implementiert') &&
 			!msg.content.includes('Nächste Schritte')
 		);
@@ -469,7 +469,7 @@ Wie möchten Sie fortfahren?`, {
 			}
 		} else {
 			// Default welcome message
-			addMessage('ai', "Willkommen bei Circuitspace! Beschreiben Sie Ihr Projekt und ich helfe Ihnen beim Design und der Implementierung.");
+			addMessage('ai', "Welcome to Circuitspace! Describe your project and I'll help you with the design and implementation.");
 		}
 	});
 		function generateAIResponse(userMessage: string) {
@@ -659,7 +659,7 @@ void loop() {
 								{#if message.showTutorialButton}
 									<div class="tutorial-button-container">
 										<button class="project-btn tutorial" on:click={onTutorialButton}>
-											Code Tutorial starten
+											Start Code Tutorial
 										</button>
 									</div>
 								{/if}
@@ -667,10 +667,10 @@ void loop() {
 								{#if message.showProjectButtons}
 									<div class="project-buttons-container">
 										<button class="project-btn continue" on:click={() => onProjectButton('continue')}>
-											Weiter
+											Continue
 										</button>
 										<button class="project-btn question" on:click={() => onProjectButton('question')}>
-											Frage
+											Ask Question
 										</button>
 									</div>
 								{/if}
@@ -689,7 +689,7 @@ void loop() {
 								{#if message.showRealTableButton}
 									<div class="real-table-button-container">
 										<button class="real-table-btn" on:click={() => onWorkspaceButton('real-workspace-after-designer')}>
-											An den Tisch
+											To the Table
 										</button>
 									</div>
 								{/if}
@@ -699,8 +699,8 @@ void loop() {
 										<button class="next-step-btn circuit" on:click={() => switchToView('designer')}>
 											⚡ Circuit Designer
 										</button>
-										<button class="next-step-btn real-table" on:click={() => addMessage('ai', 'Perfekt! Gehen Sie zu Ihrem realen Arbeitsplatz und bauen Sie die Schaltung physisch auf.')}>
-											🔧 Realer Tisch
+										<button class="next-step-btn real-table" on:click={() => addMessage('ai', 'Perfect! Go to your real workspace and build the circuit physically.')}>
+											🔧 Real Table
 										</button>
 									</div>
 								{/if}
@@ -708,10 +708,10 @@ void loop() {
 								{#if message.showCompletionButtons}
 									<div class="completion-buttons-container">
 										<button class="completion-btn new-chat" on:click={() => onCompletionButton('new-chat')}>
-											💬 Neues Chat
+											💬 New Chat
 										</button>
 										<button class="completion-btn go-home" on:click={() => onCompletionButton('go-home')}>
-											🏠 Zur Startseite
+											🏠 Go Home
 										</button>
 									</div>
 								{/if}
@@ -750,7 +750,7 @@ void loop() {
 											handleSendMessage(currentInput);
 										}
 									}}
-									placeholder={isStructuredConversation ? "Strukturierte Konversation läuft..." : "Describe your circuit requirements, ask questions, or request component suggestions..."}
+									placeholder={isStructuredConversation ? "Structured conversation in progress..." : "Describe your circuit requirements, ask questions, or request component suggestions..."}
 									class="modern-chat-input"
 									rows="1"
 									disabled={isLoading || (isStructuredConversation && tutorialActive)}
@@ -823,16 +823,6 @@ void loop() {
 						<h1>Circuit Code</h1>
 						<p>Arduino IDE Environment</p>
 					</div>
-					<div class="header-actions">
-						<button class="action-btn" on:click={() => switchToView('chat')}>
-							💬 Back to Chat
-						</button>
-						{#if tutorialActive}
-							<button class="action-btn tutorial" on:click={completeTutorial}>
-								Finish Tutorial
-							</button>
-						{/if}
-					</div>
 				</header>
 
 				<!-- Code Content -->
@@ -842,9 +832,9 @@ void loop() {
 						<div class="tutorial-sidebar">
 							<div class="tutorial-header">
 								<h3>Code Tutorial</h3>
-								<p class="tutorial-description">Schritt-für-Schritt Arduino Programmierung</p>
+								<p class="tutorial-description">Step-by-Step Arduino Programming</p>
 								<div class="tutorial-progress">
-									Schritt {tutorialStepIndex + 1} von {leonardoCodeTutorial.length}
+									Step {tutorialStepIndex + 1} of {leonardoCodeTutorial.length}
 								</div>
 							</div>
 							
@@ -863,7 +853,7 @@ void loop() {
 										on:click={previousTutorialStep}
 										disabled={tutorialStepIndex === 0}
 									>
-										← Zurück
+										← Previous
 									</button>
 									
 									{#if tutorialStepIndex < leonardoCodeTutorial.length - 1}
@@ -871,14 +861,14 @@ void loop() {
 											class="nav-btn next"
 											on:click={nextTutorialStep}
 										>
-											Weiter →
+											Next →
 										</button>
 									{:else}
 										<button 
 											class="nav-btn finish"
 											on:click={completeTutorial}
 										>
-											Tutorial beenden
+											Complete Tutorial
 										</button>
 									{/if}
 								</div>
@@ -1798,7 +1788,8 @@ void loop() {
 	
 	.tutorial-header {
 		padding: 1.5rem;
-		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+		border-bottom: 1px solid rgba(237, 247, 96, 0.2);
+		background: #1F1F1F;
 	}
 	
 	.tutorial-header h3 {
@@ -1806,19 +1797,21 @@ void loop() {
 		font-size: 1.25rem;
 		font-weight: 600;
 		margin: 0 0 0.5rem 0;
-		color: rgba(120, 119, 198, 1);
+		color: #EDF760;
 	}
 	
 	.tutorial-description {
 		margin: 0 0 1rem 0;
-		color: rgba(255, 255, 255, 0.7);
+		color: rgba(202, 189, 245, 0.8);
 		font-size: 0.875rem;
+		font-family: 'Inter', sans-serif;
 	}
 	
 	.tutorial-progress {
 		display: inline-block;
-		background: rgba(120, 119, 198, 0.2);
-		color: rgba(120, 119, 198, 1);
+		background: rgba(202, 189, 245, 0.1);
+		color: #CABDF5;
+		border: 1px solid rgba(202, 189, 245, 0.3);
 		padding: 0.5rem 1rem;
 		border-radius: 20px;
 		font-size: 0.85rem;
@@ -1831,6 +1824,7 @@ void loop() {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
+		background: #191919;
 	}
 	
 	.tutorial-step {
@@ -1843,23 +1837,25 @@ void loop() {
 		font-size: 1.1rem;
 		font-weight: 600;
 		margin: 0 0 0.5rem 0;
-		color: #FFFFFF;
+		color: #EDF760;
 	}
 	
 	.step-description {
 		margin: 0 0 1rem 0;
-		color: rgba(255, 255, 255, 0.7);
+		color: rgba(202, 189, 245, 0.8);
 		font-size: 0.9rem;
+		font-family: 'Inter', sans-serif;
 	}
 	
 	.step-explanation {
-		background: rgba(37, 37, 37, 0.6);
+		background: #1F1F1F;
 		padding: 1rem;
 		border-radius: 8px;
-		border: 1px solid rgba(255, 255, 255, 0.1);
+		border: 1px solid rgba(237, 247, 96, 0.2);
 		line-height: 1.6;
 		color: rgba(255, 255, 255, 0.9);
 		font-size: 0.9rem;
+		font-family: 'Inter', sans-serif;
 	}
 	
 	.tutorial-navigation {
@@ -1870,40 +1866,59 @@ void loop() {
 	}
 	
 	.nav-btn {
-		padding: 0.75rem 1.5rem;
-		border: 1px solid rgba(255, 255, 255, 0.3);
-		border-radius: 8px;
+		padding: 0.875rem 1.5rem;
+		border: 2px solid;
+		border-radius: 10px;
 		cursor: pointer;
 		font-family: 'Inter', sans-serif;
 		font-weight: 600;
 		font-size: 0.9rem;
-		transition: all 0.2s ease;
+		transition: all 0.3s ease;
+		min-width: 120px;
 	}
 	
 	.nav-btn.prev {
-		background: rgba(37, 37, 37, 0.8);
-		color: rgba(255, 255, 255, 0.7);
+		background: rgba(202, 189, 245, 0.1);
+		border-color: rgba(202, 189, 245, 0.5);
+		color: #CABDF5;
 	}
 	
 	.nav-btn.next {
-		background: rgba(120, 119, 198, 0.1);
-		color: rgba(120, 119, 198, 1);
+		background: rgba(237, 247, 96, 0.1);
+		border-color: rgba(237, 247, 96, 0.5);
+		color: #EDF760;
 	}
 	
 	.nav-btn.finish {
-		background: linear-gradient(135deg, rgba(120, 119, 198, 1), rgba(255, 119, 198, 1));
-		color: #FFFFFF;
+		background: linear-gradient(135deg, #EDF760 0%, #CABDF5 100%);
+		color: #191919;
 		border-color: transparent;
 	}
 	
 	.nav-btn:hover:not(:disabled) {
-		transform: translateY(-1px);
-		box-shadow: 0 4px 12px rgba(120, 119, 198, 0.2);
+		transform: translateY(-2px);
+	}
+	
+	.nav-btn.prev:hover:not(:disabled) {
+		background: #CABDF5;
+		border-color: #CABDF5;
+		color: #191919;
+	}
+	
+	.nav-btn.next:hover:not(:disabled) {
+		background: #EDF760;
+		border-color: #EDF760;
+		color: #191919;
+	}
+	
+	.nav-btn.finish:hover:not(:disabled) {
+		box-shadow: 0 4px 12px rgba(237, 247, 96, 0.3);
 	}
 	
 	.nav-btn:disabled {
 		opacity: 0.5;
 		cursor: not-allowed;
+		transform: none;
 	}
 	
 	.code-editor-area {

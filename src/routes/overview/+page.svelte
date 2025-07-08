@@ -417,7 +417,7 @@
 	}
 
 	.header-left h1 {
-		font-size: 2rem;
+		font-size: 2.5rem;
 		font-weight: 700;
 		margin: 0 0 0.5rem 0;
 		color: #FFFFFF;
