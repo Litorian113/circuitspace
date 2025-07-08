@@ -5,6 +5,7 @@
 	import HeroSection from '$lib/components/HeroSection.svelte';
 	import HowItWorksSection from '$lib/components/HowItWorksSection.svelte';
 	import BuildFirstProjectSection from '$lib/components/BuildFirstProjectSection.svelte';
+	import LearnTogetherSection from '$lib/components/LearnTogetherSection.svelte';
 	
 	let projectInput = '';
 	let isTransitioning = false;
@@ -72,6 +73,9 @@
 	
 	<!-- How You Can Build Your First Project Section -->
 	<BuildFirstProjectSection />
+	
+	<!-- Learn Together Section -->
+	<LearnTogetherSection />
 </main>
 
 <style>
@@ -210,12 +214,6 @@
 		z-index: -1;
 	}
 	
-	.container {
-		max-width: 1200px;
-		margin: 0 auto;
-		padding: 0 3rem;
-	}
-	
 	/* Animations */
 	@keyframes fadeInOverlay {
 		from {
@@ -270,22 +268,6 @@
 	@media (max-width: 1024px) {
 		.main-container {
 			margin-left: 0;
-		}
-		
-		.container {
-			padding: 0 2rem;
-		}
-	}
-	
-	@media (max-width: 768px) {
-		.container {
-			padding: 0 1.5rem;
-		}
-	}
-	
-	@media (max-width: 480px) {
-		.container {
-			padding: 0 1rem;
 		}
 	}
 </style>
