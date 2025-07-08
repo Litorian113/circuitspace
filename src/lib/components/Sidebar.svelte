@@ -51,9 +51,10 @@
 	// Toggle AI Chat submenu
 	function toggleAiChat() {
 		isAiChatExpanded = !isAiChatExpanded;
-		// Navigate to project-chat as default
+		// Navigate to project-chat as default and reset to chat view
 		if (isAiChatExpanded && $activeView !== 'circuit-designer') {
 			navigateTo('/project-chat');
+			activeView.set('chat');
 		}
 	}
 	
@@ -167,8 +168,11 @@
 					<li class="submenu-item">
 						<button
 							class="submenu-link"
-							class:active={isActiveRoute('/project-chat')}
-							on:click={() => navigateTo('/project-chat')}
+							class:active={isActiveRoute('/project-chat') && $activeView !== 'circuit-designer' && $activeView !== 'code-editor'}
+							on:click={() => {
+								navigateTo('/project-chat');
+								activeView.set('chat');
+							}}
 						>
 							Circuit Chat
 						</button>
@@ -188,11 +192,14 @@
 					<li class="submenu-item">
 						<button
 							class="submenu-link"
-							class:active={$activeView === 'code-editor'}
-							on:click={() => activeView.set('code-editor')}
+							class:active={$activeView === 'code-editor' && isActiveRoute('/project-chat')}
+							on:click={() => {
+								navigateTo('/project-chat');
+								activeView.set('code-editor');
+							}}
 						>
 							Circuit Code
-							{#if $activeView === 'code-editor'}
+							{#if $activeView === 'code-editor' && isActiveRoute('/project-chat')}
 								<span class="active-indicator">●</span>
 							{/if}
 						</button>
