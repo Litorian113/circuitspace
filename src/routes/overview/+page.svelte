@@ -337,23 +337,23 @@
 				<!-- Action Buttons -->
 				<div class="action-buttons">
 					<button 
-						class="action-btn quiz-btn"
+						class="action-btn learn-btn"
 						on:click={(e) => {
 							e.stopPropagation();
 							goToComponent(component.id);
 						}}
 					>
-						Start Quiz
+						Learn more
 					</button>
 					<button 
-						class="action-btn project-btn"
+						class="action-btn explore-btn"
 						on:click={(e) => {
 							e.stopPropagation();
 							// Navigate to project creation with this component
 							goto(`/project-chat?component=${component.id}`);
 						}}
 					>
-						Start Project
+						Explore Projects
 					</button>
 				</div>
 			</div>
@@ -777,13 +777,20 @@
 		transform: translateY(-1px);
 	}
 
-	.quiz-btn:hover {
+	.learn-btn:hover {
 		background: #CABDF5;
 		color: #0f172a;
 	}
 
-	.project-btn:hover {
-		background: rgba(202, 189, 245, 0.2);
+	.explore-btn {
+		border-color: #EDF760;
+		color: #EDF760;
+	}
+
+	.explore-btn:hover {
+		background: rgba(237, 247, 96, 0.1);
+		border-color: #EDF760;
+		color: #EDF760;
 	}
 
 	.component-image {
