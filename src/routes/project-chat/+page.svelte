@@ -576,7 +576,12 @@ void loop() {
 
 <div class="app-container">
 	<!-- Sidebar Navigation -->
-	<Sidebar />
+	<Sidebar on:showCircuitDesigner={() => {
+		// Switch to circuit designer if we're in a tutorial/circuit mode
+		if (isStructuredConversation || tutorialComponents) {
+			switchToView('designer');
+		}
+	}} />
 
 	<!-- Main Content Area -->
 	<main class="main-content">
@@ -653,8 +658,8 @@ void loop() {
 								
 								{#if message.showTutorialButton}
 									<div class="tutorial-button-container">
-										<button class="tutorial-start-btn" on:click={onTutorialButton}>
-											💻 Code Tutorial starten
+										<button class="project-btn tutorial" on:click={onTutorialButton}>
+											Code Tutorial starten
 										</button>
 									</div>
 								{/if}
@@ -1572,6 +1577,12 @@ void loop() {
 		color: #CABDF5;
 	}
 	
+	.project-btn.tutorial {
+		background: rgba(237, 247, 96, 0.1);
+		border-color: rgba(237, 247, 96, 0.5);
+		color: #EDF760;
+	}
+	
 	.project-btn:hover {
 		transform: translateY(-2px);
 	}
@@ -1585,6 +1596,12 @@ void loop() {
 	.project-btn.question:hover {
 		background: #CABDF5;
 		border-color: #CABDF5;
+		color: #191919;
+	}
+	
+	.project-btn.tutorial:hover {
+		background: #EDF760;
+		border-color: #EDF760;
 		color: #191919;
 	}
 	

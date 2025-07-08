@@ -3,6 +3,7 @@
 	import { createEventDispatcher } from 'svelte';
 	import Sidebar from './Sidebar.svelte';
 	import TutorialStepGuide from './TutorialStepGuide.svelte';
+	import { setCircuitDesignerActive } from '$lib/stores/sidebar';
 	import { 
 		allComponentPins, 
 		getComponentPins, 
@@ -154,6 +155,10 @@
 
 	onMount(() => {
 		console.log('🔧 FullscreenCircuitDesigner mounted');
+		
+		// Set circuit designer as active in sidebar
+		setCircuitDesignerActive(true);
+		
 		if (canvas) {
 			ctx = canvas.getContext('2d')!;
 			resizeCanvas();
@@ -165,6 +170,11 @@
 			setupEventListeners();
 			drawBoard();
 		}
+		
+		// Cleanup function when component is destroyed
+		return () => {
+			setCircuitDesignerActive(false);
+		};
 	});
 
 	function setupEventListeners() {
@@ -1188,6 +1198,8 @@
 			: availableComponents.filter(c => c.category === selectedCategory);
 
 	function exitFullscreen() {
+		// Reset circuit designer state
+		setCircuitDesignerActive(false);
 		dispatch('exit');
 	}
 </script>
@@ -1200,7 +1212,10 @@
 
 <div class="fullscreen-designer">
 	<!-- Navigation Sidebar -->
-	<Sidebar />
+	<Sidebar on:showCircuitDesigner={() => {
+		// Circuit Designer is already showing, do nothing or focus
+		console.log('Circuit Designer already active');
+	}} />
 	
 	<!-- Main Content Area -->
 	<div class="main-content">

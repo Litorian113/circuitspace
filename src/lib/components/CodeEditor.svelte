@@ -452,27 +452,28 @@ void loop() {
 		height: 100%;
 		width: 100%;
 		max-width: 100%;
-		background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+		background: #191919;
 		overflow: hidden;
+		font-family: 'Inter', sans-serif;
 	}
 	
 	/* IDE Header - Same style as chat header */
 	.ide-header {
 		padding: 1.5rem 2rem;
-		border-bottom: 1px solid rgba(0, 212, 170, 0.1);
+		border-bottom: 1px solid rgba(237, 247, 96, 0.2);
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		background: rgba(15, 23, 42, 0.5);
+		background: #1F1F1F;
 		backdrop-filter: blur(8px);
 	}
 	
 	.ide-header h1 {
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-size: 1.5rem;
 		font-weight: 600;
 		margin: 0;
-		color: #00d4aa;
+		color: #EDF760;
 	}
 	
 	.header-actions {
@@ -484,21 +485,24 @@ void loop() {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding: 0.75rem 1rem;
-		background: rgba(0, 212, 170, 0.1);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 8px;
-		color: #e2e8f0;
-		font-family: 'IBM Plex Mono', monospace;
-		font-size: 0.875rem;
+		padding: 0.875rem 1.5rem;
+		background: rgba(237, 247, 96, 0.1);
+		border: 2px solid rgba(237, 247, 96, 0.5);
+		border-radius: 10px;
+		color: #EDF760;
+		font-family: 'Inter', sans-serif;
+		font-weight: 600;
+		font-size: 0.9rem;
 		cursor: pointer;
 		transition: all 0.3s ease;
 		position: relative;
+		min-width: 100px;
 	}
 	
 	.action-btn:hover:not(:disabled) {
-		background: rgba(0, 212, 170, 0.2);
-		border-color: #00d4aa;
+		background: #EDF760;
+		border-color: #EDF760;
+		color: #191919;
 		transform: translateY(-2px);
 	}
 	
@@ -518,8 +522,8 @@ void loop() {
 	}
 	
 	.connection-status.connected {
-		background: #10b981;
-		box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+		background: #EDF760;
+		box-shadow: 0 0 8px rgba(237, 247, 96, 0.6);
 	}
 	
 	.connection-status.disconnected {
@@ -531,7 +535,7 @@ void loop() {
 		width: 12px;
 		height: 12px;
 		border: 2px solid transparent;
-		border-top: 2px solid #00d4aa;
+		border-top: 2px solid #EDF760;
 		border-radius: 50%;
 		animation: spin 1s linear infinite;
 	}
@@ -544,21 +548,21 @@ void loop() {
 	.editor-area {
 		flex: 1;
 		display: flex;
-		background: #0f172a;
+		background: #191919;
 		overflow: hidden;
 		min-height: 0;
 	}
 	
 	.line-numbers {
-		background: rgba(30, 41, 59, 0.5);
-		border-right: 1px solid rgba(0, 212, 170, 0.2);
+		background: #1F1F1F;
+		border-right: 1px solid rgba(237, 247, 96, 0.2);
 		padding: 1rem 0;
 		min-width: 60px;
 		display: flex;
 		flex-direction: column;
-		font-family: 'IBM Plex Mono', monospace;
-		font-size: 0.95rem;
-		color: rgba(226, 232, 240, 0.4);
+		font-family: 'Inter', sans-serif;
+		font-size: 0.9rem;
+		color: rgba(202, 189, 245, 0.6);
 		user-select: none;
 		overflow: hidden;
 		flex-shrink: 0;
@@ -592,8 +596,8 @@ void loop() {
 		color: transparent;
 		pointer-events: none;
 		overflow: auto;
-		font-family: 'IBM Plex Mono', monospace;
-		font-size: 0.95rem;
+		font-family: 'Inter', sans-serif;
+		font-size: 0.9rem;
 		line-height: 1.5;
 		white-space: pre-wrap;
 		word-wrap: break-word;
@@ -686,9 +690,9 @@ void loop() {
 		border: none;
 		padding: 1rem;
 		color: transparent;
-		caret-color: #00d4aa;
-		font-family: 'IBM Plex Mono', monospace;
-		font-size: 0.95rem;
+		caret-color: #EDF760;
+		font-family: 'Inter', sans-serif;
+		font-size: 0.9rem;
 		line-height: 1.5;
 		resize: none;
 		outline: none;
@@ -702,7 +706,7 @@ void loop() {
 	}
 	
 	.code-editor::selection {
-		background: rgba(0, 212, 170, 0.3);
+		background: rgba(237, 247, 96, 0.3);
 		color: transparent;
 	}
 	
@@ -716,8 +720,8 @@ void loop() {
 		align-items: center;
 		justify-content: space-between;
 		padding: 1rem 1.5rem;
-		background: rgba(30, 41, 59, 0.8);
-		border-top: 1px solid rgba(0, 212, 170, 0.2);
+		background: #1F1F1F;
+		border-top: 1px solid rgba(237, 247, 96, 0.2);
 	}
 	
 	.status-info {
@@ -727,8 +731,8 @@ void loop() {
 	
 	.status-item {
 		font-size: 0.85rem;
-		color: rgba(226, 232, 240, 0.6);
-		font-family: 'IBM Plex Mono', monospace;
+		color: rgba(202, 189, 245, 0.8);
+		font-family: 'Inter', sans-serif;
 	}
 	
 	.footer-right {
@@ -740,21 +744,23 @@ void loop() {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
-		padding: 0.75rem 1rem;
-		background: rgba(0, 212, 170, 0.1);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		border-radius: 8px;
-		color: #e2e8f0;
+		padding: 0.875rem 1.5rem;
+		background: rgba(202, 189, 245, 0.1);
+		border: 2px solid rgba(202, 189, 245, 0.5);
+		border-radius: 10px;
+		color: #CABDF5;
 		cursor: pointer;
-		font-family: 'Space Grotesk', sans-serif;
-		font-weight: 500;
-		font-size: 0.875rem;
+		font-family: 'Inter', sans-serif;
+		font-weight: 600;
+		font-size: 0.9rem;
 		transition: all 0.3s ease;
+		min-width: 140px;
 	}
 	
 	.footer-btn:hover:not(:disabled) {
-		background: rgba(0, 212, 170, 0.2);
-		border-color: #00d4aa;
+		background: #CABDF5;
+		border-color: #CABDF5;
+		color: #191919;
 		transform: translateY(-2px);
 	}
 	
@@ -767,8 +773,8 @@ void loop() {
 	
 	/* Serial Monitor */
 	.serial-monitor {
-		background: rgba(15, 23, 42, 0.95);
-		border-top: 1px solid rgba(0, 212, 170, 0.3);
+		background: #1F1F1F;
+		border-top: 1px solid rgba(237, 247, 96, 0.3);
 		display: flex;
 		flex-direction: column;
 		flex: 1;
@@ -790,18 +796,18 @@ void loop() {
 		align-items: center;
 		justify-content: space-between;
 		padding: 1rem 1.5rem;
-		background: rgba(0, 212, 170, 0.1);
-		border-bottom: 1px solid rgba(0, 212, 170, 0.3);
+		background: rgba(237, 247, 96, 0.1);
+		border-bottom: 1px solid rgba(237, 247, 96, 0.3);
 		border-top-left-radius: 12px;
 		border-top-right-radius: 12px;
 	}
 	
 	.serial-header h3 {
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-size: 1.1rem;
 		font-weight: 600;
 		margin: 0;
-		color: #00d4aa;
+		color: #EDF760;
 	}
 	
 	.serial-controls {
@@ -814,30 +820,30 @@ void loop() {
 	
 	.baud-rate {
 		padding: 0.5rem;
-		background: rgba(30, 41, 59, 0.8);
-		border: 1px solid rgba(0, 212, 170, 0.3);
+		background: #191919;
+		border: 1px solid rgba(237, 247, 96, 0.3);
 		border-radius: 6px;
 		color: #e2e8f0;
-		font-family: 'IBM Plex Mono', monospace;
+		font-family: 'Inter', sans-serif;
 		font-size: 0.85rem;
 	}
 	
 	.serial-btn {
 		padding: 0.5rem 1rem;
-		background: rgba(0, 212, 170, 0.2);
-		border: 1px solid rgba(0, 212, 170, 0.3);
+		background: rgba(237, 247, 96, 0.2);
+		border: 1px solid rgba(237, 247, 96, 0.3);
 		border-radius: 6px;
-		color: #e2e8f0;
+		color: #EDF760;
 		cursor: pointer;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-weight: 500;
 		font-size: 0.85rem;
 		transition: all 0.2s ease;
 	}
 	
 	.serial-btn:hover {
-		background: rgba(0, 212, 170, 0.3);
-		border-color: #00d4aa;
+		background: rgba(237, 247, 96, 0.3);
+		border-color: #EDF760;
 	}
 	
 	.serial-btn.close {
@@ -860,8 +866,8 @@ void loop() {
 	}
 	
 	.serial-btn.minimize {
-		background: rgba(0, 212, 170, 0.2);
-		border-color: rgba(0, 212, 170, 0.3);
+		background: rgba(237, 247, 96, 0.2);
+		border-color: rgba(237, 247, 96, 0.3);
 		font-size: 1.1rem;
 		padding: 0.4rem 0.8rem;
 		min-width: 32px;
@@ -870,21 +876,22 @@ void loop() {
 		align-items: center;
 		justify-content: center;
 		font-weight: bold;
+		color: #EDF760;
 	}
 	
 	.serial-btn.minimize:hover {
-		background: rgba(0, 212, 170, 0.3);
-		border-color: #00d4aa;
+		background: rgba(237, 247, 96, 0.3);
+		border-color: #EDF760;
 	}
 	
 	.serial-output {
 		flex: 1;
 		padding: 1rem 1.5rem;
 		overflow-y: auto;
-		font-family: 'IBM Plex Mono', monospace;
+		font-family: 'Inter', sans-serif;
 		font-size: 0.9rem;
 		color: #e2e8f0;
-		background: rgba(0, 0, 0, 0.2);
+		background: #191919;
 		line-height: 1.4;
 	}
 	
@@ -898,35 +905,35 @@ void loop() {
 		display: flex;
 		gap: 0.5rem;
 		padding: 1rem 1.5rem;
-		background: rgba(30, 41, 59, 0.8);
-		border-top: 1px solid rgba(0, 212, 170, 0.3);
+		background: #1F1F1F;
+		border-top: 1px solid rgba(237, 247, 96, 0.3);
 	}
 	
 	.serial-input input {
 		flex: 1;
 		padding: 0.75rem;
-		background: rgba(15, 23, 42, 0.8);
-		border: 1px solid rgba(0, 212, 170, 0.3);
+		background: #191919;
+		border: 1px solid rgba(237, 247, 96, 0.3);
 		border-radius: 6px;
 		color: #e2e8f0;
-		font-family: 'IBM Plex Mono', monospace;
+		font-family: 'Inter', sans-serif;
 		font-size: 0.9rem;
 		outline: none;
 	}
 	
 	.serial-input input:focus {
-		border-color: #00d4aa;
-		box-shadow: 0 0 0 2px rgba(0, 212, 170, 0.2);
+		border-color: #EDF760;
+		box-shadow: 0 0 0 2px rgba(237, 247, 96, 0.2);
 	}
 	
 	.send-btn {
 		padding: 0.75rem 1.5rem;
-		background: linear-gradient(135deg, #00d4aa 0%, #0ea5e9 100%);
+		background: linear-gradient(135deg, #EDF760 0%, #CABDF5 100%);
 		border: none;
 		border-radius: 6px;
-		color: #0a0f1a;
+		color: #191919;
 		cursor: pointer;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-weight: 600;
 		font-size: 0.9rem;
 		transition: all 0.3s ease;
@@ -934,7 +941,7 @@ void loop() {
 	
 	.send-btn:hover {
 		transform: translateY(-1px);
-		box-shadow: 0 4px 12px rgba(0, 212, 170, 0.3);
+		box-shadow: 0 4px 12px rgba(237, 247, 96, 0.3);
 	}
 	
 	/* Compilation Status */
@@ -953,11 +960,11 @@ void loop() {
 	}
 	
 	.compilation-popup {
-		background: rgba(15, 23, 42, 0.95);
-		border: 1px solid rgba(0, 212, 170, 0.3);
+		background: #1F1F1F;
+		border: 1px solid rgba(237, 247, 96, 0.3);
 		border-radius: 12px;
 		padding: 2rem 3rem;
-		box-shadow: 0 8px 32px rgba(0, 212, 170, 0.3);
+		box-shadow: 0 8px 32px rgba(237, 247, 96, 0.3);
 		backdrop-filter: blur(10px);
 		text-align: center;
 	}
@@ -966,20 +973,20 @@ void loop() {
 		display: flex;
 		align-items: center;
 		gap: 1rem;
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-size: 1.1rem;
 		color: #e2e8f0;
 	}
 	
 	.status-message {
-		font-family: 'Space Grotesk', sans-serif;
+		font-family: 'Inter', sans-serif;
 		font-size: 1.1rem;
 		color: #e2e8f0;
 		padding: 1rem 2rem;
 	}
 	
 	.status-message.success {
-		color: #22c55e;
+		color: #EDF760;
 		font-weight: 600;
 	}
 	
@@ -1053,15 +1060,4 @@ void loop() {
 		}
 	}
 	
-	.close-serial-btn {
-		background: rgba(239, 68, 68, 0.1) !important;
-		border-color: rgba(239, 68, 68, 0.3) !important;
-		color: #ef4444 !important;
-	}
-	
-	.close-serial-btn:hover:not(:disabled) {
-		background: rgba(239, 68, 68, 0.2) !important;
-		border-color: #ef4444 !important;
-		color: #ffffff !important;
-	}
 </style>
