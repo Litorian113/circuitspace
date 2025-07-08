@@ -344,7 +344,7 @@
 	:global(body) {
 		margin: 0;
 		padding: 0;
-		background: #0f1115;
+		background: #191919;
 		color: #e2e8f0;
 		font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 	}
@@ -358,7 +358,7 @@
 		margin-left: var(--sidebar-width, 280px);
 		overflow-y: auto;
 		height: 100vh;
-		background: #0f1115;
+		background: #191919;
 		padding: 2rem;
 		min-height: 100vh;
 		transition: margin-left 0.3s ease;
@@ -404,7 +404,7 @@
 		grid-template-columns: 1fr 2fr;
 		gap: 3rem;
 		margin-bottom: 3rem;
-		background: #1F1F1F;
+		background: rgba(35, 35, 35, 0.8);
 		border-radius: 16px;
 		padding: 2rem;
 	}
@@ -413,7 +413,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		background: #0f1115;
+		background: rgba(35, 35, 35, 0.8);
 		border-radius: 12px;
 		padding: 2rem;
 		min-height: 300px;
@@ -543,7 +543,7 @@
 	}
 
 	.detail-card {
-		background: #1F1F1F;
+		background: rgba(35, 35, 35, 0.8);
 		border-radius: 12px;
 		padding: 2rem;
 		overflow: hidden;
@@ -695,7 +695,7 @@
 	}
 
 	.quiz-modal {
-		background: #1F1F1F;
+		background: rgba(35, 35, 35, 0.8);
 		border-radius: 16px;
 		padding: 2rem;
 		max-width: 600px;

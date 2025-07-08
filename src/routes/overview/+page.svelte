@@ -381,7 +381,7 @@
 		margin: 0;
 		padding: 0;
 		font-family: 'Inter', sans-serif;
-		background: #191919;
+		background: #1F1F1F;
 		color: #e2e8f0;
 		overflow-x: hidden;
 	}
@@ -392,7 +392,7 @@
 
 	.app-container {
 		min-height: 100vh;
-		background: #191919;
+		background: #1F1F1F;
 	}
 
 	/* Sidebar Styling - Same as project-chat */
