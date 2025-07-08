@@ -153,7 +153,7 @@
 	<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
 </svelte:head>
 
-<div class="app-container">
+<div>
 	<!-- Sidebar -->
 	<Sidebar />
 
@@ -342,16 +342,9 @@
 		--sidebar-width: 280px; /* Default sidebar width */
 	}
 
-	/* App Layout */
-	.app-container {
-		display: flex;
-		min-height: 100vh;
-		background: #0f1115;
-	}
-
 	/* Main Content */
 	.main-content {
-		flex: 1;
+		margin-left: var(--sidebar-width, 280px);
 		overflow-y: auto;
 		height: 100vh;
 		background: #0f1115;
@@ -521,7 +514,8 @@
 
 	.details-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+		grid-template-columns: repeat(3, 1fr);
+		grid-template-rows: repeat(2, auto);
 		gap: 2rem;
 	}
 
@@ -781,8 +775,9 @@
 	}
 
 	/* Mobile Responsiveness */
-	@media (max-width: 768px) {
+	@media (max-width: 1024px) {
 		.main-content {
+			margin-left: 0;
 			padding: 1rem;
 		}
 
@@ -797,12 +792,20 @@
 		}
 
 		.details-grid {
-			grid-template-columns: 1fr;
+			grid-template-columns: repeat(2, 1fr);
+			grid-template-rows: repeat(3, auto);
 		}
 
 		.quiz-modal {
 			margin: 1rem;
 			padding: 1.5rem;
+		}
+	}
+
+	@media (max-width: 768px) {
+		.details-grid {
+			grid-template-columns: 1fr;
+			grid-template-rows: repeat(6, auto);
 		}
 	}
 </style>
