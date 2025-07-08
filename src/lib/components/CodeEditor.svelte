@@ -13,15 +13,15 @@
 	// Event dispatcher for upload completion
 	const dispatch = createEventDispatcher();
 	
-	let codeContent = `// Willkommen bei Circuitspace!
-// Starten Sie ein Tutorial oder erstellen Sie Ihr eigenes Projekt.
+	let codeContent = `// Welcome to Circuitspace!
+// Start a tutorial or create your own project.
 
 void setup() {
-  // Hier kommt Ihr Setup-Code hin
+  // Your setup code goes here
 }
 
 void loop() {
-  // Hier kommt Ihr Hauptprogramm hin
+  // Your main program goes here
 }`;
 
 	let connectedBoard = "Arduino Uno";
@@ -45,7 +45,7 @@ void loop() {
 		// Only update if we're not in tutorial mode and there's actual code
 		// Also check if this is from a completed tutorial (not default project code)
 		if ($currentProject.code.trim().length > 50 && 
-			!$currentProject.code.includes('// Willkommen bei Circuitspace!') && 
+			!$currentProject.code.includes('// Welcome to Circuitspace!') && 
 			$currentProject.name !== 'Smart LED Controller') { 
 			codeContent = $currentProject.code;
 			updateHighlighting();
@@ -54,9 +54,9 @@ void loop() {
 			const timestamp = new Date().toLocaleTimeString();
 			if (!showSerialMonitor) {
 				showSerialMonitor = true;
-				serialMonitor = `[${timestamp}] ✅ Code erfolgreich aus Tutorial übernommen!\n`;
-				serialMonitor += `[${timestamp}] 📝 ${$currentProject.name} Code geladen\n`;
-				serialMonitor += `[${timestamp}] 🔧 Bereit für Kompilierung und Upload\n\n`;
+				serialMonitor = `[${timestamp}] ✅ Code successfully imported from tutorial!\n`;
+				serialMonitor += `[${timestamp}] 📝 ${$currentProject.name} code loaded\n`;
+				serialMonitor += `[${timestamp}] 🔧 Ready for compilation and upload\n\n`;
 			}
 		}
 	}
@@ -69,15 +69,15 @@ void loop() {
 				updateHighlighting();
 				const timestamp = new Date().toLocaleTimeString();
 				if (showSerialMonitor) {
-					serialMonitor += `[${timestamp}] ✅ Tutorial-Code erfolgreich in IDE geladen!\n`;
-					serialMonitor += `[${timestamp}] 📝 Arduino Leonardo LED Dimmer Code bereit\n`;
-					serialMonitor += `[${timestamp}] 🔧 Kompilierung und Upload möglich\n\n`;
+					serialMonitor += `[${timestamp}] ✅ Tutorial code successfully loaded into IDE!\n`;
+					serialMonitor += `[${timestamp}] 📝 Arduino Leonardo LED Dimmer Code ready\n`;
+					serialMonitor += `[${timestamp}] 🔧 Compilation and upload possible\n\n`;
 				} else {
 					// Show serial monitor briefly to show success message
 					showSerialMonitor = true;
-					serialMonitor = `[${timestamp}] ✅ Tutorial-Code erfolgreich in IDE geladen!\n`;
-					serialMonitor += `[${timestamp}] 📝 Arduino Leonardo LED Dimmer Code bereit\n`;
-					serialMonitor += `[${timestamp}] 🔧 Code ist bereit für Kompilierung und Upload\n\n`;
+					serialMonitor = `[${timestamp}] ✅ Tutorial code successfully loaded into IDE!\n`;
+					serialMonitor += `[${timestamp}] 📝 Arduino Leonardo LED Dimmer Code ready\n`;
+					serialMonitor += `[${timestamp}] 🔧 Code ready for compilation and upload\n\n`;
 				}
 			}
 		};
@@ -254,7 +254,7 @@ void loop() {
 		console.log('toggleSerialMonitor called, current state:', showSerialMonitor, 'minimized:', isSerialMonitorMinimized);
 		
 		if (!showSerialMonitor) {
-			// Öffnen
+			// Open
 			showSerialMonitor = true;
 			isSerialMonitorMinimized = false;
 			const timestamp = new Date().toLocaleTimeString();
@@ -266,10 +266,10 @@ void loop() {
 				startSerialSimulation();
 			}
 		} else if (!isSerialMonitorMinimized) {
-			// Minimieren
+			// Minimize
 			isSerialMonitorMinimized = true;
 		} else {
-			// Vollständig schließen
+			// Close completely
 			showSerialMonitor = false;
 			isSerialMonitorMinimized = false;
 		}
@@ -928,7 +928,7 @@ void loop() {
 	
 	.send-btn {
 		padding: 0.75rem 1.5rem;
-		background: linear-gradient(135deg, #EDF760 0%, #CABDF5 100%);
+		background: #ECF65F;
 		border: none;
 		border-radius: 6px;
 		color: #191919;
@@ -940,8 +940,9 @@ void loop() {
 	}
 	
 	.send-btn:hover {
+		background: #E8F049;
 		transform: translateY(-1px);
-		box-shadow: 0 4px 12px rgba(237, 247, 96, 0.3);
+		box-shadow: 0 4px 12px rgba(236, 246, 95, 0.3);
 	}
 	
 	/* Compilation Status */

@@ -8,6 +8,7 @@
 	import CircuitDiagram from '$lib/components/CircuitDiagram.svelte';
 	import FullscreenCircuitDesigner from '$lib/components/FullscreenCircuitDesigner.svelte';
 	import { currentProject, updateProjectCode, updateProjectName, addChatMessage, componentLibrary, type Component } from '$lib/stores/project';
+	import { activeView } from '$lib/stores/sidebar';
 	import { 
 		currentConversation, 
 		conversationStep, 
@@ -401,20 +402,23 @@ How would you like to proceed?`, {
 		// Add completion message directly without triggering conversation flow
 		setTimeout(() => {
 			console.log('Adding completion message'); // Debug log
-			addMessage('ai', `🎉 **Code erfolgreich hochgeladen!**
+			addMessage('ai', `🎉 **Code uploaded successfully!**
 
-✅ **Der Arduino Leonardo LED Dimmer Code wurde auf das Board übertragen**
-✅ **Die LED sollte nun funktionieren und auf das Potentiometer reagieren**
-✅ **Ihr Projekt ist vollständig einsatzbereit!**
+✅ **The Arduino Leonardo LED Dimmer Code has been uploaded to the board**
+✅ **The LED should now work and respond to the potentiometer**
+✅ **Your project is fully operational!**
 
-**Herzlichen Glückwunsch!** Das Projekt wurde erfolgreich abgeschlossen:
-- ✅ Hardware korrekt verkabelt
-- ✅ Code programmiert und hochgeladen
-- ✅ System getestet und funktionsfähig
+**Congratulations!** The project has been completed successfully:
+- ✅ Hardware wired correctly
+- ✅ Code programmed and uploaded
+- ✅ System tested and functional
 
-**Was möchten Sie als nächstes tun?**`, {
+**What would you like to do next?**`, {
 				showCompletionButtons: true
 			});
+			
+			// Reset the activeView to chat when code tutorial is completed
+			activeView.set('chat');
 		}, 500);
 	}
 
@@ -708,10 +712,10 @@ void loop() {
 								{#if message.showCompletionButtons}
 									<div class="completion-buttons-container">
 										<button class="completion-btn new-chat" on:click={() => onCompletionButton('new-chat')}>
-											💬 New Chat
+											New Chat
 										</button>
 										<button class="completion-btn go-home" on:click={() => onCompletionButton('go-home')}>
-											🏠 Go Home
+											Home
 										</button>
 									</div>
 								{/if}
@@ -1729,20 +1733,31 @@ void loop() {
 	}
 	
 	.completion-btn.new-chat {
-		background: rgba(120, 119, 198, 0.1);
-		border-color: rgba(120, 119, 198, 0.5);
-		color: rgba(120, 119, 198, 1);
+		background: rgba(202, 189, 245, 0.1);
+		border-color: rgba(202, 189, 245, 0.5);
+		color: #CABDF5;
+	}
+	
+	.completion-btn.new-chat:hover {
+		background: #CABDF5;
+		border-color: #CABDF5;
+		color: #191919;
+		transform: translateY(-2px);
+		box-shadow: 0 6px 20px rgba(202, 189, 245, 0.3);
 	}
 	
 	.completion-btn.go-home {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.3);
-		color: rgba(255, 255, 255, 0.7);
+		background: rgba(236, 246, 95, 0.1);
+		border-color: rgba(236, 246, 95, 0.5);
+		color: #ECF65F;
 	}
 	
-	.completion-btn:hover {
+	.completion-btn.go-home:hover {
+		background: #ECF65F;
+		border-color: #ECF65F;
+		color: #191919;
 		transform: translateY(-2px);
-		box-shadow: 0 6px 20px rgba(120, 119, 198, 0.3);
+		box-shadow: 0 6px 20px rgba(236, 246, 95, 0.3);
 	}
 	
 	.next-step-btn:hover {
@@ -1890,9 +1905,9 @@ void loop() {
 	}
 	
 	.nav-btn.finish {
-		background: linear-gradient(135deg, #EDF760 0%, #CABDF5 100%);
+		background: #ECF65F;
 		color: #191919;
-		border-color: transparent;
+		border-color: #ECF65F;
 	}
 	
 	.nav-btn:hover:not(:disabled) {
@@ -1912,7 +1927,10 @@ void loop() {
 	}
 	
 	.nav-btn.finish:hover:not(:disabled) {
-		box-shadow: 0 4px 12px rgba(237, 247, 96, 0.3);
+		background: #E8F049;
+		border-color: #E8F049;
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(236, 246, 95, 0.3);
 	}
 	
 	.nav-btn:disabled {
