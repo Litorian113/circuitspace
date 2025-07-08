@@ -74,7 +74,7 @@
 		max-width: 800px;
 		margin: 0 auto;
 		display: grid;
-		grid-template-columns: 1fr 1fr;
+		grid-template-columns: 1fr 2fr;
 		gap: 4rem;
 		align-items: center;
 	}
@@ -141,7 +141,7 @@
 	}
 	
 	.project-card {
-		background-color: rgba(255, 255, 255, 0.05);
+		background-color: rgb(52 52 52);
 		border: 1px solid rgba(255, 255, 255, 0.1);
 		position: absolute;
 		width: 280px;
@@ -156,7 +156,7 @@
 	}
 	
 	.project-card:nth-child(1) {
-		left: 20%;
+		left: 10%;
 		top: 5%;
 		z-index: 1;
 		--z: 30px;
@@ -168,7 +168,7 @@
 	}
 	
 	.project-card:nth-child(2) {
-		left: 61%;
+		left: 45%;
 		top: 28%;
 		z-index: 2;
 		--z: 10px;
@@ -180,15 +180,15 @@
 	}
 	/* links*/ 
 	.project-card:nth-child(3) {
-		top: 40%;
-		left: 5%;
+		top: 47%;
+		left: 0%;
 		z-index: 3;
 		--z: 10px;
 	}
 	
 	.project-card:nth-child(3):hover {
-		--z: 40px;
-		z-index: 10;
+		--z: 90px;
+		z-index: 15;
 	}
 	
 	.project-card__background {
@@ -209,15 +209,16 @@
 	
 	.project-card__overlay {
 		position: absolute;
-		top: 0;
+		bottom: 0;
 		left: 0;
 		width: 100%;
-		height: 100%;
+		height: 70%;
 		background: linear-gradient(
 			180deg,
 			rgba(0, 0, 0, 0) 0%,
-			rgba(0, 0, 0, 0.3) 50%,
-			rgba(0, 0, 0, 0.8) 100%
+			rgba(0, 0, 0, 0.3) 30%,
+			rgba(0, 0, 0, 0.8) 80%,
+			rgba(0, 0, 0, 0.95) 100%
 		);
 		z-index: 2;
 		display: flex;
@@ -229,9 +230,10 @@
 	.project-card:hover .project-card__overlay {
 		background: linear-gradient(
 			180deg,
-			rgba(0, 0, 0, 0.1) 0%,
-			rgba(0, 0, 0, 0.4) 50%,
-			rgba(0, 0, 0, 0.9) 100%
+			rgba(0, 0, 0, 0) 0%,
+			rgba(0, 0, 0, 0.4) 30%,
+			rgba(0, 0, 0, 0.85) 80%,
+			rgba(0, 0, 0, 0.98) 100%
 		);
 	}
 	
@@ -250,7 +252,7 @@
 		font-size: 18px;
 		font-weight: 700;
 		color: #FFFFFF;
-		text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+		text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 1px 3px rgba(0, 0, 0, 0.9);
 	}
 	
 	.project-card__difficulty {
@@ -274,8 +276,8 @@
 		font-family: 'Inter', sans-serif;
 		font-size: 14px;
 		font-weight: 400;
-		color: rgba(255, 255, 255, 0.9);
-		text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+		color: rgba(255, 255, 255, 0.95);
+		text-shadow: 0 2px 6px rgba(0, 0, 0, 0.8), 0 1px 3px rgba(0, 0, 0, 0.9);
 	}
 	
 	/* Responsive Design */
