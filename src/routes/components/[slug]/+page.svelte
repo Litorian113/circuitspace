@@ -161,11 +161,14 @@
 	<!-- Main Content -->
 	<main class="main-content">
 		{#if component}
-		<!-- Back Button -->
-		<div class="back-button-container">
-			<button class="back-button" on:click={goBack}>
-				← Back to Overview
+		<!-- Header Section -->
+		<div class="page-header">
+			<button class="back-button" on:click={goBack} aria-label="Back to Overview">
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+					<path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+				</svg>
 			</button>
+			<h2 class="page-title">Component Information</h2>
 		</div>
 		<!-- Component Header -->
 		<div class="component-header">
@@ -218,14 +221,14 @@
 
 			<!-- Specifications -->
 			<div class="detail-card specs-card">
-				<div class="specs-header" on:click={() => specsExpanded = !specsExpanded}>
+				<button class="specs-header" on:click={() => specsExpanded = !specsExpanded} aria-label="Toggle technical specifications">
 					<h3>Technical Specifications</h3>
-					<button class="expand-toggle" class:expanded={specsExpanded}>
+					<span class="expand-toggle" class:expanded={specsExpanded} aria-hidden="true">
 						<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
 							<path d="M8 12l-4-4h8l-4 4z"/>
 						</svg>
-					</button>
-				</div>
+					</span>
+				</button>
 				<div class="specifications" class:expanded={specsExpanded}>
 					{#each Object.entries(component.specifications) as [key, value]}
 						<div class="spec-row">
@@ -265,7 +268,7 @@
 			<!-- Pinouts (if available) -->
 			{#if component.pinouts && component.pinouts.length > 0}
 				<div class="detail-card">
-					<h3>Pin-Belegung</h3>
+					<h3>Pin Configuration</h3>
 					<ul>
 						{#each component.pinouts as pinout}
 							<li>{pinout}</li>
@@ -361,25 +364,38 @@
 		transition: margin-left 0.3s ease;
 	}
 
-	.back-button-container {
-		margin-bottom: 2rem;
+	.page-header {
+		display: flex;
+		align-items: center;
+		gap: 1.5rem;
+		margin-bottom: 3rem;
 	}
 
-	.back-button {
-		background: rgba(0, 212, 170, 0.1);
-		border: 1px solid rgba(0, 212, 170, 0.3);
-		color: #00d4aa;
-		padding: 0.75rem 1.5rem;
-		border-radius: 8px;
-		font-size: 0.9rem;
-		font-weight: 500;
-		cursor: pointer;
-		transition: all 0.2s ease;
+	.page-title {
+		color: #f1f5f9;
+		font-size: 2rem;
+		font-weight: 700;
+		margin: 0;
 		font-family: 'Inter', sans-serif;
 	}
 
+	.back-button {
+		background: rgba(255, 255, 255, 0.1);
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		color: white;
+		padding: 0.75rem;
+		border-radius: 8px;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 44px;
+		height: 44px;
+	}
+
 	.back-button:hover {
-		background: rgba(0, 212, 170, 0.2);
+		background: rgba(255, 255, 255, 0.2);
 		transform: translateY(-1px);
 	}
 
@@ -388,10 +404,9 @@
 		grid-template-columns: 1fr 2fr;
 		gap: 3rem;
 		margin-bottom: 3rem;
-		background: linear-gradient(145deg, #1a1b23 0%, #14161b 100%);
+		background: #1F1F1F;
 		border-radius: 16px;
 		padding: 2rem;
-		border: 1px solid #2a2d3a;
 	}
 
 	.component-image-large {
@@ -528,10 +543,9 @@
 	}
 
 	.detail-card {
-		background: linear-gradient(145deg, #1a1b23 0%, #14161b 100%);
+		background: #1F1F1F;
 		border-radius: 12px;
 		padding: 2rem;
-		border: 1px solid #2a2d3a;
 		overflow: hidden;
 	}
 
@@ -546,6 +560,21 @@
 		align-items: center;
 		cursor: pointer;
 		margin-bottom: 1rem;
+		background: none;
+		border: none;
+		width: 100%;
+		text-align: left;
+		padding: 0;
+		color: inherit;
+		font-family: inherit;
+	}
+
+	.specs-header:hover {
+		background: rgba(0, 212, 170, 0.05);
+		border-radius: 8px;
+		padding: 0.5rem;
+		margin: -0.5rem;
+		margin-bottom: 0.5rem;
 	}
 
 	.specs-header h3 {
@@ -553,20 +582,13 @@
 	}
 
 	.expand-toggle {
-		background: none;
-		border: none;
 		color: #00d4aa;
-		cursor: pointer;
 		padding: 0.5rem;
 		border-radius: 6px;
 		transition: all 0.3s ease;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-	}
-
-	.expand-toggle:hover {
-		background: rgba(0, 212, 170, 0.1);
 	}
 
 	.expand-toggle svg {
@@ -578,7 +600,7 @@
 	}
 
 	.detail-card h3 {
-		color: #00d4aa;
+		color: #ffffff;
 		font-size: 1.25rem;
 		font-weight: 600;
 		margin-bottom: 1rem;
@@ -586,12 +608,12 @@
 	}
 
 	.detail-card p {
-		color: #94a3b8;
+		color: #ffffff;
 		line-height: 1.6;
 	}
 
 	.detail-card ul {
-		color: #94a3b8;
+		color: #ffffff;
 		line-height: 1.6;
 		padding-left: 1.5rem;
 	}
@@ -673,14 +695,13 @@
 	}
 
 	.quiz-modal {
-		background: linear-gradient(145deg, #1a1b23 0%, #14161b 100%);
+		background: #1F1F1F;
 		border-radius: 16px;
 		padding: 2rem;
 		max-width: 600px;
 		width: 90%;
 		max-height: 80vh;
 		overflow-y: auto;
-		border: 1px solid #2a2d3a;
 	}
 
 	.quiz-header {
