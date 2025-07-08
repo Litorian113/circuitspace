@@ -31,6 +31,7 @@
 	let userLevel = 1;
 	let totalXP = 0;
 	let componentProgress: any = {};
+	let specsExpanded = false;
 
 	onMount(() => {
 		component = data.component;
@@ -216,9 +217,16 @@
 			</div>
 
 			<!-- Specifications -->
-			<div class="detail-card">
-				<h3>Technical Specifications</h3>
-				<div class="specifications">
+			<div class="detail-card specs-card">
+				<div class="specs-header" on:click={() => specsExpanded = !specsExpanded}>
+					<h3>Technical Specifications</h3>
+					<button class="expand-toggle" class:expanded={specsExpanded}>
+						<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+							<path d="M8 12l-4-4h8l-4 4z"/>
+						</svg>
+					</button>
+				</div>
+				<div class="specifications" class:expanded={specsExpanded}>
 					{#each Object.entries(component.specifications) as [key, value]}
 						<div class="spec-row">
 							<span class="spec-key">{key}:</span>
@@ -524,6 +532,49 @@
 		border-radius: 12px;
 		padding: 2rem;
 		border: 1px solid #2a2d3a;
+		overflow: hidden;
+	}
+
+	.specs-card {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.specs-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		cursor: pointer;
+		margin-bottom: 1rem;
+	}
+
+	.specs-header h3 {
+		margin: 0;
+	}
+
+	.expand-toggle {
+		background: none;
+		border: none;
+		color: #00d4aa;
+		cursor: pointer;
+		padding: 0.5rem;
+		border-radius: 6px;
+		transition: all 0.3s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.expand-toggle:hover {
+		background: rgba(0, 212, 170, 0.1);
+	}
+
+	.expand-toggle svg {
+		transition: transform 0.3s ease;
+	}
+
+	.expand-toggle.expanded svg {
+		transform: rotate(180deg);
 	}
 
 	.detail-card h3 {
@@ -553,6 +604,33 @@
 		display: flex;
 		flex-direction: column;
 		gap: 0.75rem;
+		max-height: 200px;
+		overflow-y: auto;
+		transition: max-height 0.3s ease;
+		scrollbar-width: thin;
+		scrollbar-color: #00d4aa #1a1b23;
+	}
+
+	.specifications.expanded {
+		max-height: 400px;
+	}
+
+	.specifications::-webkit-scrollbar {
+		width: 8px;
+	}
+
+	.specifications::-webkit-scrollbar-track {
+		background: #1a1b23;
+		border-radius: 4px;
+	}
+
+	.specifications::-webkit-scrollbar-thumb {
+		background: #00d4aa;
+		border-radius: 4px;
+	}
+
+	.specifications::-webkit-scrollbar-thumb:hover {
+		background: #06b6d4;
 	}
 
 	.spec-row {
