@@ -1,4 +1,5 @@
 import { writable } from 'svelte/store';
+import { activeView } from './sidebar';
 
 export interface DelayedStep {
 	id: string;
@@ -461,17 +462,25 @@ export function resetConversation() {
 export function detectProjectType(input: string): string | null {
 	const lowerInput = input.toLowerCase();
 
-	// Arduino Leonardo LED Dimmer keywords
-	if (
-		lowerInput.includes('leonardo') &&
-		(lowerInput.includes('led') || lowerInput.includes('diode') || lowerInput.includes('leuchtdiode')) &&
-		(lowerInput.includes('dimmer') ||
-			lowerInput.includes('helligkeit') ||
-			lowerInput.includes('potentiometer') ||
-			lowerInput.includes('brightness') ||
-			lowerInput.includes('poti') ||
-			lowerInput.includes('regulieren'))
-	) {
+	// Keywords for LED Dimmer project
+	const ledKeywords = ['led', 'diode', 'leuchtdiode'];
+	const dimmerKeywords = [
+		'dimmer',
+		'helligkeit',
+		'potentiometer',
+		'brightness',
+		'poti',
+		'regulieren',
+		'controller'
+	];
+	const projectKeywords = ['project', 'build', 'create', 'make', 'new'];
+
+	const hasLed = ledKeywords.some(kw => lowerInput.includes(kw));
+	const hasDimmer = dimmerKeywords.some(kw => lowerInput.includes(kw));
+	const hasProject = projectKeywords.some(kw => lowerInput.includes(kw));
+
+	// Trigger if it's clearly about a new LED project or a dimmer
+	if (hasLed && (hasDimmer || hasProject || lowerInput.includes('leonardo'))) {
 		return 'leonardo-led-dimmer';
 	}
 
@@ -482,6 +491,7 @@ export function detectProjectType(input: string): string | null {
 export function startCodeTutorial() {
 	currentTutorialStep.set(0);
 	isTutorialActive.set(true);
+	activeView.set('code-editor'); // Switch view to code editor
 }
 
 export function nextTutorialStep() {

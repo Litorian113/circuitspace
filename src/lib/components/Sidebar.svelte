@@ -2,9 +2,9 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import { sidebarCollapsed, setSidebarWidth, circuitDesignerActive, setCircuitDesignerActive } from '$lib/stores/sidebar';
+	import { sidebarCollapsed, setSidebarWidth, activeView } from '$lib/stores/sidebar';
 	import { createEventDispatcher } from 'svelte';
-	
+
 	// Event dispatcher for parent components
 	const dispatch = createEventDispatcher();
 	
@@ -36,7 +36,11 @@
 	// Check if AI Chat parent is active (any AI Chat subpage)
 	function isAiChatParentActive(): boolean {
 		const aiChatRoutes = ['/project-chat', '/circuit-designer', '/circuit-code'];
-		return aiChatRoutes.some(route => $page.url.pathname === route) || $circuitDesignerActive;
+		return (
+			aiChatRoutes.some(route => $page.url.pathname === route) ||
+			$activeView === 'circuit-designer' ||
+			$activeView === 'code-editor'
+		);
 	}
 	
 	// Toggle sidebar collapse
@@ -48,14 +52,14 @@
 	function toggleAiChat() {
 		isAiChatExpanded = !isAiChatExpanded;
 		// Navigate to project-chat as default
-		if (isAiChatExpanded && !$circuitDesignerActive) {
+		if (isAiChatExpanded && $activeView !== 'circuit-designer') {
 			navigateTo('/project-chat');
 		}
 	}
 	
 	// Handle Circuit Designer navigation
 	function handleCircuitDesignerClick() {
-		if ($circuitDesignerActive) {
+		if ($activeView === 'circuit-designer') {
 			// We're already in circuit designer mode, don't navigate away
 			// Just dispatch an event to show/focus the designer
 			dispatch('showCircuitDesigner');
@@ -64,7 +68,7 @@
 			navigateTo('/circuit-designer');
 		}
 	}
-	
+
 	// Auto-expand AI Chat if on any AI Chat subpage
 	$: if (isAiChatParentActive()) {
 		isAiChatExpanded = true;
@@ -161,8 +165,8 @@
 				<!-- AI Chat Submenu -->
 				<ul class="submenu" class:expanded={isAiChatExpanded}>
 					<li class="submenu-item">
-						<button 
-							class="submenu-link" 
+						<button
+							class="submenu-link"
 							class:active={isActiveRoute('/project-chat')}
 							on:click={() => navigateTo('/project-chat')}
 						>
@@ -170,24 +174,27 @@
 						</button>
 					</li>
 					<li class="submenu-item">
-						<button 
-							class="submenu-link" 
-							class:active={isActiveRoute('/circuit-designer') || $circuitDesignerActive}
+						<button
+							class="submenu-link"
+							class:active={$activeView === 'circuit-designer'}
 							on:click={handleCircuitDesignerClick}
 						>
 							Circuit Designer
-							{#if $circuitDesignerActive}
+							{#if $activeView === 'circuit-designer'}
 								<span class="active-indicator">●</span>
 							{/if}
 						</button>
 					</li>
 					<li class="submenu-item">
-						<button 
-							class="submenu-link" 
-							class:active={isActiveRoute('/circuit-code')}
-							on:click={() => navigateTo('/circuit-code')}
+						<button
+							class="submenu-link"
+							class:active={$activeView === 'code-editor'}
+							on:click={() => activeView.set('code-editor')}
 						>
 							Circuit Code
+							{#if $activeView === 'code-editor'}
+								<span class="active-indicator">●</span>
+							{/if}
 						</button>
 					</li>
 				</ul>

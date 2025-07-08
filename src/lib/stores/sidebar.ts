@@ -7,6 +7,10 @@ export const sidebarCollapsed = writable(false);
 // Circuit Designer state management
 export const circuitDesignerActive = writable(false);
 
+// Active view type management
+export type ActiveView = 'chat' | 'circuit-designer' | 'code-editor';
+export const activeView = writable<ActiveView>('chat');
+
 // Helper function to get current sidebar width
 export const getSidebarWidth = (collapsed: boolean): number => {
 	return collapsed ? 80 : 280;
