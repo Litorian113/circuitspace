@@ -2,7 +2,11 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import { sidebarCollapsed, setSidebarWidth } from '$lib/stores/sidebar';
+	import { sidebarCollapsed, setSidebarWidth, circuitDesignerActive, setCircuitDesignerActive } from '$lib/stores/sidebar';
+	import { createEventDispatcher } from 'svelte';
+	
+	// Event dispatcher for parent components
+	const dispatch = createEventDispatcher();
 	
 	// Sidebar state
 	let isCollapsed = false;
@@ -32,7 +36,7 @@
 	// Check if AI Chat parent is active (any AI Chat subpage)
 	function isAiChatParentActive(): boolean {
 		const aiChatRoutes = ['/project-chat', '/circuit-designer', '/circuit-code'];
-		return aiChatRoutes.some(route => $page.url.pathname === route);
+		return aiChatRoutes.some(route => $page.url.pathname === route) || $circuitDesignerActive;
 	}
 	
 	// Toggle sidebar collapse
@@ -44,8 +48,20 @@
 	function toggleAiChat() {
 		isAiChatExpanded = !isAiChatExpanded;
 		// Navigate to project-chat as default
-		if (isAiChatExpanded) {
+		if (isAiChatExpanded && !$circuitDesignerActive) {
 			navigateTo('/project-chat');
+		}
+	}
+	
+	// Handle Circuit Designer navigation
+	function handleCircuitDesignerClick() {
+		if ($circuitDesignerActive) {
+			// We're already in circuit designer mode, don't navigate away
+			// Just dispatch an event to show/focus the designer
+			dispatch('showCircuitDesigner');
+		} else {
+			// Navigate to circuit designer route
+			navigateTo('/circuit-designer');
 		}
 	}
 	
@@ -156,10 +172,13 @@
 					<li class="submenu-item">
 						<button 
 							class="submenu-link" 
-							class:active={isActiveRoute('/circuit-designer')}
-							on:click={() => navigateTo('/circuit-designer')}
+							class:active={isActiveRoute('/circuit-designer') || $circuitDesignerActive}
+							on:click={handleCircuitDesignerClick}
 						>
 							Circuit Designer
+							{#if $circuitDesignerActive}
+								<span class="active-indicator">●</span>
+							{/if}
 						</button>
 					</li>
 					<li class="submenu-item">
@@ -587,6 +606,18 @@
 		background-color: rgba(240, 240, 240, 0.15);
 		color: #FFFFFF;
 		font-weight: 500;
+	}
+	
+	.active-indicator {
+		color: #CABDF5;
+		font-size: 1.2rem;
+		margin-left: 0.5rem;
+		animation: pulse 2s infinite;
+	}
+	
+	@keyframes pulse {
+		0%, 100% { opacity: 1; }
+		50% { opacity: 0.5; }
 	}
 	
 	/* Panel Footer */
