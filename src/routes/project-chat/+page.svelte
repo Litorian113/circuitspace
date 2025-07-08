@@ -337,7 +337,7 @@
 Now we're ready for practical implementation! Would you like to:
 
 🔹 **Circuit Designer** - Build and test the circuit virtually here
-🔹 **Real Table** - Switch directly to physical implementation at the workspace
+🔹 **Physical Setup** - Switch directly to physical implementation at the workspace
 
 How would you like to proceed?`, {
 			showNextStepsButtons: true
@@ -388,7 +388,7 @@ How would you like to proceed?`, {
 		messages = messages.filter(msg => 
 			!msg.stepId?.startsWith('delayed-') && 
 			!msg.stepId?.includes('tutorial') &&
-			!(msg.content.includes('Circuit Designer') && msg.content.includes('Real Table')) &&
+			!(msg.content.includes('Circuit Designer') && msg.content.includes('Physical Setup')) &&
 			!msg.content.includes('Code Tutorial successfully completed') &&
 			!msg.content.includes('Was wurde implementiert') &&
 			!msg.content.includes('Nächste Schritte')
@@ -613,7 +613,7 @@ void loop() {
 								
 								{#if message.componentImages && message.componentImages.length > 0}
 									<div class="component-images">
-										<h4>Benötigte Komponenten:</h4>
+										<h4>Required Components:</h4>
 										<div class="images-grid">
 											{#each message.componentImages as imagePath}
 												<div class="component-item">
@@ -681,7 +681,7 @@ void loop() {
 											Circuit Designer
 										</button>
 										<button class="workspace-btn real-table" on:click={() => onWorkspaceButton('real-table')}>
-											An den Tisch
+											Physical Setup
 										</button>
 									</div>
 								{/if}
@@ -689,7 +689,7 @@ void loop() {
 								{#if message.showRealTableButton}
 									<div class="real-table-button-container">
 										<button class="real-table-btn" on:click={() => onWorkspaceButton('real-workspace-after-designer')}>
-											To the Table
+											Physical Setup
 										</button>
 									</div>
 								{/if}
@@ -700,7 +700,7 @@ void loop() {
 											⚡ Circuit Designer
 										</button>
 										<button class="next-step-btn real-table" on:click={() => addMessage('ai', 'Perfect! Go to your real workspace and build the circuit physically.')}>
-											🔧 Real Table
+											🔧 Physical Setup
 										</button>
 									</div>
 								{/if}
