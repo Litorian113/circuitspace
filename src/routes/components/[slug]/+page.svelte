@@ -221,14 +221,17 @@
 					<div class="action-buttons">
 						{#if canStartQuiz}
 							<button class="quiz-button-new" on:click={startQuiz}>
+								<img src="/component-icon/quiz.svg" alt="Quiz" class="button-icon" />
 								Start Quiz
 							</button>
 						{:else}
 							<button class="quiz-button-new disabled" disabled>
+								<img src="/component-icon/quiz.svg" alt="Quiz" class="button-icon" />
 								Quiz Completed
 							</button>
 						{/if}
 						<button class="explore-button">
+							<img src="/component-icon/explore.svg" alt="Explore" class="button-icon" />
 							Explore Projects
 						</button>
 					</div>
@@ -622,7 +625,7 @@
 	.quiz-button-new {
 		flex: 1;
 		background: transparent;
-		color: #CABDF5;
+		color: #ffffff;
 		border: 2px solid #CABDF5;
 		padding: 1rem 1.5rem;
 		border-radius: 12px;
@@ -631,6 +634,10 @@
 		cursor: pointer;
 		transition: all 0.3s ease;
 		font-family: 'Inter', sans-serif;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
 	}
 
 	.quiz-button-new:hover:not(.disabled) {
@@ -647,7 +654,7 @@
 	.explore-button {
 		flex: 1;
 		background: transparent;
-		color: #EDF760;
+		color: #ffffff;
 		border: 2px solid #EDF760;
 		padding: 1rem 1.5rem;
 		border-radius: 12px;
@@ -656,12 +663,30 @@
 		cursor: pointer;
 		transition: all 0.3s ease;
 		font-family: 'Inter', sans-serif;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
 	}
 
 	.explore-button:hover {
 		background: rgba(237, 247, 96, 0.1);
 		transform: translateY(-1px);
 		box-shadow: 0 4px 15px rgba(237, 247, 96, 0.3);
+	}
+
+	.button-icon {
+		width: 24px;
+		height: 24px;
+		flex-shrink: 0;
+	}
+
+	.quiz-button-new .button-icon {
+		filter: brightness(0) saturate(100%) invert(100%);
+	}
+
+	.explore-button .button-icon {
+		filter: brightness(0) saturate(100%) invert(100%);
 	}
 
 	.details-grid {
