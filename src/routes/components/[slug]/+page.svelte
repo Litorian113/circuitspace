@@ -173,8 +173,14 @@
 		<div class="component-header">
 			<!-- Header Top Row -->
 			<div class="header-top-row">
-				<div class="level-badge-header">Level {component.level}</div>
-				<div class="category-badge-header">{component.category}</div>
+				<div class="header-left">
+					<img src="/special-icon/tabler-icon-progress-check.svg" alt="Progress" class="progress-icon" />
+					<span class="level-text">Level {component.level}</span>
+				</div>
+				<div class="difficulty-tag {component.difficulty}">
+					{component.difficulty === 'beginner' ? 'Beginner' : 
+					 component.difficulty === 'intermediate' ? 'Intermediate' : 'Expert'}
+				</div>
 			</div>
 
 			<!-- Main Content Row -->
@@ -432,25 +438,50 @@
 		align-items: center;
 	}
 
-	.level-badge-header {
-		background: linear-gradient(135deg, #00d4aa 0%, #06b6d4 100%);
-		color: white;
-		padding: 0.5rem 1rem;
-		border-radius: 20px;
-		font-size: 0.875rem;
-		font-weight: 600;
-		font-family: 'Inter', sans-serif;
+	.header-left {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
 	}
 
-	.category-badge-header {
-		background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
-		color: white;
-		padding: 0.5rem 1rem;
-		border-radius: 20px;
-		font-size: 0.875rem;
-		font-weight: 600;
+	.progress-icon {
+		width: 20px;
+		height: 20px;
+		filter: brightness(0) invert(1);
+	}
+
+	.level-text {
 		font-family: 'Inter', sans-serif;
-		text-transform: capitalize;
+		font-weight: 600;
+		color: #e2e8f0;
+		font-size: 0.9rem;
+	}
+
+	.difficulty-tag {
+		padding: 0.25rem 0.75rem;
+		border-radius: 20px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.difficulty-tag.beginner {
+		background: #CABDF5;
+		color: #000000;
+		border: 1px solid rgba(202, 189, 245, 0.3);
+	}
+
+	.difficulty-tag.intermediate {
+		background: #CABDF5;
+		color: #000000;
+		border: 1px solid rgba(202, 189, 245, 0.3);
+	}
+
+	.difficulty-tag.advanced {
+		background: #CABDF5;
+		color: #000000;
+		border: 1px solid rgba(202, 189, 245, 0.3);
 	}
 
 	.header-main-content {
@@ -1064,8 +1095,11 @@
 			align-items: stretch;
 		}
 
-		.level-badge-header,
-		.category-badge-header {
+		.header-left {
+			justify-content: center;
+		}
+
+		.difficulty-tag {
 			text-align: center;
 		}
 
