@@ -78,6 +78,10 @@
 			<img src="/arvis/arvis_hero.png" alt="Arvis Hero" class="arvis-hero-image" />
 			<div class="arvis-hero-overlay"></div>
 		</div>
+		<div class="arvis-hero-logo">
+			<img src="/logo/logo_dark.png" alt="Circuitspace Logo" class="hero-logo-image" />
+			<span class="hero-logo-text">Circuitspace</span>
+		</div>
 		<div class="arvis-hero-content">
 			<h1 class="arvis-hero-title">Step into Circuitspace with Arvis</h1>
 		</div>
@@ -351,6 +355,30 @@
 		max-width: 900px;
 	}
 	
+	.arvis-hero-logo {
+		position: absolute;
+		top: 2rem;
+		right: 2rem;
+		z-index: 4;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+	
+	.hero-logo-image {
+		width: 32px;
+		height: 32px;
+		object-fit: contain;
+	}
+	
+	.hero-logo-text {
+		font-family: 'Inter', sans-serif;
+		font-size: 1.25rem;
+		font-weight: 600;
+		color: #191919;
+		text-shadow: none;
+	}
+	
 	.arvis-hero-title {
 		font-family: 'Inter', sans-serif;
 		font-size: 4rem;
@@ -439,6 +467,21 @@
 			padding: 1.5rem;
 		}
 		
+		.arvis-hero-logo {
+			top: 1.5rem;
+			right: 1.5rem;
+			gap: 0.5rem;
+		}
+		
+		.hero-logo-image {
+			width: 28px;
+			height: 28px;
+		}
+		
+		.hero-logo-text {
+			font-size: 1.125rem;
+		}
+		
 		.arvis-hero-title {
 			font-size: 2.5rem;
 			margin-bottom: 3rem;
@@ -461,6 +504,20 @@
 	@media (max-width: 480px) {
 		.arvis-hero-content {
 			margin: 3rem 0 0 2rem;
+		}
+		
+		.arvis-hero-logo {
+			top: 1rem;
+			right: 1rem;
+		}
+		
+		.hero-logo-image {
+			width: 24px;
+			height: 24px;
+		}
+		
+		.hero-logo-text {
+			font-size: 1rem;
 		}
 		
 		.arvis-hero-title {

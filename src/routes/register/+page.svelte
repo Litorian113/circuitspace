@@ -282,6 +282,17 @@
 		outline: none;
 	}
 	
+	/* Verhindert weißen Autofill-Hintergrund */
+	.form-input:-webkit-autofill,
+	.form-input:-webkit-autofill:hover,
+	.form-input:-webkit-autofill:focus,
+	.form-input:-webkit-autofill:active {
+		-webkit-box-shadow: 0 0 0 30px #1F1F1F inset !important;
+		-webkit-text-fill-color: #ffffff !important;
+		background-color: #1F1F1F !important;
+		background: #1F1F1F !important;
+	}
+	
 	.form-input:focus {
 		border-color: #CABDF5;
 		box-shadow: 0 0 0 3px rgba(202, 189, 245, 0.1);
