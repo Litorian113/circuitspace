@@ -13,6 +13,11 @@
 	let projectInterests = '';
 	let timeCommitment = '';
 	
+	// Step 2 data
+	let hasElectronicsExperience = '';
+	let wiringComfort = '';
+	let knownComponents: string[] = [];
+	
 	// Step titles
 	const stepTitles: Record<number, string> = {
 		1: "Let's get to know your project goals!",
@@ -29,10 +34,16 @@
 		let totalProgress = 0;
 		
 		// Calculate progress based on completed steps
-		if (currentStep > 1) {
+		if (currentStep > 2) {
 			// All previous steps are completed
 			totalProgress = currentStep - 1;
-		} else {
+		} else if (currentStep === 2) {
+			// We're in step 2, calculate sub-step progress
+			totalProgress = 1; // Step 1 is completed
+			if (hasElectronicsExperience !== '') totalProgress += 1/3; // Sub-step 1 completed
+			if (wiringComfort !== '') totalProgress += 1/3; // Sub-step 2 completed
+			if (knownComponents.length > 0) totalProgress += 1/3; // Sub-step 3 completed
+		} else if (currentStep === 1) {
 			// We're in step 1, calculate sub-step progress
 			if (hasProject !== '') totalProgress += 1/3; // Sub-step 1 completed
 			if (hasProject === 'yes' && projectInterests.trim()) totalProgress += 1/3; // Sub-step 2 completed  
@@ -91,12 +102,41 @@
 		nextStep();
 	}
 	
+	function selectElectronicsExperience(choice: string) {
+		hasElectronicsExperience = choice;
+		currentSubStep = 2;
+		// Force progress recalculation
+		progress = calculateProgress();
+	}
+	
+	function selectWiringComfort(comfort: string) {
+		wiringComfort = comfort;
+		currentSubStep = 3;
+		// Force progress recalculation
+		progress = calculateProgress();
+	}
+	
+	function toggleComponent(component: string) {
+		if (knownComponents.includes(component)) {
+			knownComponents = knownComponents.filter(c => c !== component);
+		} else {
+			knownComponents = [...knownComponents, component];
+		}
+		// Force progress recalculation
+		progress = calculateProgress();
+	}
+	
 	function nextStep() {
 		if (currentStep < totalSteps) {
 			// Ensure step 1 is fully completed before moving to step 2
 			if (currentStep === 1) {
 				if (!hasProject) hasProject = 'no';
 				if (!timeCommitment) timeCommitment = 'no-rush';
+			}
+			// Ensure step 2 is fully completed before moving to step 3
+			if (currentStep === 2) {
+				if (!hasElectronicsExperience) hasElectronicsExperience = 'no';
+				if (!wiringComfort) wiringComfort = 'not-at-all';
 			}
 			currentStep++;
 			currentSubStep = 1;
@@ -121,6 +161,12 @@
 				if (!hasProject) hasProject = 'no'; // Default value if not set
 				if (!timeCommitment) timeCommitment = 'no-rush'; // Default value if not set
 			}
+			// If going to step 3 or beyond, ensure step 2 is completed
+			if (step > 2 && currentStep === 2) {
+				// Mark step 2 as completed by ensuring all required fields are set
+				if (!hasElectronicsExperience) hasElectronicsExperience = 'no';
+				if (!wiringComfort) wiringComfort = 'not-at-all';
+			}
 			currentStep = step;
 			currentSubStep = 1;
 		}
@@ -132,11 +178,20 @@
 			if (currentSubStep === 2) return projectInterests.trim() !== '';
 			if (currentSubStep === 3) return timeCommitment !== '';
 		}
+		if (currentStep === 2) {
+			if (currentSubStep === 1) return hasElectronicsExperience !== '';
+			if (currentSubStep === 2) return wiringComfort !== '';
+			if (currentSubStep === 3) return knownComponents.length > 0;
+		}
 		return true;
 	}
 	
 	function handleNext() {
 		if (currentStep === 1 && currentSubStep === 2 && projectInterests.trim()) {
+			currentSubStep = 3;
+			// Force progress recalculation
+			progress = calculateProgress();
+		} else if (currentStep === 2 && currentSubStep === 2 && wiringComfort !== '') {
 			currentSubStep = 3;
 			// Force progress recalculation
 			progress = calculateProgress();
@@ -275,20 +330,95 @@
 					</div>
 				{/if}
 			{:else if currentStep === 2}
-				<div class="question-container">
-					<h2 class="question">Have you worked with electronics or Arduino before?</h2>
-					<div class="placeholder-content">
-						<p>Step 2 content will be implemented next...</p>
+				{#if currentSubStep === 1}
+					<div class="question-container">
+						<h2 class="question">Have you worked with electronics or Arduino before?</h2>
+						<div class="choice-buttons">
+							<button 
+								class="choice-btn"
+								class:selected={hasElectronicsExperience === 'no'}
+								on:click={() => selectElectronicsExperience('no')}
+							>
+								<img src="/onboarding/No.svg" alt="No" class="choice-icon" />
+								No, I haven't
+							</button>
+							<button 
+								class="choice-btn"
+								class:selected={hasElectronicsExperience === 'yes'}
+								on:click={() => selectElectronicsExperience('yes')}
+							>
+								<img src="/onboarding/Yes.svg" alt="Yes" class="choice-icon" />
+								Yes, I have
+							</button>
+						</div>
+					</div>
+				{:else if currentSubStep === 2}
+					<div class="question-container">
+						<h2 class="question">How comfortable are you with wiring?</h2>
+						<div class="time-buttons">
+							<button 
+								class="time-btn"
+								class:selected={wiringComfort === 'not-at-all'}
+								on:click={() => selectWiringComfort('not-at-all')}
+							>
+								Not at all
+							</button>
+							<button 
+								class="time-btn"
+								class:selected={wiringComfort === 'basics'}
+								on:click={() => selectWiringComfort('basics')}
+							>
+								I get the basics
+							</button>
+							<button 
+								class="time-btn"
+								class:selected={wiringComfort === 'comfortable'}
+								on:click={() => selectWiringComfort('comfortable')}
+							>
+								Comfortable
+							</button>
+							<button 
+								class="time-btn"
+								class:selected={wiringComfort === 'very-confident'}
+								on:click={() => selectWiringComfort('very-confident')}
+							>
+								Very Confident
+							</button>
+						</div>
 						<div class="nav-buttons">
-							<button class="nav-btn secondary" on:click={prevStep}>
+							<button class="nav-btn secondary" on:click={() => currentSubStep = 1}>
 								Back
 							</button>
-							<button class="nav-btn primary" on:click={nextStep}>
+						</div>
+					</div>
+				{:else if currentSubStep === 3}
+					<div class="question-container">
+						<h2 class="question">Which components or tools do you know?</h2>
+						<div class="components-grid">
+							{#each ['LED', 'Resistor', 'Potentiometer', 'Temperature sensor', 'Motion sensor (PIR)', 'Light sensor (LDR)', 'DC motor', 'Servo motor', 'Arduino board', 'OLED/LCD display', 'Push button / Switch', 'Relay'] as component}
+								<button 
+									class="component-btn"
+									class:selected={knownComponents.includes(component)}
+									on:click={() => toggleComponent(component)}
+								>
+									{component}
+								</button>
+							{/each}
+						</div>
+						<div class="nav-buttons">
+							<button class="nav-btn secondary" on:click={() => currentSubStep = 2}>
+								Back
+							</button>
+							<button 
+								class="nav-btn primary"
+								disabled={knownComponents.length === 0}
+								on:click={nextStep}
+							>
 								Next
 							</button>
 						</div>
 					</div>
-				</div>
+				{/if}
 			{:else}
 				<div class="question-container">
 					<div class="placeholder-content">
@@ -343,7 +473,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		margin-bottom: 4rem;
+		margin-bottom: 8rem;
 		gap: 0;
 		position: relative;
 	}
@@ -498,6 +628,7 @@
 		color: #ffffff;
 		margin: 0 0 2rem 0;
 		line-height: 1.4;
+		text-align: center;
 	}
 	
 	/* Choice Buttons */
@@ -510,42 +641,68 @@
 	
 	.choice-btn {
 		display: flex;
-		flex-direction: column;
+		flex-direction: row;
 		align-items: center;
-		gap: 1rem;
+		gap: 0.75rem;
 		background: rgba(255, 255, 255, 0.05);
 		border: 2px solid rgba(255, 255, 255, 0.1);
-		border-radius: 16px;
-		padding: 2rem 1.5rem;
+		border-radius: 12px;
+		padding: 1rem 1.5rem;
 		color: #ffffff;
 		font-family: 'Inter', sans-serif;
-		font-size: 1.1rem;
+		font-size: 1rem;
 		font-weight: 600;
 		cursor: pointer;
 		transition: all 0.3s ease;
-		min-width: 180px;
+		min-width: 140px;
 	}
 	
 	.choice-btn:hover {
-		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.2);
 		transform: translateY(-2px);
 	}
 	
-	.choice-btn.selected {
+	/* No Button - CABDF5 border */
+	.choice-btn:first-child {
+		border-color: #CABDF5;
+	}
+	
+	.choice-btn:first-child.selected {
 		background: rgba(202, 189, 245, 0.2);
 		border-color: #CABDF5;
-		color: #CABDF5;
+	}
+	
+	.choice-btn:first-child:hover {
+		background: #CABDF5 !important;
+		color: #000000 !important;
+	}
+	
+	.choice-btn:first-child:hover .choice-icon {
+		filter: brightness(0) saturate(100%) invert(12%) sepia(7%) saturate(1075%) hue-rotate(314deg) brightness(91%) contrast(94%);
+	}
+	
+	/* Yes Button - EDF760 border */
+	.choice-btn:last-child {
+		border-color: #EDF760;
+	}
+	
+	.choice-btn:last-child.selected {
+		background: rgba(237, 247, 96, 0.2);
+		border-color: #EDF760;
+	}
+	
+	.choice-btn:last-child:hover {
+		background: #EDF760 !important;
+		color: #000000 !important;
+	}
+	
+	.choice-btn:last-child:hover .choice-icon {
+		filter: brightness(0) saturate(100%) invert(12%) sepia(7%) saturate(1075%) hue-rotate(314deg) brightness(91%) contrast(94%);
 	}
 	
 	.choice-icon {
-		width: 48px;
-		height: 48px;
-		filter: invert(1);
-	}
-	
-	.choice-btn.selected .choice-icon {
-		filter: none;
+		width: 24px;
+		height: 24px;
+		flex-shrink: 0;
 	}
 	
 	/* Input Container */
@@ -555,13 +712,13 @@
 	
 	.text-input {
 		width: 100%;
-		background: rgba(255, 255, 255, 0.95);
+		background: #1F1F1F;
 		border: 2px solid rgba(255, 255, 255, 0.2);
 		border-radius: 12px;
 		padding: 1.5rem;
 		font-size: 1rem;
 		font-family: 'Inter', sans-serif;
-		color: #1a1a1a;
+		color: #ffffff;
 		resize: vertical;
 		min-height: 120px;
 		transition: all 0.3s ease;
@@ -574,7 +731,7 @@
 	}
 	
 	.text-input::placeholder {
-		color: rgba(26, 26, 26, 0.5);
+		color: rgba(255, 255, 255, 0.5);
 	}
 	
 	/* Time Buttons */
@@ -601,11 +758,45 @@
 	
 	.time-btn:hover {
 		background: rgba(255, 255, 255, 0.1);
-		border-color: rgba(255, 255, 255, 0.2);
+		border-color: #CABDF5;
 		transform: translateY(-1px);
 	}
 	
 	.time-btn.selected {
+		background: rgba(202, 189, 245, 0.2);
+		border-color: #CABDF5;
+		color: #CABDF5;
+	}
+	
+	/* Component Selection Grid */
+	.components-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: 1rem;
+		margin-bottom: 2rem;
+	}
+	
+	.component-btn {
+		background: rgba(255, 255, 255, 0.05);
+		border: 2px solid rgba(255, 255, 255, 0.1);
+		border-radius: 12px;
+		padding: 1rem;
+		color: #ffffff;
+		font-family: 'Inter', sans-serif;
+		font-size: 0.9rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		text-align: center;
+	}
+	
+	.component-btn:hover {
+		background: rgba(255, 255, 255, 0.1);
+		border-color: #CABDF5;
+		transform: translateY(-1px);
+	}
+	
+	.component-btn.selected {
 		background: rgba(202, 189, 245, 0.2);
 		border-color: #CABDF5;
 		color: #CABDF5;
@@ -631,13 +822,16 @@
 	}
 	
 	.nav-btn.primary {
-		background: linear-gradient(135deg, #CABDF5 0%, #a78bfa 100%);
-		color: #000000;
+		background: transparent;
+		border: 2px solid #EDF760;
+		color: #EDF760;
 	}
 	
 	.nav-btn.primary:hover:not(:disabled) {
+		background: #EDF760;
+		color: #000000;
 		transform: translateY(-2px);
-		box-shadow: 0 8px 25px rgba(202, 189, 245, 0.3);
+		box-shadow: 0 8px 25px rgba(237, 247, 96, 0.3);
 	}
 	
 	.nav-btn.primary:disabled {
@@ -690,7 +884,7 @@
 		}
 		
 		.choice-btn {
-			min-width: 280px;
+			min-width: 200px;
 		}
 		
 		.steps-container {
@@ -710,6 +904,10 @@
 		.time-buttons {
 			grid-template-columns: 1fr;
 		}
+		
+		.components-grid {
+			grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+		}
 	}
 	
 	@media (max-width: 480px) {
@@ -722,8 +920,8 @@
 		}
 		
 		.choice-btn {
-			padding: 1.5rem 1rem;
-			min-width: 240px;
+			padding: 1rem;
+			min-width: 180px;
 		}
 		
 		.nav-buttons {
@@ -743,6 +941,10 @@
 		
 		.steps-container::after {
 			width: calc((84% / 4) * var(--progress, 0));
+		}
+		
+		.components-grid {
+			grid-template-columns: 1fr;
 		}
 	}
 </style>
