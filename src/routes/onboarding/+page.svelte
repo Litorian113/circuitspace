@@ -18,11 +18,20 @@
 	let wiringComfort = '';
 	let knownComponents: string[] = [];
 	
+	// Step 3 data
+	let learningPreference = '';
+	let wantsTipsWarnings = '';
+	
+	// Step 4 data
+	let experienceLevel = '';
+	let userRole = '';
+	let wantsGamification = '';
+	
 	// Step titles
 	const stepTitles: Record<number, string> = {
 		1: "Let's get to know your project goals!",
 		2: "Time to talk about your skills!",
-		3: "Learning, your way journey!",
+		3: "Learning, your way!",
 		4: "Let's tailor your journey!",
 		5: "Your Preferences at a Glance"
 	};
@@ -34,9 +43,20 @@
 		let totalProgress = 0;
 		
 		// Calculate progress based on completed steps
-		if (currentStep > 2) {
+		if (currentStep > 4) {
 			// All previous steps are completed
 			totalProgress = currentStep - 1;
+		} else if (currentStep === 4) {
+			// We're in step 4, calculate sub-step progress
+			totalProgress = 3; // Steps 1-3 are completed
+			if (experienceLevel !== '') totalProgress += 1/3; // Sub-step 1 completed
+			if (userRole !== '') totalProgress += 1/3; // Sub-step 2 completed
+			if (wantsGamification !== '') totalProgress += 1/3; // Sub-step 3 completed
+		} else if (currentStep === 3) {
+			// We're in step 3, calculate sub-step progress
+			totalProgress = 2; // Steps 1-2 are completed
+			if (learningPreference !== '') totalProgress += 1/2; // Sub-step 1 completed
+			if (wantsTipsWarnings !== '') totalProgress += 1/2; // Sub-step 2 completed
 		} else if (currentStep === 2) {
 			// We're in step 2, calculate sub-step progress
 			totalProgress = 1; // Step 1 is completed
@@ -126,6 +146,41 @@
 		progress = calculateProgress();
 	}
 	
+	function selectLearningPreference(preference: string) {
+		learningPreference = preference;
+		currentSubStep = 2;
+		// Force progress recalculation
+		progress = calculateProgress();
+	}
+	
+	function selectTipsWarnings(choice: string) {
+		wantsTipsWarnings = choice;
+		// Force progress recalculation before moving to next step
+		progress = calculateProgress();
+		nextStep();
+	}
+	
+	function selectExperienceLevel(level: string) {
+		experienceLevel = level;
+		currentSubStep = 2;
+		// Force progress recalculation
+		progress = calculateProgress();
+	}
+	
+	function selectUserRole(role: string) {
+		userRole = role;
+		currentSubStep = 3;
+		// Force progress recalculation
+		progress = calculateProgress();
+	}
+	
+	function selectGamification(choice: string) {
+		wantsGamification = choice;
+		// Force progress recalculation before moving to next step
+		progress = calculateProgress();
+		nextStep();
+	}
+	
 	function nextStep() {
 		if (currentStep < totalSteps) {
 			// Ensure step 1 is fully completed before moving to step 2
@@ -137,6 +192,17 @@
 			if (currentStep === 2) {
 				if (!hasElectronicsExperience) hasElectronicsExperience = 'no';
 				if (!wiringComfort) wiringComfort = 'not-at-all';
+			}
+			// Ensure step 3 is fully completed before moving to step 4
+			if (currentStep === 3) {
+				if (!learningPreference) learningPreference = 'step-by-step';
+				if (!wantsTipsWarnings) wantsTipsWarnings = 'no';
+			}
+			// Ensure step 4 is fully completed before moving to step 5
+			if (currentStep === 4) {
+				if (!experienceLevel) experienceLevel = 'beginner';
+				if (!userRole) userRole = 'hobbyist';
+				if (!wantsGamification) wantsGamification = 'no';
 			}
 			currentStep++;
 			currentSubStep = 1;
@@ -157,15 +223,24 @@
 		if (step <= currentStep || step === currentStep + 1) {
 			// If going to step 2 or beyond, ensure step 1 is completed
 			if (step > 1 && currentStep === 1) {
-				// Mark step 1 as completed by ensuring all required fields are set
-				if (!hasProject) hasProject = 'no'; // Default value if not set
-				if (!timeCommitment) timeCommitment = 'no-rush'; // Default value if not set
+				if (!hasProject) hasProject = 'no';
+				if (!timeCommitment) timeCommitment = 'no-rush';
 			}
 			// If going to step 3 or beyond, ensure step 2 is completed
 			if (step > 2 && currentStep === 2) {
-				// Mark step 2 as completed by ensuring all required fields are set
 				if (!hasElectronicsExperience) hasElectronicsExperience = 'no';
 				if (!wiringComfort) wiringComfort = 'not-at-all';
+			}
+			// If going to step 4 or beyond, ensure step 3 is completed
+			if (step > 3 && currentStep === 3) {
+				if (!learningPreference) learningPreference = 'step-by-step';
+				if (!wantsTipsWarnings) wantsTipsWarnings = 'no';
+			}
+			// If going to step 5 or beyond, ensure step 4 is completed
+			if (step > 4 && currentStep === 4) {
+				if (!experienceLevel) experienceLevel = 'beginner';
+				if (!userRole) userRole = 'hobbyist';
+				if (!wantsGamification) wantsGamification = 'no';
 			}
 			currentStep = step;
 			currentSubStep = 1;
@@ -183,17 +258,33 @@
 			if (currentSubStep === 2) return wiringComfort !== '';
 			if (currentSubStep === 3) return knownComponents.length > 0;
 		}
+		if (currentStep === 3) {
+			if (currentSubStep === 1) return learningPreference !== '';
+			if (currentSubStep === 2) return wantsTipsWarnings !== '';
+		}
+		if (currentStep === 4) {
+			if (currentSubStep === 1) return experienceLevel !== '';
+			if (currentSubStep === 2) return userRole !== '';
+			if (currentSubStep === 3) return wantsGamification !== '';
+		}
 		return true;
 	}
 	
 	function handleNext() {
 		if (currentStep === 1 && currentSubStep === 2 && projectInterests.trim()) {
 			currentSubStep = 3;
-			// Force progress recalculation
 			progress = calculateProgress();
 		} else if (currentStep === 2 && currentSubStep === 2 && wiringComfort !== '') {
 			currentSubStep = 3;
-			// Force progress recalculation
+			progress = calculateProgress();
+		} else if (currentStep === 3 && currentSubStep === 1 && learningPreference !== '') {
+			currentSubStep = 2;
+			progress = calculateProgress();
+		} else if (currentStep === 4 && currentSubStep === 1 && experienceLevel !== '') {
+			currentSubStep = 2;
+			progress = calculateProgress();
+		} else if (currentStep === 4 && currentSubStep === 2 && userRole !== '') {
+			currentSubStep = 3;
 			progress = calculateProgress();
 		} else if (canProceedToNext()) {
 			nextStep();
@@ -419,6 +510,314 @@
 						</div>
 					</div>
 				{/if}
+			{:else if currentStep === 3}
+				{#if currentSubStep === 1}
+					<div class="question-container">
+						<h2 class="question">How do you prefer to learn?</h2>
+						<div class="time-buttons">
+							<button 
+								class="time-btn"
+								class:selected={learningPreference === 'step-by-step'}
+								on:click={() => selectLearningPreference('step-by-step')}
+							>
+								Step-by-step tutorials
+							</button>
+							<button 
+								class="time-btn"
+								class:selected={learningPreference === 'theory-first'}
+								on:click={() => selectLearningPreference('theory-first')}
+							>
+								Theory first, then build
+							</button>
+							<button 
+								class="time-btn"
+								class:selected={learningPreference === 'simulate-build'}
+								on:click={() => selectLearningPreference('simulate-build')}
+							>
+								Simulate, then build
+							</button>
+							<button 
+								class="time-btn"
+								class:selected={learningPreference === 'minimal-hints'}
+								on:click={() => selectLearningPreference('minimal-hints')}
+							>
+								Minimal hints
+							</button>
+						</div>
+						<div class="nav-buttons">
+							<button class="nav-btn secondary" on:click={prevStep}>
+								Back
+							</button>
+						</div>
+					</div>
+				{:else if currentSubStep === 2}
+					<div class="question-container">
+						<h2 class="question">Do you want tips & warnings about mistakes?</h2>
+						<div class="choice-buttons">
+							<button 
+								class="choice-btn"
+								class:selected={wantsTipsWarnings === 'no'}
+								on:click={() => selectTipsWarnings('no')}
+							>
+								<img src="/onboarding/No.svg" alt="No" class="choice-icon" />
+								No, I prefer learning by doing
+							</button>
+							<button 
+								class="choice-btn"
+								class:selected={wantsTipsWarnings === 'yes'}
+								on:click={() => selectTipsWarnings('yes')}
+							>
+								<img src="/onboarding/Yes.svg" alt="Yes" class="choice-icon" />
+								Yes, help me avoid mistakes
+							</button>
+						</div>
+						<div class="nav-buttons">
+							<button class="nav-btn secondary" on:click={() => currentSubStep = 1}>
+								Back
+							</button>
+						</div>
+					</div>
+				{/if}
+			{:else if currentStep === 4}
+				{#if currentSubStep === 1}
+					<div class="question-container">
+						<h2 class="question">What's your experience level with electronics?</h2>
+						<div class="time-buttons">
+							<button 
+								class="time-btn"
+								class:selected={experienceLevel === 'beginner'}
+								on:click={() => selectExperienceLevel('beginner')}
+							>
+								Beginner
+							</button>
+							<button 
+								class="time-btn"
+								class:selected={experienceLevel === 'intermediate'}
+								on:click={() => selectExperienceLevel('intermediate')}
+							>
+								Intermediate
+							</button>
+							<button 
+								class="time-btn"
+								class:selected={experienceLevel === 'advanced'}
+								on:click={() => selectExperienceLevel('advanced')}
+							>
+								Advanced
+							</button>
+							<button 
+								class="time-btn"
+								class:selected={experienceLevel === 'expert'}
+								on:click={() => selectExperienceLevel('expert')}
+							>
+								Expert
+							</button>
+						</div>
+						<div class="nav-buttons">
+							<button class="nav-btn secondary" on:click={prevStep}>
+								Back
+							</button>
+						</div>
+					</div>
+				{:else if currentSubStep === 2}
+					<div class="question-container">
+						<h2 class="question">What best describes your role?</h2>
+						<div class="time-buttons">
+							<button 
+								class="time-btn"
+								class:selected={userRole === 'student'}
+								on:click={() => selectUserRole('student')}
+							>
+								Student
+							</button>
+							<button 
+								class="time-btn"
+								class:selected={userRole === 'hobbyist'}
+								on:click={() => selectUserRole('hobbyist')}
+							>
+								Hobbyist
+							</button>
+							<button 
+								class="time-btn"
+								class:selected={userRole === 'educator'}
+								on:click={() => selectUserRole('educator')}
+							>
+								Educator
+							</button>
+							<button 
+								class="time-btn"
+								class:selected={userRole === 'professional'}
+								on:click={() => selectUserRole('professional')}
+							>
+								Professional / Engineer
+							</button>
+						</div>
+						<div class="nav-buttons">
+							<button class="nav-btn secondary" on:click={() => currentSubStep = 1}>
+								Back
+							</button>
+						</div>
+					</div>
+				{:else if currentSubStep === 3}
+					<div class="question-container">
+						<h2 class="question">Do you want to enable gamification?</h2>
+						<div class="choice-buttons">
+							<button 
+								class="choice-btn"
+								class:selected={wantsGamification === 'no'}
+								on:click={() => selectGamification('no')}
+							>
+								<img src="/onboarding/No.svg" alt="No" class="choice-icon" />
+								No, keep it simple
+							</button>
+							<button 
+								class="choice-btn"
+								class:selected={wantsGamification === 'yes'}
+								on:click={() => selectGamification('yes')}
+							>
+								<img src="/onboarding/Yes.svg" alt="Yes" class="choice-icon" />
+								Yes, make it fun!
+							</button>
+						</div>
+						<div class="nav-buttons">
+							<button class="nav-btn secondary" on:click={() => currentSubStep = 2}>
+								Back
+							</button>
+						</div>
+					</div>
+				{/if}
+			{:else if currentStep === 5}
+				<div class="summary-container">
+					<h2 class="question">Your Preferences at a Glance</h2>
+					<div class="summary-card">
+						<!-- Project Goals Section -->
+						<div class="summary-section">
+							<div class="section-icon">
+								<img src="/onboarding/Step1.svg" alt="Project Goals" />
+							</div>
+							<div class="section-content">
+								<h3 class="section-title">Project Goals</h3>
+								<div class="section-questions">
+									<div class="question-answer-row">
+										<span class="question-label">Do you have a project in mind?</span>
+										<span class="answer-value">{hasProject === 'yes' ? 'Yes, I do' : "No, I don't"}</span>
+									</div>
+									{#if hasProject === 'yes' && projectInterests.trim()}
+										<div class="question-answer-row">
+											<span class="question-label">Your interests:</span>
+											<span class="answer-value">{projectInterests}</span>
+										</div>
+									{/if}
+									<div class="question-answer-row">
+										<span class="question-label">Time commitment:</span>
+										<span class="answer-value">{
+											timeCommitment === 'few-hours' ? 'A few hours' :
+											timeCommitment === 'couple-days' ? 'A couple of days' :
+											timeCommitment === 'week-more' ? 'A week or more' :
+											'No rush, taking it slow'
+										}</span>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Your Skills Section -->
+						<div class="summary-section">
+							<div class="section-icon">
+								<img src="/onboarding/Step2.svg" alt="Your Skills" />
+							</div>
+							<div class="section-content">
+								<h3 class="section-title">Your Skills</h3>
+								<div class="section-questions">
+									<div class="question-answer-row">
+										<span class="question-label">Electronics experience:</span>
+										<span class="answer-value">{hasElectronicsExperience === 'yes' ? 'Yes, I have' : "No, I haven't"}</span>
+									</div>
+									<div class="question-answer-row">
+										<span class="question-label">Wiring comfort:</span>
+										<span class="answer-value">{
+											wiringComfort === 'not-at-all' ? 'Not at all' :
+											wiringComfort === 'basics' ? 'I get the basics' :
+											wiringComfort === 'comfortable' ? 'Comfortable' :
+											'Very Confident'
+										}</span>
+									</div>
+									<div class="question-answer-row">
+										<span class="question-label">Known components:</span>
+										<span class="answer-value">{knownComponents.length > 0 ? knownComponents.join(', ') : 'None selected'}</span>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Learning Journey Section -->
+						<div class="summary-section">
+							<div class="section-icon">
+								<img src="/onboarding/Step3.svg" alt="Learning Journey" />
+							</div>
+							<div class="section-content">
+								<h3 class="section-title">Learning Journey</h3>
+								<div class="section-questions">
+									<div class="question-answer-row">
+										<span class="question-label">Learning preference:</span>
+										<span class="answer-value">{
+											learningPreference === 'step-by-step' ? 'Step-by-step tutorials' :
+											learningPreference === 'theory-first' ? 'Theory first, then build' :
+											learningPreference === 'simulate-build' ? 'Simulate, then build' :
+											'Minimal hints'
+										}</span>
+									</div>
+									<div class="question-answer-row">
+										<span class="question-label">Tips & warnings:</span>
+										<span class="answer-value">{wantsTipsWarnings === 'yes' ? 'Yes, help me avoid mistakes' : 'No, I prefer learning by doing'}</span>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Your Journey Section -->
+						<div class="summary-section">
+							<div class="section-icon">
+								<img src="/onboarding/Step4.svg" alt="Your Journey" />
+							</div>
+							<div class="section-content">
+								<h3 class="section-title">Your Journey</h3>
+								<div class="section-questions">
+									<div class="question-answer-row">
+										<span class="question-label">Experience level:</span>
+										<span class="answer-value">{
+											experienceLevel === 'beginner' ? 'Beginner' :
+											experienceLevel === 'intermediate' ? 'Intermediate' :
+											experienceLevel === 'advanced' ? 'Advanced' :
+											'Expert'
+										}</span>
+									</div>
+									<div class="question-answer-row">
+										<span class="question-label">Your role:</span>
+										<span class="answer-value">{
+											userRole === 'student' ? 'Student' :
+											userRole === 'hobbyist' ? 'Hobbyist' :
+											userRole === 'educator' ? 'Educator' :
+											'Professional / Engineer'
+										}</span>
+									</div>
+									<div class="question-answer-row">
+										<span class="question-label">Gamification:</span>
+										<span class="answer-value">{wantsGamification === 'yes' ? 'Yes, make it fun!' : 'No, keep it simple'}</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					
+					<div class="nav-buttons">
+						<button class="nav-btn secondary" on:click={prevStep}>
+							Back
+						</button>
+						<button class="nav-btn primary" on:click={() => goto('/')}>
+							Save and Continue
+						</button>
+					</div>
+				</div>
 			{:else}
 				<div class="question-container">
 					<div class="placeholder-content">
@@ -802,6 +1201,97 @@
 		color: #CABDF5;
 	}
 	
+	/* Summary Page Styles */
+	.summary-container {
+		max-width: 900px;
+		margin: 0 auto;
+	}
+	
+	.summary-card {
+		background: rgba(255, 255, 255, 0.03);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 16px;
+		padding: 2rem;
+		margin-bottom: 3rem;
+	}
+	
+	.summary-section {
+		display: flex;
+		gap: 1.5rem;
+		align-items: flex-start;
+		padding-bottom: 2rem;
+		margin-bottom: 2rem;
+		border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	}
+	
+	.summary-section:last-child {
+		border-bottom: none;
+		margin-bottom: 0;
+		padding-bottom: 0;
+	}
+	
+	.section-icon {
+		flex-shrink: 0;
+		width: 48px;
+		height: 48px;
+		background: #CABDF5;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 8px;
+	}
+	
+	.section-icon img {
+		filter: brightness(0) saturate(100%) invert(12%) sepia(7%) saturate(1075%) hue-rotate(314deg) brightness(91%) contrast(94%);
+	}
+	
+	.section-content {
+		flex: 1;
+	}
+	
+	.section-title {
+		color: #CABDF5;
+		font-size: 1.25rem;
+		font-weight: 600;
+		margin: 0 0 1rem 0;
+		font-family: 'Inter', sans-serif;
+        text-align: left;
+	}
+	
+	.section-questions {
+		display: flex;
+		flex-direction: column;
+	}
+	
+	.question-answer-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 1rem;
+		padding: 0.5rem 0;
+	}
+	
+	.question-label {
+		color: rgba(255, 255, 255, 0.7);
+		font-size: 0.9rem;
+		font-weight: 500;
+		flex: 1;
+		min-width: 0;
+        text-align: left;
+	}
+	
+	.answer-value {
+		color: #CABDF5;
+		font-size: 1rem;
+		font-weight: 600;
+		text-align: right;
+		flex: 1;
+		min-width: 0;
+		word-wrap: break-word;
+        text-align: left;
+	}
+	
 	/* Navigation Buttons */
 	.nav-buttons {
 		display: flex;
@@ -908,6 +1398,26 @@
 		.components-grid {
 			grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 		}
+		
+		.summary-section {
+			flex-direction: column;
+			gap: 5rem;
+			text-align: left;
+		}
+		
+		.section-icon {
+			align-self: flex-start;
+		}
+		
+		.question-answer-row {
+			flex-direction: column;
+			gap: 0.25rem;
+			align-items: flex-start;
+		}
+		
+		.answer-value {
+			text-align: left;
+		}
 	}
 	
 	@media (max-width: 480px) {
@@ -945,6 +1455,10 @@
 		
 		.components-grid {
 			grid-template-columns: 1fr;
+		}
+		
+		.summary-section {
+			padding: 1.5rem;
 		}
 	}
 </style>
