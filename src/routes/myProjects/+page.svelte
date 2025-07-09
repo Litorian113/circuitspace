@@ -240,6 +240,9 @@
 	:global(body) {
 		margin: 0;
 		padding: 0;
+		background: #191919;
+		color: #e2e8f0;
+		font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 		overflow-x: hidden;
 	}
 	
