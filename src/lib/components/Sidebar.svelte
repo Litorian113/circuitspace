@@ -19,6 +19,10 @@
 	$: setSidebarWidth(isCollapsed);
 	
 	onMount(() => {
+		// Initialize with collapsed state if on homepage
+		if ($page.url.pathname === '/') {
+			isCollapsed = true;
+		}
 		// Initialize CSS custom property
 		setSidebarWidth(isCollapsed);
 	});
