@@ -271,13 +271,13 @@
 	}
 	
 	.form-input {
-		background: #ffffff;
-		border: 2px solid rgba(226, 232, 240, 0.2);
+		background: #1F1F1F;
+		border: 2px solid rgba(255, 255, 255, 0.2);
 		border-radius: 8px;
 		padding: 1rem;
 		font-size: 1rem;
 		font-family: 'Inter', sans-serif;
-		color: #1a1a1a;
+		color: #ffffff;
 		transition: all 0.2s ease;
 		outline: none;
 	}
@@ -292,7 +292,7 @@
 	}
 	
 	.form-input::placeholder {
-		color: rgba(26, 26, 26, 0.5);
+		color: rgba(255, 255, 255, 0.5);
 	}
 	
 	.password-wrapper {
@@ -310,16 +310,21 @@
 		transform: translateY(-50%);
 		background: none;
 		border: none;
-		color: rgba(26, 26, 26, 0.6);
+		color: rgba(255, 255, 255, 0.6);
 		cursor: pointer;
 		padding: 0.25rem;
 		border-radius: 4px;
 		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
 	}
 	
 	.password-toggle:hover {
-		color: rgba(26, 26, 26, 0.8);
-		background: rgba(26, 26, 26, 0.05);
+		color: rgba(255, 255, 255, 0.8);
+		background: rgba(255, 255, 255, 0.1);
 	}
 	
 	.checkbox-label {
@@ -340,8 +345,8 @@
 	.checkbox-custom {
 		min-width: 20px;
 		height: 20px;
-		background: #ffffff;
-		border: 2px solid rgba(226, 232, 240, 0.2);
+		background: #1F1F1F;
+		border: 2px solid rgba(255, 255, 255, 0.2);
 		border-radius: 4px;
 		display: flex;
 		align-items: center;
