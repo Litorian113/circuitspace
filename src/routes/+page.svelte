@@ -11,6 +11,142 @@
 	let projectInput = '';
 	let isTransitioning = false;
 	let heroSectionElement: HTMLElement;
+	let titleElement: HTMLElement;
+	let particleCanvas: HTMLCanvasElement;
+	let ctx: CanvasRenderingContext2D | null = null;
+	let particles: Particle[] = [];
+	let animationId: number;
+	let isHovering = false;
+	
+	interface Particle {
+		x: number;
+		y: number;
+		vx: number;
+		vy: number;
+		life: number;
+		maxLife: number;
+		opacity: number;
+		size: number;
+	}
+	
+	onMount(() => {
+		if (particleCanvas) {
+			ctx = particleCanvas.getContext('2d');
+			resizeCanvas();
+			window.addEventListener('resize', resizeCanvas);
+		}
+		
+		return () => {
+			if (animationId) {
+				cancelAnimationFrame(animationId);
+			}
+			window.removeEventListener('resize', resizeCanvas);
+		};
+	});
+	
+	function resizeCanvas() {
+		if (particleCanvas && titleElement) {
+			const rect = titleElement.getBoundingClientRect();
+			particleCanvas.width = rect.width;
+			particleCanvas.height = rect.height;
+		}
+	}
+	
+	function createParticle(x: number, y: number) {
+		return {
+			x,
+			y,
+			vx: (Math.random() - 0.5) * 2,
+			vy: (Math.random() - 0.5) * 2,
+			life: 0,
+			maxLife: 60 + Math.random() * 40,
+			opacity: 0,
+			size: 2 + Math.random() * 3
+		};
+	}
+	
+	function updateParticles() {
+		for (let i = particles.length - 1; i >= 0; i--) {
+			const particle = particles[i];
+			particle.life++;
+			particle.x += particle.vx;
+			particle.y += particle.vy;
+			
+			// Fade in, then fade out
+			if (particle.life < particle.maxLife * 0.3) {
+				particle.opacity = particle.life / (particle.maxLife * 0.3);
+			} else if (particle.life > particle.maxLife * 0.7) {
+				particle.opacity = 1 - (particle.life - particle.maxLife * 0.7) / (particle.maxLife * 0.3);
+			} else {
+				particle.opacity = 1;
+			}
+			
+			if (particle.life > particle.maxLife) {
+				particles.splice(i, 1);
+			}
+		}
+	}
+	
+	function drawParticles() {
+		if (!ctx || !particleCanvas) return;
+		
+		ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+		
+		particles.forEach(particle => {
+			ctx!.save();
+			ctx!.globalAlpha = particle.opacity * 0.6;
+			ctx!.fillStyle = '#EDF760';
+			ctx!.shadowBlur = 8;
+			ctx!.shadowColor = '#EDF760';
+			ctx!.beginPath();
+			ctx!.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+			ctx!.fill();
+			ctx!.restore();
+		});
+	}
+	
+	function animate() {
+		updateParticles();
+		drawParticles();
+		animationId = requestAnimationFrame(animate);
+	}
+	
+	function handleTitleMouseMove(event: MouseEvent) {
+		if (!isHovering || !titleElement) return;
+		
+		const rect = titleElement.getBoundingClientRect();
+		const x = event.clientX - rect.left;
+		const y = event.clientY - rect.top;
+		
+		// Create particles on mouse movement
+		if (Math.random() < 0.3) {
+			particles.push(createParticle(x, y));
+		}
+		
+		// Limit particle count
+		if (particles.length > 40) {
+			particles.splice(0, particles.length - 40);
+		}
+		
+		if (!animationId) {
+			animate();
+		}
+	}
+	
+	function handleTitleMouseEnter() {
+		isHovering = true;
+		if (titleElement) {
+			titleElement.style.textShadow = '0 2px 8px rgba(0, 0, 0, 0.3), 0 0 20px rgba(237, 247, 96, 0.3)';
+		}
+	}
+	
+	function handleTitleMouseLeave() {
+		isHovering = false;
+		if (titleElement) {
+			titleElement.style.textShadow = '0 2px 8px rgba(0, 0, 0, 0.3)';
+		}
+		// Let existing particles fade out naturally
+	}
 	
 	function scrollToHeroSection() {
 		if (heroSectionElement) {
@@ -83,7 +219,16 @@
 			<span class="hero-logo-text">Circuitspace</span>
 		</div>
 		<div class="arvis-hero-content">
-			<h1 class="arvis-hero-title">Step into Circuitspace with Arvis</h1>
+			<div class="title-container" 
+				role="button"
+				tabindex="0"
+				on:mousemove={handleTitleMouseMove} 
+				on:mouseenter={handleTitleMouseEnter}
+				on:mouseleave={handleTitleMouseLeave}
+			>
+				<h1 class="arvis-hero-title" bind:this={titleElement}>Step into Circuitspace with Arvis</h1>
+				<canvas bind:this={particleCanvas} class="particle-canvas"></canvas>
+			</div>
 		</div>
 		<div class="scroll-indicator" on:click={scrollToHeroSection} on:keydown={(e) => e.key === 'Enter' && scrollToHeroSection()} tabindex="0" role="button" aria-label="Scroll to main content">
 			<div class="scroll-arrow">
@@ -353,6 +498,41 @@
 		text-align: center;
 		padding: 2rem;
 		max-width: 900px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+	}
+	
+	.title-container {
+		position: relative;
+		display: inline-block;
+		cursor: pointer;
+	}
+	
+	.particle-canvas {
+		position: absolute;
+		top: 0;
+		left: 0;
+		pointer-events: none;
+		z-index: 1;
+	}
+	
+	.arvis-hero-title {
+		font-family: 'Inter', sans-serif;
+		font-size: 4rem;
+		font-weight: 700;
+		color: #FFFFFF;
+		margin: 0;
+		text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+		line-height: 1.1;
+		position: relative;
+		z-index: 2;
+		/* Fade-up Animation */
+		opacity: 0;
+		transform: translateY(30px);
+		animation: fadeUpTitle 1.2s ease-out 0.5s forwards;
+		transition: text-shadow 0.3s ease;
 	}
 	
 	.arvis-hero-logo {
@@ -377,16 +557,6 @@
 		font-weight: 600;
 		color: #191919;
 		text-shadow: none;
-	}
-	
-	.arvis-hero-title {
-		font-family: 'Inter', sans-serif;
-		font-size: 4rem;
-		font-weight: 700;
-		color: #FFFFFF;
-		margin: 0 0 4rem 0;
-		text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-		line-height: 1.1;
 	}
 	
 	.scroll-indicator {
@@ -440,6 +610,17 @@
 		}
 	}
 	
+	@keyframes fadeUpTitle {
+		0% {
+			opacity: 0;
+			transform: translateY(30px);
+		}
+		100% {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+	
 	/* Hero Section Wrapper */
 	.hero-section-wrapper {
 		scroll-margin-top: 0;
@@ -458,6 +639,12 @@
 		
 		.arvis-hero-title {
 			font-size: 3rem;
+			margin: 0;
+			/* Animation bleibt erhalten */
+			opacity: 0;
+			transform: translateY(20px);
+			animation: fadeUpTitle 1.2s ease-out 0.5s forwards;
+			transition: text-shadow 0.3s ease;
 		}
 	}
 	
@@ -484,7 +671,12 @@
 		
 		.arvis-hero-title {
 			font-size: 2.5rem;
-			margin-bottom: 3rem;
+			margin: 0;
+			/* Animation bleibt erhalten */
+			opacity: 0;
+			transform: translateY(15px);
+			animation: fadeUpTitle 1.2s ease-out 0.5s forwards;
+			transition: text-shadow 0.3s ease;
 		}
 		
 		.scroll-indicator {
@@ -522,6 +714,10 @@
 		
 		.arvis-hero-title {
 			font-size: 2rem;
+			/* Animation für Mobile */
+			opacity: 0;
+			transform: translateY(15px);
+			animation: fadeUpTitle 1.2s ease-out 0.5s forwards;
 		}
 	}
 </style>

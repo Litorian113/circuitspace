@@ -48,15 +48,18 @@ export const leonardoLedDimmerConversation: Conversation = {
 		{
 			id: 'project-understanding',
 			type: 'ai',
-			content: `I believe I have now fully understood your project.
+			content: `Oh cool, that sounds fun! I actually have a great project idea for you.
+			How about building a simple LED dimmer circuit? It’s a neat little setup where:
 
-We are building an **Arduino Leonardo LED Dimmer**, where:
-- A potentiometer controls the LED brightness
-- PWM is used for stepless brightness control
-- All connections run through a breadboard
-- A protective resistor protects the LED from overcurrent
+- A potentiometer controls the LED brightness,
+- PWM (Pulse Width Modulation) lets you dim the LED smoothly,
+- Everything connects through a breadboard, and
+- A resistor protects the LED from too much current.
 
-Do you have any other questions about the project, or can we proceed?`,
+It’s a great beginner-friendly project that teaches you about analog input,
+PWM output, and safe circuit design.
+If you like the idea, press continue — otherwise,
+feel free to ask me anything or suggest an alternative. I'm here to help!`,
 			nextSteps: ['continue-project', 'ask-question'],
 			showProjectButtons: true,
 			isCompleted: false
