@@ -9,14 +9,14 @@
 			<h2 class="section-title">How You Can Build Your First Project</h2>
 			<div class="build-steps-grid">
 				<div class="build-step">
-					<img src="/works-section/describe-your-project.svg" alt="Describe Your Project" class="build-step-icon" />
-					<h3 class="build-step-title">Describe Your Project</h3>
-					<p class="build-step-text">Tell us what you want to build in simple terms - like "a temperature monitor" or "smart plant watering system".</p>
-				</div>
-				<div class="build-step">
 					<img src="/works-section/choose-your-experience.svg" alt="Choose Your Experience" class="build-step-icon" />
 					<h3 class="build-step-title">Choose Your Experience</h3>
 					<p class="build-step-text">Select your skill level and preferred learning style - beginner tutorials, advanced guides, or hands-on exploration.</p>
+				</div>
+				<div class="build-step">
+					<img src="/works-section/describe-your-project.svg" alt="Describe Your Project" class="build-step-icon" />
+					<h3 class="build-step-title">Describe Your Project</h3>
+					<p class="build-step-text">Tell us what you want to build in simple terms - like "a temperature monitor" or "smart plant watering system".</p>
 				</div>
 				<div class="build-step">
 					<img src="/works-section/connect-arvis.svg" alt="Connect with Arvis" class="build-step-icon" />

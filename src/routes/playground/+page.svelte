@@ -706,7 +706,6 @@
 	<main class="playground-main">
 		<div class="playground-header">
 			<h1>Circuit Playground</h1>
-			<p>Experiment freely with electronic components! Drag components onto the workspace and connect them together.</p>
 		</div>
 		
 		<div class="playground-content">
@@ -803,22 +802,16 @@
 	
 	.playground-header {
 		padding: 2rem;
-		background: #2A2A2A;
+		background: #191919;
 		border-bottom: 1px solid #3A3A3A;
 	}
 	
 	.playground-header h1 {
-		margin: 0 0 0.5rem 0;
-		color: #FFFFFF;
-		font-size: 2rem;
-		font-weight: 600;
-		font-family: 'Inter', Arial, sans-serif;
-	}
-	
-	.playground-header p {
 		margin: 0;
-		color: #B0B0B0;
-		font-size: 1rem;
+		color: #FFFFFF;
+		font-size: 2.5rem;
+		padding-left: 4rem;
+		font-weight: 700;
 		font-family: 'Inter', Arial, sans-serif;
 	}
 	
