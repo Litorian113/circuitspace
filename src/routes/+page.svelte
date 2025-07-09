@@ -4,6 +4,7 @@
 	import Sidebar from '$lib/components/Sidebar.svelte';
 	import HeroSection from '$lib/components/HeroSection.svelte';
 	import HowItWorksSection from '$lib/components/HowItWorksSection.svelte';
+	import ArDeviceSection from '$lib/components/ArDeviceSection.svelte';
 	import BuildFirstProjectSection from '$lib/components/BuildFirstProjectSection.svelte';
 	import LearnTogetherSection from '$lib/components/LearnTogetherSection.svelte';
 	
@@ -78,7 +79,7 @@
 			<div class="arvis-hero-overlay"></div>
 		</div>
 		<div class="arvis-hero-content">
-			<h1 class="arvis-hero-title">Step Into Circuitspace with Arvis</h1>
+			<h1 class="arvis-hero-title">Step into Circuitspace with Arvis</h1>
 		</div>
 		<div class="scroll-indicator" on:click={scrollToHeroSection} on:keydown={(e) => e.key === 'Enter' && scrollToHeroSection()} tabindex="0" role="button" aria-label="Scroll to main content">
 			<div class="scroll-arrow">
@@ -101,6 +102,9 @@
 	
 	<!-- How It Works Section -->
 	<HowItWorksSection />
+	
+	<!-- Our AR Device Section -->
+	<ArDeviceSection />
 	
 	<!-- How You Can Build Your First Project Section -->
 	<BuildFirstProjectSection />
@@ -345,7 +349,6 @@
 		text-align: center;
 		padding: 2rem;
 		max-width: 900px;
-		margin: 0 auto;
 	}
 	
 	.arvis-hero-title {
@@ -431,13 +434,14 @@
 	}
 	
 	@media (max-width: 768px) {
+		.arvis-hero-content {
+			margin: 4rem 0 0 3rem;
+			padding: 1.5rem;
+		}
+		
 		.arvis-hero-title {
 			font-size: 2.5rem;
 			margin-bottom: 3rem;
-		}
-		
-		.arvis-hero-content {
-			padding: 1.5rem;
 		}
 		
 		.scroll-indicator {
@@ -455,6 +459,10 @@
 	}
 	
 	@media (max-width: 480px) {
+		.arvis-hero-content {
+			margin: 3rem 0 0 2rem;
+		}
+		
 		.arvis-hero-title {
 			font-size: 2rem;
 		}
