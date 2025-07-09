@@ -171,41 +171,61 @@
 		</div>
 		<!-- Component Header -->
 		<div class="component-header">
-			<div class="component-image-large">
-				<img src={component.image} alt={component.name} />
+			<!-- Header Top Row -->
+			<div class="header-top-row">
+				<div class="level-badge-header">Level {component.level}</div>
+				<div class="category-badge-header">{component.category}</div>
 			</div>
-			<div class="component-meta">
-				<span class="category-badge">{component.category}</span>
-				<h1>{component.name}</h1>
-				<p class="description">{component.description}</p>
-				
-				<!-- Progress Section -->
-				<div class="progress-section">
-					<div class="level-info">
-						<span class="level-badge">Level {component.level}/{component.maxLevel}</span>
-						<span class="experience-text">{component.experience}/{component.maxLevel * 100} XP</span>
+
+			<!-- Main Content Row -->
+			<div class="header-main-content">
+				<!-- Left Column -->
+				<div class="left-column">
+					<h1 class="component-title">{component.name}</h1>
+					<div class="component-image-container">
+						<img src={component.image} alt={component.name} />
 					</div>
-					<div class="progress-bars">
-						<div class="progress-bar total">
-							<div class="progress-fill" style="width: {getProgressPercentage()}%"></div>
-						</div>
-						<div class="progress-bar current">
-							<div class="progress-fill" style="width: {getCurrentLevelProgress()}%"></div>
-						</div>
+					<div class="component-tags">
+						{#each component.commonUses.slice(0, 3) as tag}
+							<span class="tag">#{tag.toLowerCase().replace(/\s+/g, '')}</span>
+						{/each}
 					</div>
 				</div>
 
-				<!-- Quiz Button -->
-				<div class="quiz-section">
-					{#if canStartQuiz}
-						<button class="quiz-button" on:click={startQuiz}>
-							🧠 Start Quiz ({component.maxQuizzesPerDay - dailyQuizCount} remaining)
-						</button>
-					{:else}
-						<div class="quiz-limit-message">
-							Daily quiz limit reached. Try again tomorrow!
+				<!-- Right Column -->
+				<div class="right-column">
+					<h3 class="info-title">General Info</h3>
+					<p class="component-description">{component.description}</p>
+					
+					<!-- Progress Section -->
+					<div class="progress-section">
+						<div class="progress-header">
+							<span class="progress-label">Level {component.level}/{component.maxLevel}</span>
 						</div>
-					{/if}
+						<div class="progress-bar">
+							<div class="progress-fill" style="width: {getCurrentLevelProgress()}%"></div>
+						</div>
+						<div class="progress-details">
+							<span class="earn-exp">Earn {(component.maxLevel - component.level) * 20} exp</span>
+							<span class="progress-percentage">{Math.round(getCurrentLevelProgress())}%</span>
+						</div>
+					</div>
+
+					<!-- Action Buttons -->
+					<div class="action-buttons">
+						{#if canStartQuiz}
+							<button class="quiz-button-new" on:click={startQuiz}>
+								Start Quiz
+							</button>
+						{:else}
+							<button class="quiz-button-new disabled" disabled>
+								Quiz Completed
+							</button>
+						{/if}
+						<button class="explore-button">
+							Explore Projects
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -397,139 +417,220 @@
 	}
 
 	.component-header {
-		display: grid;
-		grid-template-columns: 1fr 2fr;
-		gap: 3rem;
-		margin-bottom: 3rem;
 		background: rgba(35, 35, 35, 0.8);
 		border-radius: 16px;
 		padding: 2rem;
-	}
-
-	.component-image-large {
+		margin-bottom: 3rem;
 		display: flex;
+		flex-direction: column;
+		gap: 2rem;
+	}
+
+	.header-top-row {
+		display: flex;
+		justify-content: space-between;
 		align-items: center;
-		justify-content: center;
-		background: rgba(35, 35, 35, 0.8);
-		border-radius: 12px;
-		padding: 2rem;
-		min-height: 300px;
-		border: 1px solid #2a2d3a;
 	}
 
-	.component-image-large img {
-		max-width: 100%;
-		max-height: 100%;
-		object-fit: contain;
-	}
-
-	.component-meta h1 {
-		font-size: 2.5rem;
-		font-weight: 700;
-		color: #f1f5f9;
-		margin: 1rem 0;
-		font-family: 'Inter', sans-serif;
-	}
-
-	.category-badge {
-		display: inline-block;
+	.level-badge-header {
 		background: linear-gradient(135deg, #00d4aa 0%, #06b6d4 100%);
 		color: white;
 		padding: 0.5rem 1rem;
 		border-radius: 20px;
 		font-size: 0.875rem;
 		font-weight: 600;
+		font-family: 'Inter', sans-serif;
 	}
 
-	.description {
-		font-size: 1.125rem;
-		color: #94a3b8;
+	.category-badge-header {
+		background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
+		color: white;
+		padding: 0.5rem 1rem;
+		border-radius: 20px;
+		font-size: 0.875rem;
+		font-weight: 600;
+		font-family: 'Inter', sans-serif;
+		text-transform: capitalize;
+	}
+
+	.header-main-content {
+		display: grid;
+		grid-template-columns: 1fr 1.5fr;
+		gap: 3rem;
+		align-items: start;
+	}
+
+	.left-column {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.component-title {
+		font-size: 2rem;
+		font-weight: 700;
+		color: #f1f5f9;
+		margin: 0;
+		font-family: 'Inter', sans-serif;
+	}
+
+	.component-image-container {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: rgba(25, 25, 25, 0.8);
+		border-radius: 12px;
+		padding: 2rem;
+		min-height: 200px;
+		border: 1px solid #2a2d3a;
+	}
+
+	.component-image-container img {
+		max-width: 100%;
+		max-height: 180px;
+		object-fit: contain;
+	}
+
+	.component-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.tag {
+		background: rgba(202, 189, 245, 0.1);
+		color: #CABDF5;
+		padding: 0.375rem 0.75rem;
+		border-radius: 20px;
+		font-size: 0.8rem;
+		font-weight: 500;
+		border: 1px solid rgba(202, 189, 245, 0.3);
+		font-family: 'Inter', sans-serif;
+	}
+
+	.right-column {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+
+	.info-title {
+		color: #ffffff;
+		font-size: 1.5rem;
+		font-weight: 600;
+		margin: 0;
+		font-family: 'Inter', sans-serif;
+	}
+
+	.component-description {
+		font-size: 1.1rem;
+		color: #e2e8f0;
 		line-height: 1.6;
-		margin-bottom: 2rem;
+		margin: 0;
+		font-family: 'Inter', sans-serif;
 	}
 
 	.progress-section {
-		background: rgba(0, 212, 170, 0.05);
-		border: 1px solid rgba(0, 212, 170, 0.2);
-		border-radius: 12px;
-		padding: 1.5rem;
-		margin-bottom: 2rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
 	}
 
-	.level-info {
+	.progress-header {
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
+		margin-bottom: 0.5rem;
+	}
+
+	.progress-label {
+		font-family: 'Inter', sans-serif;
+		font-weight: 600;
+		color: #CABDF5;
+		font-size: 0.9rem;
+	}
+
+	.progress-details {
 		display: flex;
 		justify-content: space-between;
-		align-items: center;
-		margin-bottom: 1rem;
+		width: 100%;
+		font-size: 0.8rem;
+		margin-bottom: 0.75rem;
 	}
 
-	.level-badge {
-		background: linear-gradient(135deg, #00d4aa 0%, #06b6d4 100%);
-		color: white;
-		padding: 0.5rem 1rem;
-		border-radius: 8px;
-		font-weight: 600;
-	}
-
-	.experience-text {
-		color: #94a3b8;
+	.earn-exp {
+		color: #CABDF5;
 		font-weight: 500;
 	}
 
-	.progress-bars {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
+	.progress-percentage {
+		color: #CABDF5;
+		font-weight: 600;
 	}
 
 	.progress-bar {
 		height: 8px;
-		background: #1a1b23;
+		background: rgba(25, 25, 25, 0.8);
 		border-radius: 4px;
 		overflow: hidden;
+		border: 1px solid rgba(202, 189, 245, 0.3);
 		position: relative;
-	}
-
-	.progress-bar.total {
-		height: 12px;
 	}
 
 	.progress-fill {
 		height: 100%;
-		background: linear-gradient(90deg, #00d4aa, #06b6d4);
+		background: linear-gradient(90deg, #CABDF5, #a78bfa);
 		transition: width 0.5s ease;
 	}
 
-	.quiz-section {
-		margin-top: 1rem;
+	.action-buttons {
+		display: flex;
+		gap: 1rem;
 	}
 
-	.quiz-button {
-		background: linear-gradient(135deg, #00d4aa 0%, #06b6d4 100%);
-		color: white;
-		border: none;
-		padding: 1rem 2rem;
+	.quiz-button-new {
+		flex: 1;
+		background: transparent;
+		color: #CABDF5;
+		border: 2px solid #CABDF5;
+		padding: 1rem 1.5rem;
 		border-radius: 12px;
-		font-size: 1.125rem;
+		font-size: 1rem;
 		font-weight: 600;
 		cursor: pointer;
 		transition: all 0.3s ease;
-		width: 100%;
 		font-family: 'Inter', sans-serif;
 	}
 
-	.quiz-button:hover {
-		transform: translateY(-2px);
-		box-shadow: 0 8px 25px rgba(0, 212, 170, 0.3);
+	.quiz-button-new:hover:not(.disabled) {
+		background: rgba(202, 189, 245, 0.1);
+		transform: translateY(-1px);
+		box-shadow: 0 4px 15px rgba(202, 189, 245, 0.3);
 	}
 
-	.quiz-limit-message {
-		background: #1a1b23;
-		color: #94a3b8;
-		padding: 1rem;
-		border-radius: 8px;
-		text-align: center;
-		border: 1px solid #2a2d3a;
+	.quiz-button-new.disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.explore-button {
+		flex: 1;
+		background: transparent;
+		color: #EDF760;
+		border: 2px solid #EDF760;
+		padding: 1rem 1.5rem;
+		border-radius: 12px;
+		font-size: 1rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.3s ease;
+		font-family: 'Inter', sans-serif;
+	}
+
+	.explore-button:hover {
+		background: rgba(237, 247, 96, 0.1);
+		transform: translateY(-1px);
+		box-shadow: 0 4px 15px rgba(237, 247, 96, 0.3);
 	}
 
 	.details-grid {
@@ -924,14 +1025,25 @@
 			padding: 1rem;
 		}
 
-		.component-header {
+		.header-main-content {
 			grid-template-columns: 1fr;
 			gap: 2rem;
-			padding: 1.5rem;
 		}
 
-		.component-meta h1 {
-			font-size: 2rem;
+		.component-title {
+			font-size: 1.75rem;
+		}
+
+		.component-image-container {
+			min-height: 150px;
+		}
+
+		.component-image-container img {
+			max-height: 130px;
+		}
+
+		.action-buttons {
+			flex-direction: column;
 		}
 
 		.details-grid {
@@ -946,6 +1058,29 @@
 	}
 
 	@media (max-width: 768px) {
+		.header-top-row {
+			flex-direction: column;
+			gap: 1rem;
+			align-items: stretch;
+		}
+
+		.level-badge-header,
+		.category-badge-header {
+			text-align: center;
+		}
+
+		.component-title {
+			font-size: 1.5rem;
+		}
+
+		.info-title {
+			font-size: 1.25rem;
+		}
+
+		.component-description {
+			font-size: 1rem;
+		}
+
 		.details-grid {
 			grid-template-columns: 1fr;
 			grid-template-rows: repeat(6, auto);
