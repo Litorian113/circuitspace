@@ -31,7 +31,6 @@
 	let userLevel = 1;
 	let totalXP = 0;
 	let componentProgress: any = {};
-	let specsExpanded = false;
 
 	onMount(() => {
 		component = data.component;
@@ -221,15 +220,8 @@
 
 			<!-- Specifications -->
 			<div class="detail-card specs-card">
-				<button class="specs-header" on:click={() => specsExpanded = !specsExpanded} aria-label="Toggle technical specifications">
-					<h3>Technical Specifications</h3>
-					<span class="expand-toggle" class:expanded={specsExpanded} aria-hidden="true">
-						<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-							<path d="M8 12l-4-4h8l-4 4z"/>
-						</svg>
-					</span>
-				</button>
-				<div class="specifications" class:expanded={specsExpanded}>
+				<h3>Technical Specifications</h3>
+				<div class="specifications">
 					{#each Object.entries(component.specifications) as [key, value]}
 						<div class="spec-row">
 							<span class="spec-key">{key}:</span>
@@ -575,7 +567,7 @@
 	}
 
 	.specs-header:hover {
-		background: rgba(0, 212, 170, 0.05);
+		background: rgba(255, 255, 255, 0.05);
 		border-radius: 8px;
 		padding: 0.5rem;
 		margin: -0.5rem;
@@ -587,7 +579,7 @@
 	}
 
 	.expand-toggle {
-		color: #00d4aa;
+		color: #ffffff;
 		padding: 0.5rem;
 		border-radius: 6px;
 		transition: all 0.3s ease;

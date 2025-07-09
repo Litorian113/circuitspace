@@ -482,22 +482,23 @@
 		max-width: 500px;
 		display: flex;
 		align-items: center;
-		background: #191919;
-		border: none;
+		background: rgba(35, 35, 35, 0.8);
+		border: 1px solid rgba(226, 232, 240, 0.2);
 		border-radius: 12px;
-		transition: all 0.3s ease;
+		transition: all 0.2s ease;
 	}
 
 	.search-box:focus-within {
-		box-shadow: 0 0 0 2px rgba(202, 189, 245, 0.3);
+		border-color: rgba(226, 232, 240, 0.4);
+		box-shadow: 0 0 0 3px rgba(226, 232, 240, 0.1);
 	}
 
 	.search-box input {
 		flex: 1;
-		padding: 1rem 1.5rem;
+		padding: 0.875rem 1rem;
 		border: none;
 		background: transparent;
-		font-size: 1rem;
+		font-size: 0.875rem;
 		color: #e2e8f0;
 		font-family: 'Inter', sans-serif;
 		outline: none;
