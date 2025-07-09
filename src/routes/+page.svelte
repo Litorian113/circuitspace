@@ -9,6 +9,16 @@
 	
 	let projectInput = '';
 	let isTransitioning = false;
+	let heroSectionElement: HTMLElement;
+	
+	function scrollToHeroSection() {
+		if (heroSectionElement) {
+			heroSectionElement.scrollIntoView({
+				behavior: 'smooth',
+				block: 'start'
+			});
+		}
+	}
 	
 	async function handleProjectSubmit() {
 		if (projectInput.trim() && !isTransitioning) {
@@ -61,12 +71,33 @@
 
 <!-- Main Content with Sidebar Offset -->
 <main class="main-container">
+	<!-- Fullscreen Arvis Hero Section -->
+	<section class="arvis-hero-section">
+		<div class="arvis-hero-background">
+			<img src="/arvis/arvis_hero.png" alt="Arvis Hero" class="arvis-hero-image" />
+			<div class="arvis-hero-overlay"></div>
+		</div>
+		<div class="arvis-hero-content">
+			<h1 class="arvis-hero-title">Step Into Circuitspace with Arvis</h1>
+		</div>
+		<div class="scroll-indicator" on:click={scrollToHeroSection} on:keydown={(e) => e.key === 'Enter' && scrollToHeroSection()} tabindex="0" role="button" aria-label="Scroll to main content">
+			<div class="scroll-arrow">
+				<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M7 10l5 5 5-5"/>
+				</svg>
+			</div>
+			<span class="scroll-text">Scroll to explore</span>
+		</div>
+	</section>
+
 	<!-- Hero Section -->
-	<HeroSection 
-		bind:projectInput
-		{isTransitioning}
-		onProjectSubmit={handleProjectSubmit}
-	/>
+	<section bind:this={heroSectionElement} class="hero-section-wrapper">
+		<HeroSection 
+			bind:projectInput
+			{isTransitioning}
+			onProjectSubmit={handleProjectSubmit}
+		/>
+	</section>
 	
 	<!-- How It Works Section -->
 	<HowItWorksSection />
@@ -87,6 +118,7 @@
 		color: rgba(255, 255, 255, 0.9);
 		overflow-x: hidden;
 		min-height: 100vh;
+		scroll-behavior: smooth;
 	}
 	
 	:global(:root) {
@@ -264,10 +296,167 @@
 		}
 	}
 	
+	/* Arvis Hero Section */
+	.arvis-hero-section {
+		position: relative;
+		width: 100vw;
+		height: 100vh;
+		margin-left: calc(-1 * var(--sidebar-width, 280px));
+		overflow: hidden;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	
+	.arvis-hero-background {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		z-index: 1;
+	}
+	
+	.arvis-hero-image {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		object-position: center;
+	}
+	
+	.arvis-hero-overlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background: linear-gradient(
+			135deg,
+			rgba(25, 25, 25, 0.2) 0%,
+			rgba(25, 25, 25, 0.1) 50%,
+			rgba(25, 25, 25, 0.3) 100%
+		);
+		z-index: 2;
+	}
+	
+	.arvis-hero-content {
+		position: relative;
+		z-index: 3;
+		text-align: center;
+		padding: 2rem;
+		max-width: 900px;
+		margin: 0 auto;
+	}
+	
+	.arvis-hero-title {
+		font-family: 'Inter', sans-serif;
+		font-size: 4rem;
+		font-weight: 700;
+		color: #FFFFFF;
+		margin: 0 0 4rem 0;
+		text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+		line-height: 1.1;
+	}
+	
+	.scroll-indicator {
+		position: absolute;
+		bottom: 3rem;
+		left: 50%;
+		transform: translateX(-50%);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.75rem;
+		animation: scrollBounce 2s ease-in-out infinite;
+		cursor: pointer;
+		z-index: 4;
+	}
+	
+	.scroll-arrow {
+		width: 48px;
+		height: 48px;
+		border: 2px solid rgba(255, 255, 255, 0.8);
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: rgba(255, 255, 255, 0.9);
+		backdrop-filter: blur(10px);
+		background: rgba(255, 255, 255, 0.1);
+		transition: all 0.3s ease;
+	}
+	
+	.scroll-arrow:hover {
+		background: rgba(255, 255, 255, 0.2);
+		border-color: rgba(255, 255, 255, 1);
+		transform: translateY(-2px);
+	}
+	
+	.scroll-text {
+		font-family: 'Inter', sans-serif;
+		font-size: 0.9rem;
+		font-weight: 500;
+		color: rgba(255, 255, 255, 0.8);
+		text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+	}
+	
+	@keyframes scrollBounce {
+		0%, 100% {
+			transform: translateX(-50%) translateY(0);
+		}
+		50% {
+			transform: translateX(-50%) translateY(8px);
+		}
+	}
+	
+	/* Hero Section Wrapper */
+	.hero-section-wrapper {
+		scroll-margin-top: 0;
+		position: relative;
+	}
+	
 	/* Responsive Design */
 	@media (max-width: 1024px) {
 		.main-container {
 			margin-left: 0;
+		}
+		
+		.arvis-hero-section {
+			margin-left: 0;
+		}
+		
+		.arvis-hero-title {
+			font-size: 3rem;
+		}
+	}
+	
+	@media (max-width: 768px) {
+		.arvis-hero-title {
+			font-size: 2.5rem;
+			margin-bottom: 3rem;
+		}
+		
+		.arvis-hero-content {
+			padding: 1.5rem;
+		}
+		
+		.scroll-indicator {
+			bottom: 2rem;
+		}
+		
+		.scroll-arrow {
+			width: 40px;
+			height: 40px;
+		}
+		
+		.scroll-text {
+			font-size: 0.8rem;
+		}
+	}
+	
+	@media (max-width: 480px) {
+		.arvis-hero-title {
+			font-size: 2rem;
 		}
 	}
 </style>
