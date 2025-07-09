@@ -1,9 +1,48 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { authStore, currentUser } from '$lib/stores/auth';
+	import { onMount } from 'svelte';
 	
 	export let projectInput = '';
 	export let isTransitioning = false;
 	export let onProjectSubmit: () => void;
+	
+	let showLoginDropdown = false;
+	
+	// Close dropdown when clicking outside
+	function handleClickOutside(event: MouseEvent) {
+		const target = event.target as HTMLElement;
+		if (!target.closest('.login-section')) {
+			showLoginDropdown = false;
+		}
+	}
+	
+	onMount(() => {
+		document.addEventListener('click', handleClickOutside);
+		return () => {
+			document.removeEventListener('click', handleClickOutside);
+		};
+	});
+	
+	function toggleLoginDropdown() {
+		showLoginDropdown = !showLoginDropdown;
+	}
+	
+	function handleLogin() {
+		showLoginDropdown = false;
+		// TODO: Implement login modal or redirect to login page
+		console.log('Login clicked');
+	}
+	
+	function handleRegister() {
+		showLoginDropdown = false;
+		goto('/register');
+	}
+	
+	function handleLogout() {
+		showLoginDropdown = false;
+		authStore.logout();
+	}
 </script>
 
 <!-- Hero Section -->
@@ -11,14 +50,45 @@
 	<div class="container">
 		<!-- Login Section -->
 		<div class="login-section">
-			<button class="login-button" aria-label="Login">
-				Login
-			</button>
-			<button class="dropdown-button" aria-label="More options">
-				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-					<polyline points="6,9 12,15 18,9"></polyline>
-				</svg>
-			</button>
+			{#if $currentUser && $currentUser.isLoggedIn}
+				<div class="user-info">
+					<span class="user-name">Hello, {$currentUser.name || 'User'}!</span>
+					<button class="logout-button" on:click={handleLogout} aria-label="Logout">
+						Log Out
+					</button>
+				</div>
+			{:else}
+				<button class="login-button" on:click={toggleLoginDropdown} aria-label="Login">
+					Log In
+				</button>
+				<button class="dropdown-button" on:click={toggleLoginDropdown} aria-label="Login Options">
+					<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<polyline points="6,9 12,15 18,9"></polyline>
+					</svg>
+				</button>
+				
+				{#if showLoginDropdown}
+					<div class="login-dropdown">
+						<button class="dropdown-item" on:click={handleLogin}>
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+								<polyline points="10,17 15,12 10,7"/>
+								<line x1="15" y1="12" x2="3" y2="12"/>
+							</svg>
+							Log In
+						</button>
+						<button class="dropdown-item" on:click={handleRegister}>
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+								<path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+								<circle cx="8.5" cy="7" r="4"/>
+								<line x1="20" y1="8" x2="20" y2="14"/>
+								<line x1="23" y1="11" x2="17" y2="11"/>
+							</svg>
+							Register
+						</button>
+					</div>
+				{/if}
+			{/if}
 		</div>
 		
 		<div class="hero-content">
@@ -125,6 +195,37 @@
 		z-index: 2;
 	}
 	
+	.user-info {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+	
+	.user-name {
+		color: #FFFFFF;
+		font-family: 'Inter', sans-serif;
+		font-size: 0.875rem;
+		font-weight: 500;
+	}
+	
+	.logout-button {
+		background: rgba(255, 255, 255, 0.1);
+		color: #FFFFFF;
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		border-radius: 8px;
+		padding: 0.5rem 1rem;
+		font-family: 'Inter', sans-serif;
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+	}
+	
+	.logout-button:hover {
+		background: rgba(255, 255, 255, 0.15);
+		border-color: rgba(255, 255, 255, 0.3);
+	}
+	
 	.login-button {
 		background: #EDF760;
 		color: #000000;
@@ -158,6 +259,59 @@
 	.dropdown-button:hover {
 		color: rgba(255, 255, 255, 0.7);
 		transform: translateY(-1px);
+	}
+	
+	.login-dropdown {
+		position: absolute;
+		top: 100%;
+		right: 0;
+		margin-top: 0.5rem;
+		background: rgba(25, 25, 25, 0.95);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		border-radius: 12px;
+		padding: 0.5rem;
+		min-width: 180px;
+		backdrop-filter: blur(20px);
+		box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+		animation: fadeInUp 0.2s ease-out;
+	}
+	
+	@keyframes fadeInUp {
+		from {
+			opacity: 0;
+			transform: translateY(-10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+	
+	.dropdown-item {
+		width: 100%;
+		background: transparent;
+		color: #FFFFFF;
+		border: none;
+		border-radius: 8px;
+		padding: 0.75rem 1rem;
+		font-family: 'Inter', sans-serif;
+		font-size: 0.875rem;
+		font-weight: 500;
+		cursor: pointer;
+		transition: all 0.2s ease;
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		text-align: left;
+	}
+	
+	.dropdown-item:hover {
+		background: rgba(255, 255, 255, 0.1);
+		color: #EDF760;
+	}
+	
+	.dropdown-item svg {
+		flex-shrink: 0;
 	}
 	
 	.hero-content {
@@ -335,6 +489,16 @@
 		.login-section {
 			top: 1rem;
 			right: 1.5rem;
+			position: absolute;
+		}
+		
+		.user-name {
+			font-size: 0.8rem;
+		}
+		
+		.logout-button {
+			padding: 0.5rem 0.875rem;
+			font-size: 0.8rem;
 		}
 		
 		.login-button {
@@ -344,6 +508,15 @@
 		
 		.dropdown-button {
 			padding: 0.625rem;
+		}
+		
+		.login-dropdown {
+			min-width: 160px;
+		}
+		
+		.dropdown-item {
+			padding: 0.625rem 0.875rem;
+			font-size: 0.8rem;
 		}
 		
 		.hero-title {
@@ -364,6 +537,16 @@
 		.login-section {
 			top: 1rem;
 			right: 1rem;
+			position: absolute;
+		}
+		
+		.user-name {
+			font-size: 0.75rem;
+		}
+		
+		.logout-button {
+			padding: 0.4rem 0.75rem;
+			font-size: 0.75rem;
 		}
 		
 		.login-button {
@@ -373,6 +556,15 @@
 		
 		.dropdown-button {
 			padding: 0.5rem;
+		}
+		
+		.login-dropdown {
+			min-width: 140px;
+		}
+		
+		.dropdown-item {
+			padding: 0.5rem 0.75rem;
+			font-size: 0.75rem;
 		}
 		
 		.hero-title {
