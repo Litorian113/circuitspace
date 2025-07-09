@@ -38,9 +38,14 @@
 	
 	function handleCreateAccount() {
 		if (validateForm()) {
-			// For now, just prepare for onboarding
-			console.log('Account creation ready:', { name, email, password });
-			// TODO: Implement onboarding flow
+			// Create account with authStore and redirect to onboarding
+			const success = authStore.register(name, email, password);
+			if (success) {
+				console.log('Account created successfully for:', name);
+				goto('/onboarding');
+			} else {
+				console.error('Failed to create account');
+			}
 		}
 	}
 	
