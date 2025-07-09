@@ -179,7 +179,6 @@
 					<div class="step-icon">
 						<img src="/onboarding/Step{stepNumber}.svg" alt="Step {stepNumber}" />
 					</div>
-					<div class="step-number">{stepNumber}</div>
 				</div>
 			{/each}
 		</div>
@@ -328,11 +327,14 @@
 		padding: 2rem;
 		margin-left: var(--sidebar-width, 280px);
 		transition: margin-left 0.3s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 	
 	.onboarding-container {
 		max-width: 800px;
-		margin: 0 auto;
+		width: 100%;
 		padding: 2rem 0;
 	}
 	
@@ -380,7 +382,6 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.5rem;
 		cursor: pointer;
 		transition: all 0.3s ease;
 		padding: 0.5rem;
@@ -414,10 +415,10 @@
 		border: 2px solid #CABDF5;
 	}
 	
-	.step-item.unreached .step-icon img {
+	/* .step-item.unreached .step-icon img {
 		filter: invert(1) sepia(1) saturate(0) hue-rotate(0deg) brightness(0.9) contrast(1.2);
 		opacity: 0.8;
-	}
+	} */
 	
 	/* Active step (filled background, dark icon) */
 	.step-item.active .step-icon {
@@ -440,28 +441,6 @@
 	
 	.step-item.completed .step-icon img {
 		filter: brightness(0) saturate(100%) invert(12%) sepia(7%) saturate(1075%) hue-rotate(314deg) brightness(91%) contrast(94%); /* #191919 filter */
-	}
-	
-	.step-number {
-		font-size: 0.875rem;
-		font-weight: 600;
-		color: rgba(255, 255, 255, 0.6);
-		transition: all 0.3s ease;
-	}
-	
-	.step-item.active .step-number {
-		color: #CABDF5;
-		font-weight: 700;
-	}
-	
-	.step-item.completed .step-number {
-		color: #CABDF5;
-		font-weight: 700;
-	}
-	
-	.step-item.unreached .step-number {
-		color: #CABDF5;
-		opacity: 0.7;
 	}
 	
 	/* Remove old step connectors since we now have the continuous line */
