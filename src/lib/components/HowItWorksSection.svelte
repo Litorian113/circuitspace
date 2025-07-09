@@ -9,24 +9,32 @@
 			<h2 class="section-title">How It Works</h2>
 			<div class="how-it-works-grid">
 				<div class="work-card">
-					<div class="work-card-image">🤖</div>
+					<div class="work-card-image">
+						<img src="/how-it-works/Ai-Assistant.png" alt="AI Assistant" />
+					</div>
 					<h3 class="work-card-title">AI-Powered Planning</h3>
 					<p class="work-card-text">Describe your project idea and get intelligent component suggestions, wiring diagrams, and step-by-step guidance.</p>
 				</div>
-				<div class="work-card">
-					<div class="work-card-image">🔧</div>
-					<h3 class="work-card-title">Component Library</h3>
-					<p class="work-card-text">Access our comprehensive database of electronic components with detailed specifications and usage examples.</p>
+								<div class="work-card">
+					<div class="work-card-image">
+						<img src="/how-it-works/Real-Time-Recognition.png" alt="Real-Time Recognition" />
+					</div>
+					<h3 class="work-card-title">Real-Time Recognition</h3>
+					<p class="work-card-text">Use your camera to identify components and get instant information about their specifications and usage.</p>
 				</div>
 				<div class="work-card">
-					<div class="work-card-image">⚡</div>
-					<h3 class="work-card-title">Circuit Designer</h3>
-					<p class="work-card-text">Build and test your circuits virtually with our interactive designer before creating physical prototypes.</p>
+					<div class="work-card-image">
+						<img src="/how-it-works/Guided-Code.png" alt="Guided Code Generation" />
+					</div>
+					<h3 class="work-card-title">Guided Code Generation</h3>
+					<p class="work-card-text">Get automatically generated, commented code for your circuits with explanations and best practices included.</p>
 				</div>
 				<div class="work-card">
-					<div class="work-card-image">🔍</div>
-					<h3 class="work-card-title">AR Assistance</h3>
-					<p class="work-card-text">Use augmented reality to overlay instructions and component information directly onto your physical workspace.</p>
+					<div class="work-card-image">
+						<img src="/how-it-works/Learn.png" alt="Interactive Learning" />
+					</div>
+					<h3 class="work-card-title">Interactive Learning</h3>
+					<p class="work-card-text">Learn electronics fundamentals through hands-on tutorials and interactive lessons tailored to your skill level.</p>
 				</div>
 			</div>
 		</div>
@@ -74,7 +82,7 @@
 		border: 1px solid rgba(255, 255, 255, 0.08);
 		border-radius: 16px;
 		padding: 2rem;
-		text-align: center;
+		text-align: left;
 		transition: all 0.3s ease;
 	}
 	
@@ -85,8 +93,24 @@
 	}
 	
 	.work-card-image {
-		font-size: 3rem;
+		height: 140px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		margin-bottom: 1.5rem;
+	}
+	
+	.work-card-image img {
+		width: 120px;
+		height: 120px;
+		object-fit: contain;
+		filter: brightness(0.9) contrast(1.1);
+		transition: all 0.3s ease;
+	}
+	
+	.work-card:hover .work-card-image img {
+		filter: brightness(1) contrast(1.2);
+		transform: scale(1.05);
 	}
 	
 	.work-card-title {
@@ -150,8 +174,13 @@
 		}
 		
 		.work-card-image {
-			font-size: 2.5rem;
+			height: 120px;
 			margin-bottom: 1rem;
+		}
+		
+		.work-card-image img {
+			width: 100px;
+			height: 100px;
 		}
 	}
 </style>

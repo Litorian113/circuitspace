@@ -560,7 +560,7 @@
 								on:click={() => selectTipsWarnings('no')}
 							>
 								<img src="/onboarding/No.svg" alt="No" class="choice-icon" />
-								No, I prefer learning by doing
+								No thanks, I'll figure it out
 							</button>
 							<button 
 								class="choice-btn"
@@ -568,7 +568,7 @@
 								on:click={() => selectTipsWarnings('yes')}
 							>
 								<img src="/onboarding/Yes.svg" alt="Yes" class="choice-icon" />
-								Yes, help me avoid mistakes
+								Yes, show me tips
 							</button>
 						</div>
 						<div class="nav-buttons">
@@ -768,7 +768,7 @@
 									</div>
 									<div class="question-answer-row">
 										<span class="question-label">Tips & warnings:</span>
-										<span class="answer-value">{wantsTipsWarnings === 'yes' ? 'Yes, help me avoid mistakes' : 'No, I prefer learning by doing'}</span>
+										<span class="answer-value">{wantsTipsWarnings === 'yes' ? 'Yes, show me tips' : "No thanks, I'll figure it out"}</span>
 									</div>
 								</div>
 							</div>
