@@ -607,7 +607,7 @@
 				ctx.textAlign = 'center';
 				
 				let labelX = pin.x;
-				let labelY = pin.y - 25; // Mehr Abstand für größere Pins
+				let labelY = pin.y - 14; // Mehr Abstand für größere Pins
 				
 				// Adjust label position for better readability with more spacing
 				if (pin.x <= component.x + 25) { // Angepasst für bessere Abstände
@@ -618,11 +618,21 @@
 					ctx.textAlign = 'left';
 				}
 				
-				// Enhanced label background
+				// Enhanced label background mit runden Ecken
 				const labelWidth = ctx.measureText(pin.name).width;
 				const bgX = labelX - (ctx.textAlign === 'center' ? labelWidth/2 : ctx.textAlign === 'right' ? labelWidth : 0) - 4;
-				ctx.fillStyle = 'rgba(0, 0, 0, 0.9)';
-				ctx.fillRect(bgX, labelY - 14, labelWidth + 8, 16);
+
+				ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+
+				// Moderne Canvas roundRect API (falls verfügbar)
+				if (ctx.roundRect) {
+				    ctx.beginPath();
+				    ctx.roundRect(bgX, labelY - 14, labelWidth + 8, 16, 8); // 4px Radius
+				    ctx.fill();
+				} else {
+				    // Fallback für ältere Browser
+				    ctx.fillRect(bgX, labelY - 14, labelWidth + 8, 16);
+				}
 				
 				// Label text
 				ctx.fillStyle = isHighlighted ? '#ECF65F' : '#CABDF5';

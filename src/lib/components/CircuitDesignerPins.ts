@@ -20,19 +20,19 @@ export const arduinoLeonardoPins: ComponentPinConfig = {
 	name: 'Arduino Leonardo',
 	pins: [
 		// Power Pins (rechte Seite, oben nach unten)
-		{ name: '5V', type: 'power', x: 85, y: 25, description: '5V power output' },
-		{ name: '3.3V', type: 'power', x: 85, y: 35, description: '3.3V power output' },
-		{ name: 'GND', type: 'ground', x: 85, y: 45, description: 'Ground connection' },
+		{ name: '5V', type: 'power', x: 45, y: 15, description: '5V power output' },
+		{ name: '3.3V', type: 'power', x: 65, y: 15, description: '3.3V power output' },
+		{ name: 'GND', type: 'ground', x: 85, y: 15, description: 'Ground connection' },
 		
 		// Digital/PWM Pins (linke Seite, verteilt)
-		{ name: 'D9', type: 'pwm', x: 15, y: 25, description: 'Digital Pin 9 (PWM)' },
-		{ name: 'D8', type: 'digital', x: 15, y: 35, description: 'Digital Pin 8' },
-		{ name: 'D7', type: 'digital', x: 15, y: 45, description: 'Digital Pin 7' },
+		{ name: 'D9', type: 'pwm', x: 15, y: 15, description: 'Digital Pin 9 (PWM)' },
+		{ name: 'D8', type: 'digital', x: 15, y: 50, description: 'Digital Pin 8' },
+		{ name: 'D7', type: 'digital', x: 15, y: 85, description: 'Digital Pin 7' },
 		
 		// Analog Pins (unten)
-		{ name: 'A0', type: 'analog', x: 65, y: 75, description: 'Analog Pin A0' },
-		{ name: 'A1', type: 'analog', x: 80, y: 75, description: 'Analog Pin A1' },
-		{ name: 'A2', type: 'analog', x: 95, y: 75, description: 'Analog Pin A2' }
+		{ name: 'A0', type: 'analog', x: 55, y: 85, description: 'Analog Pin A0' },
+		{ name: 'A1', type: 'analog', x: 70, y: 85, description: 'Analog Pin A1' },
+		{ name: 'A2', type: 'analog', x: 85, y: 85, description: 'Analog Pin A2' }
 	]
 };
 
@@ -41,8 +41,8 @@ export const ledPins: ComponentPinConfig = {
 	id: 'leuchtdiode',
 	name: 'LED',
 	pins: [
-		{ name: 'Anode', type: 'power', x: 50, y: 20, description: 'LED Anode (+)' },
-		{ name: 'Kathode', type: 'ground', x: 50, y: 80, description: 'LED Kathode (-)' }
+		{ name: '+', type: 'power', x: 25, y: 84, description: 'LED Anode (+)' },
+		{ name: '-', type: 'ground', x: 75, y: 84, description: 'LED Kathode (-)' }
 	]
 };
 
@@ -62,7 +62,7 @@ export const potentiometerPins: ComponentPinConfig = {
 	name: 'Potentiometer (10kΩ)',
 	pins: [
 		{ name: 'VCC', type: 'power', x: 20, y: 90, description: 'Power input (left pin)' },
-		{ name: 'Wiper', type: 'analog', x: 50, y: 10, description: 'Variable output (middle pin)' },
+		{ name: 'Wiper', type: 'analog', x: 50, y: 90, description: 'Variable output (middle pin)' },
 		{ name: 'GND', type: 'ground', x: 80, y: 90, description: 'Ground (right pin)' }
 	]
 };
@@ -73,18 +73,18 @@ export const breadboardPins: ComponentPinConfig = {
 	name: 'Breadboard',
 	pins: [
 		// Power Rails (obere Seite)
-		{ name: 'Power+', type: 'power', x: 15, y: 15, description: 'Positive power rail' },
-		{ name: 'Power-', type: 'ground', x: 15, y: 25, description: 'Negative power rail' },
+		{ name: 'Power+', type: 'power', x: 30, y: 15, description: 'Positive power rail' },
+		{ name: 'Power-', type: 'ground', x: 70, y: 15, description: 'Negative power rail' },
 		
 		// Power Rails (untere Seite)
-		{ name: 'Power+2', type: 'power', x: 15, y: 75, description: 'Positive power rail (bottom)' },
-		{ name: 'Power-2', type: 'ground', x: 15, y: 85, description: 'Negative power rail (bottom)' },
+		{ name: 'Power+2', type: 'power', x: 30, y: 85, description: 'Positive power rail (bottom)' },
+		{ name: 'Power-2', type: 'ground', x: 70, y: 85, description: 'Negative power rail (bottom)' },
 		
 		// Connection points (Beispiel-Positionen)
-		{ name: 'A1', type: 'power', x: 40, y: 40, description: 'Connection point A1' },
-		{ name: 'A5', type: 'power', x: 70, y: 40, description: 'Connection point A5' },
-		{ name: 'F1', type: 'ground', x: 40, y: 60, description: 'Connection point F1' },
-		{ name: 'F5', type: 'ground', x: 70, y: 60, description: 'Connection point F5' }
+		{ name: 'A1', type: 'power', x: 42, y: 35, description: 'Connection point A1' },
+		{ name: 'A5', type: 'power', x: 58, y: 35, description: 'Connection point A5' },
+		{ name: 'F1', type: 'ground', x: 42, y: 60, description: 'Connection point F1' },
+		{ name: 'F5', type: 'ground', x: 58, y: 60, description: 'Connection point F5' }
 	]
 };
 
@@ -136,7 +136,7 @@ export const ledDimmerConnections: ConnectionRule[] = [
 	},
 	{
 		from: { component: 'leonardo-keyestudio', pin: 'D9' },
-		to: { component: 'leuchtdiode', pin: 'Anode' },
+		to: { component: 'leuchtdiode', pin: '+' }, // Geändert von 'Anode' zu '+'
 		description: 'Arduino D9 (PWM) zu LED Anode',
 		required: true
 	},
@@ -147,7 +147,7 @@ export const ledDimmerConnections: ConnectionRule[] = [
 		required: true
 	},
 	{
-		from: { component: 'leuchtdiode', pin: 'Kathode' },
+		from: { component: 'leuchtdiode', pin: '-' }, // Geändert von 'Kathode' zu '-'
 		to: { component: 'widerstand', pin: 'Pin1' },
 		description: 'LED Kathode zu Widerstand',
 		required: true
