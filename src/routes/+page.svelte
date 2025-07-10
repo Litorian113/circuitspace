@@ -7,6 +7,7 @@
 	import ArDeviceSection from '$lib/components/ArDeviceSection.svelte';
 	import BuildFirstProjectSection from '$lib/components/BuildFirstProjectSection.svelte';
 	import LearnTogetherSection from '$lib/components/LearnTogetherSection.svelte';
+	import ArvisDevicePopup from '$lib/components/ArvisDevicePopup.svelte';
 	
 	let projectInput = '';
 	let isTransitioning = false;
@@ -17,6 +18,7 @@
 	let particles: Particle[] = [];
 	let animationId: number;
 	let isHovering = false;
+	let showArvisPopup = false;
 	
 	interface Particle {
 		x: number;
@@ -35,12 +37,46 @@
 			resizeCanvas();
 			window.addEventListener('resize', resizeCanvas);
 		}
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						const lastShownString = localStorage.getItem('arvisPopupLastShown');
+						const now = new Date().getTime();
+						const tenMinutes = 10 * 60 * 1000;
+
+						if (lastShownString) {
+							const lastShown = parseInt(lastShownString, 10);
+							if (now - lastShown < tenMinutes) {
+								observer.unobserve(entry.target); // Don't show again if recently shown
+								return;
+							}
+						}
+
+						setTimeout(() => {
+							showArvisPopup = true;
+							localStorage.setItem('arvisPopupLastShown', now.toString());
+						}, 3000);
+						observer.unobserve(entry.target); // Stop observing after it's scheduled to show
+					}
+				});
+			},
+			{ threshold: 0.1 } // Trigger when 10% of the element is visible
+		);
+
+		if (heroSectionElement) {
+			observer.observe(heroSectionElement);
+		}
 		
 		return () => {
 			if (animationId) {
 				cancelAnimationFrame(animationId);
 			}
 			window.removeEventListener('resize', resizeCanvas);
+			if (heroSectionElement) {
+				observer.unobserve(heroSectionElement);
+			}
 		};
 	});
 	
@@ -262,6 +298,8 @@
 	<LearnTogetherSection />
 </main>
 
+<ArvisDevicePopup bind:show={showArvisPopup} />
+
 <style>
 	:global(body) {
 		margin: 0;
@@ -289,7 +327,7 @@
 		left: 0;
 		width: 100vw;
 		height: 100vh;
-		background: rgba(0, 0, 0, 0.4);
+		background: rgba(25, 25, 25, 0.4);
 		backdrop-filter: blur(40px) saturate(180%);
 		-webkit-backdrop-filter: blur(40px) saturate(180%);
 		display: flex;
@@ -311,7 +349,7 @@
 		position: relative;
 		width: 120px;
 		height: 120px;
-		border: 2px solid rgba(255, 255, 255, 0.1);
+		border: 2px solid rgba(202, 189, 245, 0.2); /* #CABDF5 with opacity */
 		border-radius: 50%;
 		display: flex;
 		align-items: center;
@@ -321,10 +359,10 @@
 	
 	.circuit-wave {
 		position: absolute;
-		border: 2px solid rgba(120, 119, 198, 0.8);
+		border: 2px solid #CABDF5;
 		border-radius: 50%;
 		animation: circuitPulse 2s infinite ease-out;
-		box-shadow: 0 0 20px rgba(120, 119, 198, 0.3);
+		box-shadow: 0 0 20px rgba(202, 189, 245, 0.3); /* #CABDF5 with opacity */
 	}
 	
 	.wave-1 {
@@ -349,7 +387,7 @@
 		font-family: 'Inter', sans-serif;
 		font-size: 1.5rem;
 		font-weight: 600;
-		background: linear-gradient(135deg, rgba(120, 119, 198, 1), rgba(255, 119, 198, 1));
+		background: linear-gradient(135deg, #CABDF5, #ECF65F);
 		-webkit-background-clip: text;
 		-webkit-text-fill-color: transparent;
 		background-clip: text;
@@ -365,10 +403,10 @@
 	.dot {
 		width: 8px;
 		height: 8px;
-		background: linear-gradient(135deg, rgba(120, 119, 198, 0.8), rgba(255, 119, 198, 0.8));
+		background: linear-gradient(135deg, #CABDF5, #ECF65F);
 		border-radius: 50%;
 		animation: dotBounce 1.4s infinite ease-in-out both;
-		box-shadow: 0 0 10px rgba(120, 119, 198, 0.5);
+		box-shadow: 0 0 10px rgba(202, 189, 245, 0.5); /* #CABDF5 with opacity */
 	}
 	
 	.dot:nth-child(1) { animation-delay: -0.32s; }
@@ -415,26 +453,26 @@
 		0% {
 			transform: scale(0.8);
 			opacity: 1;
-			border-color: rgba(120, 119, 198, 0.8);
+			border-color: #CABDF5;
 		}
 		50% {
 			transform: scale(1.1);
 			opacity: 0.6;
-			border-color: rgba(255, 119, 198, 0.8);
+			border-color: #ECF65F;
 		}
 		100% {
 			transform: scale(1.3);
 			opacity: 0;
-			border-color: rgba(120, 219, 226, 0.4);
+			border-color: rgba(202, 189, 245, 0.4); /* #CABDF5 with opacity */
 		}
 	}
 	
 	@keyframes textGlow {
 		0%, 100% {
-			filter: drop-shadow(0 0 10px rgba(120, 119, 198, 0.4));
+			filter: drop-shadow(0 0 10px rgba(202, 189, 245, 0.4)); /* #CABDF5 glow */
 		}
 		50% {
-			filter: drop-shadow(0 0 20px rgba(120, 119, 198, 0.6)) drop-shadow(0 0 30px rgba(255, 119, 198, 0.3));
+			filter: drop-shadow(0 0 20px rgba(202, 189, 245, 0.6)) drop-shadow(0 0 30px rgba(236, 246, 95, 0.3)); /* #CABDF5 & #ECF65F glow */
 		}
 	}
 	
