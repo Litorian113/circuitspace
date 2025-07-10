@@ -950,6 +950,12 @@
 			dragOffset.x = x - selectedComponent.x;
 			dragOffset.y = y - selectedComponent.y;
 			canvas.style.cursor = 'grabbing';
+		} else {
+			// Kein Pin, keine Komponente getroffen - starte Panning mit linker Maustaste
+			isPanning = true;
+			panStartPos = { x: screenX, y: screenY };
+			lastPanPos = { x: panX, y: panY };
+			canvas.style.cursor = 'grab';
 		}
 		drawBoard();
 	}
