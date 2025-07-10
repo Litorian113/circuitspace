@@ -887,7 +887,7 @@
 		left: 0;
 		width: 100vw;
 		height: 100vh;
-		background: rgba(0, 0, 0, 0.8);
+		background: rgba(25, 25, 25, 0.8); /* Use #191919 with opacity */
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -896,13 +896,15 @@
 	}
 
 	.quiz-modal {
-		background: rgba(35, 35, 35, 0.8);
+		background: #191919;
+		border: 1px solid #CABDF5;
 		border-radius: 16px;
 		padding: 2rem;
 		max-width: 600px;
 		width: 90%;
 		max-height: 80vh;
 		overflow-y: auto;
+		font-family: 'Inter', sans-serif;
 	}
 
 	.quiz-header {
@@ -911,11 +913,11 @@
 		align-items: center;
 		margin-bottom: 2rem;
 		padding-bottom: 1rem;
-		border-bottom: 1px solid #2a2d3a;
+		border-bottom: 1px solid #CABDF5;
 	}
 
 	.quiz-header h3 {
-		color: #00d4aa;
+		color: #CABDF5;
 		font-size: 1.5rem;
 		font-weight: 600;
 		margin: 0;
@@ -923,12 +925,12 @@
 	}
 
 	.question-counter {
-		color: #94a3b8;
+		color: #FFFFFF;
 		font-weight: 500;
 	}
 
 	.quiz-question h4 {
-		color: #f1f5f9;
+		color: #FFFFFF;
 		font-size: 1.25rem;
 		font-weight: 600;
 		margin-bottom: 1.5rem;
@@ -944,9 +946,9 @@
 	}
 
 	.quiz-option {
-		background: #0f1115;
-		color: #e2e8f0;
-		border: 2px solid #2a2d3a;
+		background: transparent;
+		color: #FFFFFF;
+		border: 2px solid #CABDF5;
 		padding: 1rem;
 		border-radius: 8px;
 		cursor: pointer;
@@ -957,25 +959,25 @@
 	}
 
 	.quiz-option:hover {
-		border-color: #00d4aa;
-		background: rgba(0, 212, 170, 0.1);
+		border-color: #ECF65F;
+		background: rgba(236, 246, 95, 0.1);
 	}
 
 	.quiz-option.selected {
-		border-color: #00d4aa;
-		background: rgba(0, 212, 170, 0.1);
+		border-color: #ECF65F;
+		background: rgba(236, 246, 95, 0.2);
 	}
 
 	.quiz-option.correct {
-		border-color: #10b981;
-		background: rgba(16, 185, 129, 0.2);
-		color: #10b981;
+		border-color: #ECF65F;
+		background: rgba(236, 246, 95, 0.2);
+		color: #ECF65F;
 	}
 
 	.quiz-option.incorrect {
-		border-color: #ef4444;
-		background: rgba(239, 68, 68, 0.2);
-		color: #ef4444;
+		border-color: #F87171; /* A generic red for incorrect answers */
+		background: rgba(248, 113, 113, 0.2);
+		color: #F87171;
 	}
 
 	.quiz-option:disabled {
@@ -983,18 +985,18 @@
 	}
 
 	.quiz-explanation {
-		background: #0f1115;
+		background: rgba(255, 255, 255, 0.05);
 		padding: 1rem;
 		border-radius: 8px;
 		margin-bottom: 1.5rem;
-		color: #94a3b8;
+		color: #FFFFFF;
 		line-height: 1.5;
-		border: 1px solid #2a2d3a;
+		border: 1px solid #CABDF5;
 	}
 
 	.submit-answer-btn {
-		background: linear-gradient(135deg, #00d4aa 0%, #06b6d4 100%);
-		color: white;
+		background: #CABDF5;
+		color: #191919;
 		border: none;
 		padding: 0.75rem 2rem;
 		border-radius: 8px;
@@ -1007,20 +1009,22 @@
 
 	.submit-answer-btn:disabled {
 		background: #2a2d3a;
+		color: #FFFFFF;
 		cursor: not-allowed;
 	}
 
 	.submit-answer-btn:not(:disabled):hover {
 		transform: translateY(-1px);
-		box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3);
+		box-shadow: 0 4px 15px rgba(202, 189, 245, 0.3);
 	}
 
 	.quiz-results {
 		text-align: center;
+		font-family: 'Inter', sans-serif;
 	}
 
 	.quiz-results h3 {
-		color: #00d4aa;
+		color: #ECF65F;
 		font-size: 2rem;
 		margin-bottom: 2rem;
 		font-family: 'Inter', sans-serif;
@@ -1033,33 +1037,33 @@
 	.score {
 		font-size: 3rem;
 		font-weight: 700;
-		color: #00d4aa;
+		color: #ECF65F;
 		margin-bottom: 0.5rem;
 		font-family: 'Inter', sans-serif;
 	}
 
 	.score-text {
-		color: #94a3b8;
+		color: #FFFFFF;
 		font-size: 1.125rem;
 		margin-bottom: 1rem;
 	}
 
 	.experience-gained {
-		color: #10b981;
+		color: #ECF65F;
 		font-size: 1.25rem;
 		font-weight: 600;
 		margin-bottom: 0.5rem;
 	}
 
 	.level-up {
-		color: #f59e0b;
+		color: #CABDF5;
 		font-size: 1.125rem;
 		font-weight: 600;
 	}
 
 	.close-quiz-btn {
-		background: linear-gradient(135deg, #00d4aa 0%, #06b6d4 100%);
-		color: white;
+		background: #CABDF5;
+		color: #191919;
 		border: none;
 		padding: 1rem 2rem;
 		border-radius: 8px;
@@ -1071,7 +1075,7 @@
 
 	.close-quiz-btn:hover {
 		transform: translateY(-1px);
-		box-shadow: 0 4px 15px rgba(0, 212, 170, 0.3);
+		box-shadow: 0 4px 15px rgba(202, 189, 245, 0.3);
 	}
 
 	/* Mobile Responsiveness */
