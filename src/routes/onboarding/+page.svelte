@@ -208,7 +208,7 @@
 			currentSubStep = 1;
 		} else {
 			// Onboarding complete
-			goto('/');
+			goto('/#main-hero');
 		}
 	}
 	
@@ -813,7 +813,7 @@
 						<button class="nav-btn secondary" on:click={prevStep}>
 							Back
 						</button>
-						<button class="nav-btn primary" on:click={() => goto('/')}>
+						<button class="nav-btn primary" on:click={() => goto('/#main-hero')}>
 							Save and Continue
 						</button>
 					</div>
@@ -969,7 +969,7 @@
 	}
 	
 	.step-item.completed .step-icon img {
-		filter: brightness(0) saturate(100%) invert(12%) sepia(7%) saturate(1075%) hue-rotate(314deg) brightness(91%) contrast(94%); /* #191919 filter */
+		filter: brightness(0) saturate(100%) invert(12%) sepia(7) saturate(1075%) hue-rotate(314deg) brightness(91%) contrast(94%); /* #191919 filter */
 	}
 	
 	/* Remove old step connectors since we now have the continuous line */

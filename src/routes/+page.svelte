@@ -241,7 +241,7 @@
 	</section>
 
 	<!-- Hero Section -->
-	<section bind:this={heroSectionElement} class="hero-section-wrapper">
+	<section bind:this={heroSectionElement} class="hero-section-wrapper" id="main-hero">
 		<HeroSection 
 			bind:projectInput
 			{isTransitioning}
